@@ -35,7 +35,7 @@ connectMG();
 routes(app);
 let dataZalo = {};
 app.get("/", (req, res) => {
-  res.json({ test: "Hello World 1313!" });
+  res.json({ test: "Hello World !" });
 });
 
 app.post("/zalopay", (request, response) => {
