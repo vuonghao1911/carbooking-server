@@ -6,7 +6,7 @@ const http = require("http");
 const https = require("https");
 var bodyParser = require("body-parser");
 //const serverTest = http.createServer(app);
-const server = https.createServer(app);
+const server = http.createServer(app);
 const axios = require("axios"); // npm install axios
 const CryptoJS = require("crypto-js"); // npm install crypto-js
 const moment = require("moment"); // npm install moment
@@ -166,8 +166,8 @@ app.get("/", (req, res) => {
 //   res.json(response);
 // });
 ///sdfsfffffklkkkkkkfsdfsdfsd
-httpsServer.listen(4004, () => {
-  console.log("Example app listening on http://localhost:" + 4004);
+server.listen(5005, () => {
+  console.log("Example app listening on http://localhost:" + 5005);
 });
 //var date = new Date("2023-01-03T09:00:00.000Z");
 // var date = "October 13";
