@@ -12,6 +12,7 @@ const CryptoJS = require("crypto-js"); // npm install crypto-js
 const moment = require("moment"); // npm install moment
 const qs = require("qs");
 require("dotenv").config();
+const path = require("path");
 const handleEror = require("./src/middleware/handleEror");
 const fs = require("fs");
 //const { connectDB } = require("./src/config/configDb");
@@ -22,8 +23,9 @@ const routes = require("./src/routes");
 // import model
 var User = require("./src/modal/User");
 var Customer = require("./src/modal/Customer");
-
-const file = fs.readFileSync("./B5FBE6D172956F8EE89AD7361294BB4B.txt");
+const file = fs.readFileSync(
+  path.resolve("B5FBE6D172956F8EE89AD7361294BB4B.txt")
+);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -38,7 +40,7 @@ connectMG();
 app.get(
   "/.well-known/pki-validation/B5FBE6D172956F8EE89AD7361294BB4B.txt",
   (req, res) => {
-    res.sendFile("D:\\carbooking-server\\B5FBE6D172956F8EE89AD7361294BB4B.txt");
+    res.sendFile(path.resolve("B5FBE6D172956F8EE89AD7361294BB4B.txt"));
   }
 );
 
