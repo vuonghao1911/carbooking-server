@@ -23,9 +23,14 @@ const routes = require("./src/routes");
 // import model
 var User = require("./src/modal/User");
 var Customer = require("./src/modal/Customer");
-const file = fs.readFileSync(
-  path.resolve("B5FBE6D172956F8EE89AD7361294BB4B.txt")
-);
+const cert = fs.readFileSync(path.resolve("ssl/certificate.crt"));
+
+const key = fs.readFileSync(path.resolve("ssl/private.key"));
+
+const options = {
+  key: key,
+  cert: cert,
+};
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -34,15 +39,10 @@ app.use((req, res, next) => {
   res.header({ "Access-Control-Allow-Origin": "*" });
   next();
 });
+const httpsServer = https.createServer(options, app);
 //connectDB();
 connectMG();
-//routes(app);
-app.get(
-  "/.well-known/pki-validation/B5FBE6D172956F8EE89AD7361294BB4B.txt",
-  (req, res) => {
-    res.sendFile(path.resolve("B5FBE6D172956F8EE89AD7361294BB4B.txt"));
-  }
-);
+routes(app);
 
 let dataZalo = {};
 app.get("/", (req, res) => {
@@ -166,8 +166,8 @@ app.get("/", (req, res) => {
 //   res.json(response);
 // });
 ///sdfsfffffklkkkkkkfsdfsdfsd
-app.listen(5005, () => {
-  console.log("Example app listening on http://localhost:" + 5005);
+httpsServer.listen(4004, () => {
+  console.log("Example app listening on http://localhost:" + 4004);
 });
 //var date = new Date("2023-01-03T09:00:00.000Z");
 // var date = "October 13";
