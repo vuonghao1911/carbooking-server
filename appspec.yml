@@ -4,10 +4,10 @@ files:
   - source: /
     destination: /home/ec2-user/car-booking
 hooks:
-  BeforeInstall:
-    - location: scripts/before_install.sh
-      timeout: 300
-      runas: ec2-user
+  # BeforeInstall:
+  #   - location: scripts/before_install.sh
+  #     timeout: 300
+  #     runas: ec2-user
   ApplicationStart:
     - location: scripts/application_start.sh
       timeout: 300
