@@ -165,17 +165,7 @@ app.post("/getStatusOrderZalopay", (req, res) => {
 //     });
 //   res.json(response);
 // });
-///sdfsfffffklkkkkkkfsdfsdfsd
+
 server.listen(5005, () => {
   console.log("Example app listening on http://localhost:" + 5005);
 });
-//var date = new Date("2023-01-03T09:00:00.000Z");
-// var date = "October 13";
-// var year = "2044";
-
-// const endTime = new Date(`${date},${year} 04:00`);
-// endTime.setTime(5 * 3600);
-// console.log("sdfsf", endTime.toString());
-// server.listen(5005, () => {
-//   console.log("Example app listening on https://localhost:" + 5005);
-// });

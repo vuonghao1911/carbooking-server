@@ -257,6 +257,47 @@ class VehicleRouteController {
       next(error);
     }
   }
+  // get list vehicleRoute unique by start date and departure,destination
+  async getListVehicleRouteCurrenDate(req, res, next) {
+    let arrrayFinal = [];
+
+    try {
+      var vehicleRoute = await VehicleRoute.find({
+        startDate: { $gte: new Date() },
+      }).sort({ startDate: 1 });
+
+      let cachedObject = {};
+      vehicleRoute.map(
+        (item) => (cachedObject[item.startDate] = item.startDate)
+      );
+      vehicleRoute = Object.values(cachedObject);
+
+      for (const elem of vehicleRoute) {
+        var listVehiceDate = await vehicleRouteService.getInfoVehicleCurrenDate(
+          elem
+        );
+        var list = [];
+        //   console.log("list", listVehiceDate);
+        for (var i = 0; i < listVehiceDate.length - 1; i++) {
+          for (var j = i + 1; j < listVehiceDate.length; j++) {
+            if (
+              listVehiceDate[i].departure.toString() ==
+                listVehiceDate[j].departure.toString() &&
+              listVehiceDate[i].destination.toString() ==
+                listVehiceDate[j].destination.toString()
+            ) {
+              console.log("vao", listVehiceDate[i]._id);
+              listVehiceDate.splice(j, 1);
+            }
+          }
+        }
+        arrrayFinal.push(...listVehiceDate);
+      }
+      res.json(arrrayFinal);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new VehicleRouteController();

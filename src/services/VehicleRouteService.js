@@ -385,6 +385,69 @@ const VehicleRouteService = {
     ]);
     return vehicleRoute;
   },
+
+  getInfoVehicleCurrenDate: async (startDate) => {
+    const vehicleRoute = await VehicleRoute.aggregate([
+      {
+        $match: {
+          $and: [
+            { startDate: { $lte: new Date(startDate) } },
+            { startDate: { $gte: new Date(startDate) } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "places",
+          localField: "departure",
+          foreignField: "_id",
+          as: "departure",
+        },
+      },
+      {
+        $unwind: "$departure",
+      },
+      {
+        $lookup: {
+          from: "departuretimes",
+          localField: "startTime",
+          foreignField: "_id",
+          as: "departuretimes",
+        },
+      },
+      {
+        $unwind: "$departuretimes",
+      },
+      {
+        $lookup: {
+          from: "places",
+          localField: "destination",
+          foreignField: "_id",
+          as: "destination",
+        },
+      },
+      {
+        $unwind: "$destination",
+      },
+
+      {
+        $project: {
+          startDate: "$startDate",
+
+          departure: {
+            _id: 1,
+            name: 1,
+          },
+          destination: {
+            _id: 1,
+            name: 1,
+          },
+        },
+      },
+    ]);
+    return vehicleRoute;
+  },
 };
 
 module.exports = VehicleRouteService;

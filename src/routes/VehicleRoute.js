@@ -15,5 +15,10 @@ router.get(
   "/getTicketVehice/:vehicleId",
   vehicleRouteController.getListTicketByIdVehicleRoute
 );
-
+// get list vehicleRoute unique by start date and departure,destination (quan ly chhuyen xe)
+// chuyen xe header
+router.get(
+  "/getVehiceCurrenDate",
+  vehicleRouteController.getListVehicleRouteCurrenDate
+);
 module.exports = router;

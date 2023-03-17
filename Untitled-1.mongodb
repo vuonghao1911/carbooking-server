@@ -183,73 +183,81 @@
       //   departure:ObjectId("63da8c5cee09e7dba6d76fb1"),
       // });
 
-       db.promotions.aggregate([
-      {
-        $match: {
-          promotionHeaderId: ObjectId("640e05a3ea08be71285e8ba8"),
-        },
-      },
-      {
-        $lookup: {
-          from: "promotionlines",
-          localField: "promotionLineId",
-          foreignField: "_id",
-          as: "promotionlines",
-        },
-      },
-      {
-        $unwind: "$promotionlines",
-      },
-      // {
-      //   $lookup: {
-      //     from: "routetypes",
-      //     localField: "promotionlines.routeTypeId",
-      //     foreignField: "_id",
-      //     as: "routetypes",
-      //   },
-      // },
-      // {
-      //   $unwind: "$routetypes",
-      // },
-      {
-        $lookup: {
-          from: "promotionheaders",
-          localField: "promotionHeaderId",
-          foreignField: "_id",
-          as: "promotionheaders",
-        },
-      },
-      {
-        $unwind: "$promotionheaders",
-      },
-      {
-        $lookup: {
-          from: "promotiontypes",
-          localField: "promotionlines.promotionTypeId",
-          foreignField: "_id",
-          as: "promotiontypes",
-        },
-      },
-      {
-        $unwind: "$promotiontypes",
-      },
+    //    db.promotions.aggregate([
+    //   {
+    //     $match: {
+    //       promotionHeaderId: ObjectId("640e05a3ea08be71285e8ba8"),
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "promotionlines",
+    //       localField: "promotionLineId",
+    //       foreignField: "_id",
+    //       as: "promotionlines",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$promotionlines",
+    //   },
+    //   // {
+    //   //   $lookup: {
+    //   //     from: "routetypes",
+    //   //     localField: "promotionlines.routeTypeId",
+    //   //     foreignField: "_id",
+    //   //     as: "routetypes",
+    //   //   },
+    //   // },
+    //   // {
+    //   //   $unwind: "$routetypes",
+    //   // },
+    //   {
+    //     $lookup: {
+    //       from: "promotionheaders",
+    //       localField: "promotionHeaderId",
+    //       foreignField: "_id",
+    //       as: "promotionheaders",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$promotionheaders",
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "promotiontypes",
+    //       localField: "promotionlines.promotionTypeId",
+    //       foreignField: "_id",
+    //       as: "promotiontypes",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$promotiontypes",
+    //   },
 
-      {
-        $project: {
-          _id: "$_id",
-          percentDiscount: "$percentDiscount",
-          quantityTicket: "$quantityTicket",
-          purchaseAmount: "$purchaseAmount",
-          moneyReduced: "$moneyReduced",
-          maximumDiscount: "$maximumDiscount",
-          budget: "$budget",
-          createdAt: "$createdAt",
-          updatedAt: "$updatedAt",
-          promotionType: "$promotiontypes",
-          promotionLine: "$promotionlines",
-          promotionLHeader: "$promotionheaders"      
-          // routeTypes: "$routetypes"
-        },
-      },
+    //   {
+    //     $project: {
+    //       _id: "$_id",
+    //       percentDiscount: "$percentDiscount",
+    //       quantityTicket: "$quantityTicket",
+    //       purchaseAmount: "$purchaseAmount",
+    //       moneyReduced: "$moneyReduced",
+    //       maximumDiscount: "$maximumDiscount",
+    //       budget: "$budget",
+    //       createdAt: "$createdAt",
+    //       updatedAt: "$updatedAt",
+    //       promotionType: "$promotiontypes",
+    //       promotionLine: "$promotionlines",
+    //       promotionLHeader: "$promotionheaders"      
+    //       // routeTypes: "$routetypes"
+    //     },
+    //   },
       
-    ]);
+    // ]);
+
+    db.vehicleroutes.find({
+$and:[
+{startDate: { $lte: new Date("2023-03-24T00:00:00Z") }},
+    { startDate: { $gte: new Date("2023-03-24T00:00:00Z") }}
+]
+     
+    })
