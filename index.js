@@ -45,9 +45,9 @@ app.get(
 );
 
 let dataZalo = {};
-// app.get("/", (req, res) => {
-//   res.json({ test: "Hello World 123 !" });
-// });
+app.get("/", (req, res) => {
+  res.json({ test: "Hello World 123 !" });
+});
 
 // app.post("/zalopay", (request, response) => {
 //   let totalMoney = request.body.totalMoney;
