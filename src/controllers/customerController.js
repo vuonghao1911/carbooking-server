@@ -88,7 +88,7 @@ class CustomerController {
   }
 
   async updateInfo(req, res, next) {
-    const { firstName, lastName, phoneNumber, id } = req.body;
+    const { firstName, lastName, id, address } = req.body;
     //console.log(number);
     try {
       await Customer.updateOne(
@@ -97,7 +97,7 @@ class CustomerController {
           $set: {
             lastName: lastName,
             firstName: firstName,
-            phoneNumber: phoneNumber,
+            address: address,
           },
         }
       );

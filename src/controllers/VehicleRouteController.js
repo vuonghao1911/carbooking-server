@@ -257,7 +257,7 @@ class VehicleRouteController {
       next(error);
     }
   }
-  // get list vehicleRoute unique by start date and departure,destination
+  // get list vehicleRoute unique by start date and departure,destination (quan ly chhuyen xe)
   async getListVehicleRouteCurrenDate(req, res, next) {
     let arrrayFinal = [];
 

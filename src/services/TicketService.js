@@ -183,6 +183,7 @@ const TicketService = {
           firstName: "$customer.firstName",
           lastName: "$customer.lastName",
           phoneNumber: "$customer.phoneNumber",
+          address: "$customer.address",
           departure: {
             _id: 1,
             name: 1,
@@ -274,17 +275,39 @@ const TicketService = {
         $unwind: "$customer",
       },
       {
+        $lookup: {
+          from: "prices",
+          localField: "priceId",
+          foreignField: "_id",
+          as: "prices",
+        },
+      },
+      {
+        $unwind: "$prices",
+      },
+      {
+        $lookup: {
+          from: "promotionresults",
+          localField: "_id",
+          foreignField: "ticketId",
+          as: "promotionresults",
+        },
+      },
+      {
         $project: {
           _id: "$_id",
           firstName: "$customer.firstName",
           lastName: "$customer.lastName",
           phoneNumber: "$customer.phoneNumber",
+          address: "$customer.address",
           createdAt: "$createdAt",
           updatedAt: "$updatedAt",
           code: "$code",
           status: "$status",
           chair: "$chair",
           quantity: "$quantity",
+          price: "$prices.price",
+          promotionresults: "$promotionresults",
         },
       },
       { $sort: { _id: -1 } },

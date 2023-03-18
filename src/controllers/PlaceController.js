@@ -83,19 +83,18 @@ class PlaceController {
       const route = await Route.aggregate([
         {
           $lookup: {
-            from: "cartypes",
-            localField: "carTypeId",
+            from: "routetypes",
+            localField: "routeType",
             foreignField: "_id",
-            as: "cartype",
+            as: "routetypes",
           },
         },
-        { $unwind: "$cartype" },
+        { $unwind: "$routetypes" },
         {
           $project: {
             _id: "$_id",
-            carType: "$cartype.type",
+            routeType: "$routetypes.type",
             intendTime: "$intendTime",
-            route: "$route",
             departure: "$departure",
             destination: "$destination",
             status: "$status",
