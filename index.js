@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const port = 3000;
 const http = require("http");
 const https = require("https");
 var bodyParser = require("body-parser");
@@ -17,12 +16,8 @@ const handleEror = require("./src/middleware/handleEror");
 const fs = require("fs");
 //const { connectDB } = require("./src/config/configDb");
 const connectMG = require("./src/config/configMg");
-var Sequelize = require("sequelize");
 const routes = require("./src/routes");
 
-// import model
-var User = require("./src/modal/User");
-var Customer = require("./src/modal/Customer");
 const cert = fs.readFileSync(path.resolve("ssl/certificate.crt"));
 
 const key = fs.readFileSync(path.resolve("ssl/private.key"));
@@ -40,6 +35,7 @@ app.use((req, res, next) => {
   next();
 });
 const httpsServer = https.createServer(options, app);
+
 //connectDB();
 connectMG();
 routes(app);

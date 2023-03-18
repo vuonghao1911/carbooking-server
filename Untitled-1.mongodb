@@ -291,64 +291,64 @@ db.tickets.aggregate([
       {
         $unwind: "$vehicleroute",
       },
-      {
-        $lookup: {
-          from: "departuretimes",
-          localField: "vehicleroute.startTime",
-          foreignField: "_id",
-          as: "departuretimes",
-        },
-      },
-      {
-        $unwind: "$departuretimes",
-      },
-      {
-        $lookup: {
-          from: "promotionresults",
-          localField: "_id",
-          foreignField: "ticketId",
-          as: "promotionresults",
-        },
-      },
+    //   {
+    //     $lookup: {
+    //       from: "departuretimes",
+    //       localField: "vehicleroute.startTime",
+    //       foreignField: "_id",
+    //       as: "departuretimes",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$departuretimes",
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "promotionresults",
+    //       localField: "_id",
+    //       foreignField: "ticketId",
+    //       as: "promotionresults",
+    //     },
+    //   },
 
-      {
-        $lookup: {
-          from: "promotions",
-          localField: "promotionresults.promotionId",
-          foreignField: "_id",
-          as: "promotions",
-        },
-      },
-      {
-        $lookup: {
-          from: "places",
-          localField: "vehicleroute.departure",
-          foreignField: "_id",
-          as: "departure",
-        },
-      },
-      {
-        $unwind: "$departure",
-      },
-      {
-        $lookup: {
-          from: "places",
-          localField: "vehicleroute.destination",
-          foreignField: "_id",
-          as: "destination",
-        },
-      },
-      {
-        $unwind: "$destination",
-      },
-      {
-        $lookup: {
-          from: "cars",
-          localField: "vehicleroute.carId",
-          foreignField: "_id",
-          as: "car",
-        },
-      },
+    //   {
+    //     $lookup: {
+    //       from: "promotions",
+    //       localField: "promotionresults.promotionId",
+    //       foreignField: "_id",
+    //       as: "promotions",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "places",
+    //       localField: "vehicleroute.departure",
+    //       foreignField: "_id",
+    //       as: "departure",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$departure",
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "places",
+    //       localField: "vehicleroute.destination",
+    //       foreignField: "_id",
+    //       as: "destination",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$destination",
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "cars",
+    //       localField: "vehicleroute.carId",
+    //       foreignField: "_id",
+    //       as: "car",
+    //     },
+    //   },
       {
         $unwind: "$car",
       },
@@ -387,9 +387,9 @@ db.tickets.aggregate([
           chair: "$chair",
           createdAt: "$createdAt",
           updatedAt: "$updatedAt",
-          promotionresults: "$promotionresults",
-          promotions: "$promotions",
-          price: "$prices.price",
+        //  promotionresults: "$promotionresults",
+        //  promotions: "$promotions",
+          price: "$prices.price"
         },
       },
       { $sort: { _id: -1 } },

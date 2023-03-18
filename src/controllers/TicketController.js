@@ -273,14 +273,14 @@ class TicketController {
           "destination._id": ObjectId(ticket.destination._id),
         });
         var pomrotionLine;
-        // if (ticket.promotions[0]) {
-        //   pomrotionLine = await PromotionLine.findById(
-        //     ticket.promotions[0].promotionLineId
-        //   );
-        // }
+        if (ticket.promotions[0]) {
+          pomrotionLine = await PromotionLine.findById(
+            ticket.promotions[0].promotionLineId
+          );
+        }
         listTicketResult.push({
           ...ticket,
-          //  pomrotionLine,
+          pomrotionLine,
           intendTime: intendTime,
         });
       }
