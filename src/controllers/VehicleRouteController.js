@@ -6,24 +6,40 @@ const Route = require("../modal/Route");
 const RouteType = require("../modal/RouteType");
 const VehicleRoute = require("../modal/VehicleRoute");
 const DepartureTime = require("../modal/DepartureTime");
+const Car = require("../modal/Car");
 class VehicleRouteController {
   async addVehicleRoute(req, res, next) {
     const { startDate, startTimeId, routeId, carId, endDate } = req.body;
     console.log(routeId);
+    var message = "success";
     try {
       const routeChoose = await Route.findById(routeId);
+      const { typeCarId } = await Car.findById(carId);
       const departure = routeChoose.departure._id;
       const destination = routeChoose.destination._id;
-      const route = await vehicleRouteService.addRoutes(
+      const priceCheck = await vehicleRouteService.checkPriceRoute(
         startDate,
-        startTimeId,
-        departure,
-        destination,
-        routeChoose.intendTime,
-        carId,
-        endDate
+        routeId,
+        typeCarId
       );
-      return res.json(route);
+      console.log(priceCheck);
+      if (priceCheck) {
+        const route = await vehicleRouteService.addRoutes(
+          startDate,
+          startTimeId,
+          departure,
+          destination,
+          routeChoose.intendTime,
+          carId,
+          endDate
+        );
+        return res.json({ route, message });
+      } else {
+        return res.json({
+          route: null,
+          message: "Price  is not exist in this route and carType",
+        });
+      }
     } catch (error) {
       console.log(error);
       next(error);
@@ -41,13 +57,11 @@ class VehicleRouteController {
         "departure._id": ObjectId(departure),
         "destination._id": ObjectId(destination),
       });
+      const promotion = await vehicleRouteService.checkPromotionsRoute(
+        startDate
+      );
 
       for (const route of vehicleRoute) {
-        console.log(
-          "Vehicle",
-          new Date(route.startDate).toLocaleDateString(),
-          new Date(req.body.startDate).toLocaleDateString()
-        );
         if (
           new Date(route.startDate).toLocaleDateString() ===
           new Date(req.body.startDate).toLocaleDateString()
@@ -57,34 +71,30 @@ class VehicleRouteController {
             _id,
             route.carTypeId
           );
-          const promotion = await vehicleRouteService.checkPromotionsRoute(
-            startDate
-          );
-          if (promotion?.promotionLine.routeTypeId) {
-            if (promotion.promotionLine.routeTypeId === routeType) {
-              vehicleRouteSearch.push({
-                ...route,
-                intendTime,
-                priceId: price._id,
-                price: price.price,
-                promotion,
-              });
-            } else {
-              vehicleRouteSearch.push({
-                ...route,
-                intendTime,
-                priceId: price._id,
-                price: price.price,
-                promotion: null,
-              });
+          const arrayPromotions = [];
+          if (promotion.promotion.length > 0) {
+            for (const elem of promotion.promotion) {
+              if (
+                elem.promotionLine.routeTypeId === routeType ||
+                elem?.promotionLine.routeTypeId == null
+              ) {
+                arrayPromotions.push({ ...elem });
+              }
             }
+            vehicleRouteSearch.push({
+              ...route,
+              intendTime,
+              priceId: price._id,
+              price: price.price,
+              promotion: arrayPromotions,
+            });
           } else {
             vehicleRouteSearch.push({
               ...route,
               intendTime,
               priceId: price._id,
               price: price.price,
-              promotion,
+              promotion: arrayPromotions,
             });
           }
         }
@@ -163,31 +173,30 @@ class VehicleRouteController {
         const promotion = await vehicleRouteService.checkPromotionsRoute(
           route.startDate
         );
-        if (promotion?.promotionLine.routeTypeId) {
-          if (promotion.promotionLine.routeTypeId === routeType) {
-            vehicleRouteSearch.push({
-              ...route,
-              intendTime,
-              priceId: price._id,
-              price: price.price,
-              promotion,
-            });
-          } else {
-            vehicleRouteSearch.push({
-              ...route,
-              intendTime,
-              priceId: price._id,
-              price: price.price,
-              promotion: null,
-            });
+        const arrayPromotions = [];
+        if (promotion.promotion.length > 0) {
+          for (const elem of promotion.promotion) {
+            if (
+              elem.promotionLine.routeTypeId === routeType ||
+              elem?.promotionLine.routeTypeId == null
+            ) {
+              arrayPromotions.push({ ...elem });
+            }
           }
+          vehicleRouteSearch.push({
+            ...route,
+            intendTime,
+            priceId: price._id,
+            price: price.price,
+            promotion: arrayPromotions,
+          });
         } else {
           vehicleRouteSearch.push({
             ...route,
             intendTime,
             priceId: price._id,
             price: price.price,
-            promotion,
+            promotion: arrayPromotions,
           });
         }
       }
@@ -224,30 +233,31 @@ class VehicleRouteController {
         vehicleId
       );
 
-      if (promotion?.promotionLine.routeTypeId) {
-        if (promotion.promotionLine.routeTypeId === routeType) {
-          vehicleRouteSearch = {
-            vehicle,
-            intendTime,
-            price: price.price,
-            promotion,
-            listTicketUser,
-          };
-        } else {
-          vehicleRouteSearch = {
-            vehicle,
-            intendTime,
-            price: price.price,
-            promotion: null,
-            listTicketUser,
-          };
+      const arrayPromotions = [];
+      if (promotion.promotion.length > 0) {
+        for (const elem of promotion.promotion) {
+          if (
+            elem.promotionLine.routeTypeId === routeType ||
+            elem?.promotionLine.routeTypeId == null
+          ) {
+            arrayPromotions.push({ ...elem });
+          }
         }
+        vehicleRouteSearch = {
+          vehicle,
+          intendTime,
+          priceId: price._id,
+          price: price.price,
+          promotion: arrayPromotions,
+          listTicketUser,
+        };
       } else {
         vehicleRouteSearch = {
           vehicle,
           intendTime,
+          priceId: price._id,
           price: price.price,
-          promotion,
+          promotion: arrayPromotions,
           listTicketUser,
         };
       }
@@ -260,10 +270,11 @@ class VehicleRouteController {
   // get list vehicleRoute unique by start date and departure,destination (quan ly chhuyen xe)
   async getListVehicleRouteCurrenDate(req, res, next) {
     let arrrayFinal = [];
-
+    const a = new Date().toLocaleDateString();
+    console.log(a);
     try {
       var vehicleRoute = await VehicleRoute.find({
-        startDate: { $gte: new Date() },
+        startDate: { $gte: new Date(a) },
       }).sort({ startDate: 1 });
 
       let cachedObject = {};
@@ -271,22 +282,20 @@ class VehicleRouteController {
         (item) => (cachedObject[item.startDate] = item.startDate)
       );
       vehicleRoute = Object.values(cachedObject);
-
+      console.log("ve", vehicleRoute);
       for (const elem of vehicleRoute) {
         var listVehiceDate = await vehicleRouteService.getInfoVehicleCurrenDate(
           elem
         );
-        var list = [];
-        //   console.log("list", listVehiceDate);
+
         for (var i = 0; i < listVehiceDate.length - 1; i++) {
           for (var j = i + 1; j < listVehiceDate.length; j++) {
             if (
-              listVehiceDate[i].departure.toString() ==
-                listVehiceDate[j].departure.toString() &&
-              listVehiceDate[i].destination.toString() ==
-                listVehiceDate[j].destination.toString()
+              listVehiceDate[i].departure._id.toString() ===
+                listVehiceDate[j].departure._id.toString() &&
+              listVehiceDate[i].destination._id.toString() ===
+                listVehiceDate[j].destination._id.toString()
             ) {
-              console.log("vao", listVehiceDate[i]._id);
               listVehiceDate.splice(j, 1);
             }
           }

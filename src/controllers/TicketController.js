@@ -242,16 +242,24 @@ class TicketController {
           "destination._id": ObjectId(ticket.destination._id),
         });
         var pomrotionLine;
-        if (ticket.promotions[0]) {
+
+        if (ticket.promotions.length > 0) {
           pomrotionLine = await PromotionLine.findById(
             ticket.promotions[0].promotionLineId
           );
+
+          listTicketResult.push({
+            ...ticket,
+            pomrotionLine,
+            intendTime: intendTime,
+          });
+        } else {
+          listTicketResult.push({
+            ...ticket,
+            pomrotionLine: null,
+            intendTime: intendTime,
+          });
         }
-        listTicketResult.push({
-          ...ticket,
-          pomrotionLine,
-          intendTime: intendTime,
-        });
       }
       res.json(listTicketResult);
     } catch (error) {
@@ -273,16 +281,24 @@ class TicketController {
           "destination._id": ObjectId(ticket.destination._id),
         });
         var pomrotionLine;
-        if (ticket.promotions[0]) {
+        console.log(ticket.promotions[0]?.promotionLineId);
+        if (ticket.promotions.length > 0) {
           pomrotionLine = await PromotionLine.findById(
             ticket.promotions[0].promotionLineId
           );
+
+          listTicketResult.push({
+            ...ticket,
+            pomrotionLine,
+            intendTime: intendTime,
+          });
+        } else {
+          listTicketResult.push({
+            ...ticket,
+            pomrotionLine: null,
+            intendTime: intendTime,
+          });
         }
-        listTicketResult.push({
-          ...ticket,
-          pomrotionLine,
-          intendTime: intendTime,
-        });
       }
       res.json(listTicketResult);
     } catch (error) {

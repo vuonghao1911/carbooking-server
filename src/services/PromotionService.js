@@ -178,6 +178,23 @@ const PromotionService = {
       }
     );
   },
+  updatePromotionHeaderWithStartDateEndDate: async (
+    status,
+    startDate,
+    endDate,
+    id
+  ) => {
+    return await PromotionHeader.updateOne(
+      { _id: id },
+      {
+        $set: {
+          endDate: endDate,
+          startDate: startDate,
+          status: status,
+        },
+      }
+    );
+  },
   updatePromotionLine: async (status, endDate, id) => {
     return await PromotionLine.updateOne(
       { _id: id },
@@ -185,6 +202,23 @@ const PromotionService = {
         $set: {
           endDate: endDate,
           status: status,
+        },
+      }
+    );
+  },
+  updatePromotionLineStartDateEndDate: async (
+    startDate,
+    status,
+    endDate,
+    id
+  ) => {
+    return await PromotionLine.updateOne(
+      { _id: id },
+      {
+        $set: {
+          endDate: endDate,
+          status: status,
+          startDate: startDate,
         },
       }
     );

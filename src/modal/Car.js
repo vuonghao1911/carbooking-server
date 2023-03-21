@@ -10,8 +10,15 @@ const carSchema = new Schema({
     type: ObjectId,
     required: true,
   },
-  employeeId: {
-    type: ObjectId,
+  status: {
+    type: Boolean,
+    default: true,
+  },
+  description: {
+    type: String,
+  },
+  purchaseDate: {
+    type: Date,
   },
   chair: [],
 });

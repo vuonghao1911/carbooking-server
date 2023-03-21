@@ -57,37 +57,28 @@ class CarController {
     try {
       const cars = await Car.aggregate([
         {
-          $lookup:
-          {
+          $lookup: {
             from: "cartypes",
             localField: "typeCarId",
             foreignField: "_id",
-            as: "cartype"
+            as: "cartype",
           },
         },
         {
-          "$unwind": "$cartype"
+          $unwind: "$cartype",
         },
+
         {
-          $lookup:
-          {
-            from: "employees",
-            localField: "employeeId",
-            foreignField: "_id",
-            as: "employee"
-          },
-        },
-        {
-          "$unwind": "$employee"
-        },
-        {
-          "$project": {
-            "_id": "$_id",
-            "licensePlates": "$licensePlates",
-            "carType": "$cartype",
-            "employeeFirstName": "$employee.firstName",
-            "employeeLastName": "$employee.lastName",
-            "chair": {"$size": "$chair"}
+          $project: {
+            _id: "$_id",
+            licensePlates: "$licensePlates",
+            carType: {
+              _id: "$cartype._id",
+              type: "$cartype.type",
+            },
+            description: "$description",
+            purchaseDate: "$purchaseDate",
+            chair: { $size: "$chair" },
           },
         },
       ]);
@@ -97,20 +88,35 @@ class CarController {
     }
   }
   async addCar(req, res, next) {
-    const { idTypeCar, licensePlates, employeeId } = req.body;
+    const { idTypeCar, licensePlates, description, purchaseDate } = req.body;
 
     const { chair } = await CarType.findById(idTypeCar);
     console.log(chair);
     const car = new Car({
       licensePlates: licensePlates,
       typeCarId: idTypeCar,
-      employeeId: employeeId,
       chair: chair,
+      description: description,
+      purchaseDate: purchaseDate,
     });
 
     try {
       const newcar = await carService.addCar(car);
       res.json(newcar);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getVehicleByCarId(req, res, next) {
+    const { id } = req.params;
+    try {
+      const listVehcle = await carService.findVehicleRouteByIdCar(id);
+      if (listVehcle.length > 0) {
+        res.json({ listVehcle, message: "success" });
+      } else {
+        res.json({ listVehcle: null, message: "This car has no trips" });
+      }
     } catch (error) {
       next(error);
     }

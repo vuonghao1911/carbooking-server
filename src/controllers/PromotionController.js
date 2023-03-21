@@ -45,54 +45,33 @@ class PromotionController {
       endDate
     );
     if (checkDate) {
-      var checkRouteTypeLine = true;
-      const promotionCheck = await PromotionLine.find({
-        endDate: { $gte: new Date(startDate) },
-        status: true,
+      const promotionLine = new PromotionLine({
+        startDate: startDate,
+        endDate: endDate,
+        title: title,
+        code: codeLine,
+        title: title,
+        promotionTypeId: promotionType,
+        promotionHeaderId: promotionHeaderId,
+        description: description,
+        routeTypeId: routeTypeId,
       });
-      if (promotionCheck.length > 0) {
-        for (const elem of promotionCheck) {
-          if (elem.routeTypeId == null || elem.routeTypeId == routeTypeId) {
-            checkRouteTypeLine = false;
-            break;
-          }
-        }
-      }
+      const newPromotionLine = await promotionLine.save();
+      const promotion = new Promotion({
+        percentDiscount: percentDiscount,
+        quantityTicket: quantityTicket,
+        purchaseAmount: purchaseAmount,
+        moneyReduced: moneyReduced,
+        maximumDiscount: maximumDiscount,
+        budget: budget,
+        promotionType: promotionType,
+        promotionHeaderId: promotionHeaderId,
+        promotionLineId: newPromotionLine._id,
+      });
 
-      if (checkRouteTypeLine) {
-        const promotionLine = new PromotionLine({
-          startDate: startDate,
-          endDate: endDate,
+      const newPromotion = await promotion.save();
 
-          title: title,
-          code: codeLine,
-          title: title,
-          promotionTypeId: promotionType,
-          promotionHeaderId: promotionHeaderId,
-          description: description,
-          routeTypeId: routeTypeId,
-        });
-
-        const newPromotionLine = await promotionLine.save();
-        const promotion = new Promotion({
-          percentDiscount: percentDiscount,
-          quantityTicket: quantityTicket,
-          purchaseAmount: purchaseAmount,
-          moneyReduced: moneyReduced,
-          maximumDiscount: maximumDiscount,
-          budget: budget,
-          promotionType: promotionType,
-          promotionHeaderId: promotionHeaderId,
-          promotionLineId: newPromotionLine._id,
-        });
-
-        const newPromotion = await promotion.save();
-
-        res.json({ newPromotionLine, newPromotion, message });
-      } else {
-        message = " There is a promotionLine for this RouteType";
-        res.json({ newPromotionLine: null, newPromotion: null, message });
-      }
+      res.json({ newPromotionLine, newPromotion, message });
     } else {
       message =
         "startDate and EndDate promotionLine or PromotionDetails invalid ";
@@ -243,7 +222,6 @@ class PromotionController {
           );
         }
       }
-
       const promotionResult = await PromotionHeader.find();
       res.json(promotionResult);
     } catch (error) {
@@ -251,7 +229,7 @@ class PromotionController {
     }
   }
   async updatePromotionHeader(req, res, next) {
-    const { endDate, status, id } = req.body;
+    const { startDate, endDate, status, id } = req.body;
     var message = "status: active -- not update";
     const promoHeader = await PromotionHeader.findById(id);
     const promoLine = await PromotionLine.find({
@@ -259,25 +237,41 @@ class PromotionController {
     });
     console.log(promoLine);
     try {
-      if (status) {
-        if (new Date(endDate) < new Date()) {
-          message = "endDate < currendate ";
+      if (
+        new Date(promoHeader.endDate) >= new Date() &&
+        new Date(promoHeader.startDate) <= new Date()
+      ) {
+        if (new Date(new Date(endDate).toLocaleDateString) < new Date()) {
+          message = "update false : endDate < currendate ";
           res.json(message);
-        } else if (new Date(endDate) < new Date(promoHeader.endDate)) {
-          message = "endDate < endDatePromotionHeader ";
+        } else if (new Date(startDate) > new Date()) {
+          message = "update false: promotion Actice ---not update StartDate ";
           res.json(message);
         } else {
           await promotionService.updatePromotionHeader(status, endDate, id);
 
-          message = "update success with status: true";
+          message = "update success ";
           res.json(message);
         }
       } else {
-        await promotionService.updatePromotionHeader(status, endDate, id);
+        if (
+          new Date(startDate) < new Date() ||
+          new Date(endDate) < new Date()
+        ) {
+          message =
+            "update false : startDate < currendate || endDate < currendate";
+          res.json(message);
+        }
+        await promotionService.updatePromotionHeaderWithStartDateEndDate(
+          status,
+          startDate,
+          endDate,
+          id
+        );
         for (const elem of promoLine) {
           await promotionService.updateStatusPromotionLine(status, elem._id);
         }
-        message = "update success with status: false";
+        message = "update success ";
         res.json(message);
       }
     } catch (error) {
@@ -285,7 +279,7 @@ class PromotionController {
     }
   }
   async updatePromotionLine(req, res, next) {
-    const { endDate, status, id } = req.body;
+    const { startDate, endDate, status, id } = req.body;
     var message = "status: active -- not update";
 
     try {
@@ -295,12 +289,23 @@ class PromotionController {
       );
 
       if (promoHeader.status) {
-        if (status) {
-          if (new Date(endDate) < new Date()) {
+        if (
+          new Date(promoLine.endDate) >= new Date() &&
+          new Date(promoLine.startDate) <= new Date()
+        ) {
+          if (new Date(new Date(endDate).toLocaleDateString) < new Date()) {
             message = "endDate < currendate ";
             res.json(message);
-          } else if (new Date(endDate) < new Date(promoHeader.endDate)) {
-            message = "endDate < endDatePromotionLine ";
+          } else if (
+            new Date(new Date(endDate).toLocaleDateString) >
+            new Date(promoHeader.endDate)
+          ) {
+            message = "endDate > endDatePromotionHeader ";
+            res.json(message);
+          } else if (
+            new Date(new Date(startDate).toLocaleDateString) > new Date()
+          ) {
+            message = "update false: promotion Actice ---not update StartDate ";
             res.json(message);
           } else {
             await promotionService.updatePromotionLine(status, endDate, id);
@@ -309,7 +314,20 @@ class PromotionController {
             res.json(message);
           }
         } else {
-          await promotionService.updatePromotionLine(status, endDate, id);
+          if (
+            new Date(new Date(startDate).toLocaleDateString) < new Date() ||
+            new Date(new Date(endDate).toLocaleDateString) < new Date()
+          ) {
+            message =
+              "update false : startDate < currendate || endDate < currendate";
+            res.json(message);
+          }
+          await promotionService.updatePromotionLineStartDateEndDate(
+            startDate,
+            status,
+            endDate,
+            id
+          );
 
           message = "update success with status: false";
           res.json(message);

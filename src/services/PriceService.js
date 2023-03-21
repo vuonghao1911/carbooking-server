@@ -24,8 +24,8 @@ const priceService = {
     });
     return await newprice.save();
   },
-  checDatePrice: async (startDate) => {
-    const price = await PriceHeader.findOne({
+  checkDatePrice: async (startDate) => {
+    const price = await PriceHeader.find({
       endDate: { $gte: new Date(startDate) },
       startDate: { $lte: new Date(startDate) },
     });

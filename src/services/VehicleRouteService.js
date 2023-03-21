@@ -71,7 +71,7 @@ const VehicleRouteService = {
     const result = [];
     const time = await DepartureTime.findById(startTimeId);
     // get list car
-    var listCar = await Car.find();
+    var listCar = await Car.find({ status: true });
     // get infomation route
     const { departure, destination, intendTime } = await Route.findById(
       routeId
@@ -267,36 +267,50 @@ const VehicleRouteService = {
     return vehicleRoute;
   },
   checkPriceRoute: async (currenDate, routeId, carTypeId) => {
-    const priceHeader = await PriceHeader.findOne({
+    const priceHeader = await PriceHeader.find({
       endDate: { $gte: new Date(currenDate) },
       startDate: { $lte: new Date(currenDate) },
     });
-    const price = await Price.findOne({
-      priceHeaderId: priceHeader._id,
-      routeId: routeId,
-      carTypeId: carTypeId,
-    });
 
-    return price;
+    for (const elem of priceHeader) {
+      const price = await Price.findOne({
+        priceHeaderId: elem._id,
+        routeId: routeId,
+        carTypeId: carTypeId,
+      });
+      if (price) console.log("price", price);
+      return price;
+    }
   },
   checkPromotionsRoute: async (currenDate) => {
+    const arrayFilters = [];
     const promotionHeader = await promotionsHeader.findOne({
       endDate: { $gte: new Date(currenDate) },
       startDate: { $lte: new Date(currenDate) },
     });
     if (promotionHeader) {
-      const promotionLine = await PromotionsLine.findOne({
+      const promotionLine = await PromotionsLine.find({
         promotionHeaderId: promotionHeader._id,
         endDate: { $gte: new Date(currenDate) },
         startDate: { $lte: new Date(currenDate) },
         status: true,
       });
-      if (promotionLine) {
-        const promotion = await Promotions.findOne({
-          promotionHeaderId: promotionHeader._id,
-          promotionLineId: promotionLine._id,
-        });
-        return { promotionHeader, promotion, promotionLine };
+      //  console.log(promotionLine);
+      if (promotionLine.length > 0) {
+        for (const elem of promotionLine) {
+          const promotion = await Promotions.findOne({
+            promotionHeaderId: promotionHeader._id,
+            promotionLineId: elem._id,
+          });
+          //  console.log(elem._id);
+          if (promotion) {
+            arrayFilters.push({
+              promotionDetail: promotion,
+              promotionLine: elem,
+            });
+          }
+        }
+        return { promotion: arrayFilters };
       } else {
         return null;
       }

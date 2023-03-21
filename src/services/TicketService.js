@@ -177,6 +177,7 @@ const TicketService = {
       {
         $unwind: "$prices",
       },
+
       {
         $project: {
           _id: "$_id",
@@ -206,7 +207,7 @@ const TicketService = {
           price: "$prices.price",
         },
       },
-      { $sort: { _id: -1 } },
+      { $sort: { startDate: -1 } },
     ]);
 
     return ticket;

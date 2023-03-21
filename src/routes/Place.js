@@ -5,6 +5,8 @@ router.post("/addPlace", placeController.addPlace);
 router.get("/all/getPlace", placeController.getPlace);
 router.post("/addRoute", placeController.addRoute);
 router.get("/all/getRoute", placeController.getRoute);
+//add busStation
+router.post("/addBusStation", placeController.addBusStation);
 
 //router.get("/:id", carController.getCarById);
 

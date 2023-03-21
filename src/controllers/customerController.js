@@ -111,9 +111,15 @@ class CustomerController {
   async getCustomerByPhoneNumber(req, res, next) {
     const { phone = "" } = req.query;
     //console.log(number);
+    var message = "success";
     try {
       const customer = await customerService.getCustomerByPhone(phone);
-      return res.json(customer);
+
+      if (customer) {
+        return res.json({ customer, message });
+      } else {
+        return res.json({ customer: null, message: "customer not found" });
+      }
     } catch (error) {
       console.log(error);
       next(error);

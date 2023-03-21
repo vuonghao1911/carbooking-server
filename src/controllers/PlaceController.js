@@ -107,6 +107,30 @@ class PlaceController {
       next(error);
     }
   }
+  async addBusStation(req, res, next) {
+    const { idPlace, address } = req.body;
+
+    try {
+      const place = await Place.findById(idPlace);
+      if (place) {
+        await Place.updateOne(
+          {
+            _id: idPlace,
+          },
+          {
+            $push: {
+              busStation: { address: address },
+            },
+          }
+        );
+        res.json({ message: "Update Success" });
+      } else {
+        res.json({ message: "Update false : place not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new PlaceController();
