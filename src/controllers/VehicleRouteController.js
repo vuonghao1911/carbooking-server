@@ -1,5 +1,6 @@
 const vehicleRouteService = require("../services/VehicleRouteService");
 const ticketService = require("../services/TicketService");
+const utilService = require("../utils/utils");
 const Customer = require("../modal/Customer");
 const ObjectId = require("mongoose").Types.ObjectId;
 const Route = require("../modal/Route");
@@ -209,6 +210,7 @@ class VehicleRouteController {
   // get list ticket and list chair vehicle by id vehicle
   async getListTicketByIdVehicleRoute(req, res, next) {
     const { vehicleId } = req.params;
+
     let vehicleRouteSearch = {};
     try {
       const vehicleRoute = await vehicleRouteService.getInfoVehicleById(
@@ -269,6 +271,7 @@ class VehicleRouteController {
   }
   // get list vehicleRoute unique by start date and departure,destination (quan ly chhuyen xe)
   async getListVehicleRouteCurrenDate(req, res, next) {
+    const { page, size } = req.query;
     let arrrayFinal = [];
     const a = new Date().toLocaleDateString();
     console.log(a);
@@ -282,7 +285,6 @@ class VehicleRouteController {
         (item) => (cachedObject[item.startDate] = item.startDate)
       );
       vehicleRoute = Object.values(cachedObject);
-      console.log("ve", vehicleRoute);
       for (const elem of vehicleRoute) {
         var listVehiceDate = await vehicleRouteService.getInfoVehicleCurrenDate(
           elem
@@ -302,7 +304,13 @@ class VehicleRouteController {
         }
         arrrayFinal.push(...listVehiceDate);
       }
-      res.json(arrrayFinal);
+      const { arrPagination, totalPages } = await utilService.pagination(
+        parseInt(page),
+        parseInt(size),
+        arrrayFinal
+      );
+
+      res.json({ arrPagination, totalPages });
     } catch (error) {
       next(error);
     }

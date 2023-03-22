@@ -1,4 +1,5 @@
 const priceService = require("../services/PriceService");
+const utilsService = require("../utils/utils");
 const Price = require("../modal/Price");
 const PriceHeader = require("../modal/PriceHeader");
 const ObjectId = require("mongoose").Types.ObjectId;
@@ -81,6 +82,8 @@ class PriceController {
   }
   async getPriceByIdHeader(req, res, next) {
     const { priceHeaderId } = req.params;
+    const { page, size } = req.query;
+
     try {
       const price = await Price.aggregate([
         {
@@ -138,7 +141,12 @@ class PriceController {
           },
         },
       ]);
-      res.json(price);
+      const { arrPagination, totalPages } = await utilsService.pagination(
+        parseInt(page),
+        parseInt(size),
+        price
+      );
+      res.json({ price: arrPagination, totalPages });
     } catch (error) {
       next(error);
     }
