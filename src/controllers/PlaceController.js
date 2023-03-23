@@ -79,7 +79,9 @@ class PlaceController {
     }
   }
   async getRoute(req, res, next) {
+    const { departure_id, destination_id } = req.query;
     try {
+      const result = [];
       const route = await Route.aggregate([
         {
           $lookup: {
@@ -102,7 +104,21 @@ class PlaceController {
           },
         },
       ]);
-      res.json(route);
+      if (departure_id != null && destination_id != null) {
+        for (const elem of route) {
+          if (
+            elem.departure._id.toString() == departure_id &&
+            elem.destination._id.toString() == destination_id
+          ) {
+            result.push(elem);
+            break;
+          }
+        }
+      } else {
+        result.push(...route);
+      }
+
+      res.json(result);
     } catch (error) {
       next(error);
     }

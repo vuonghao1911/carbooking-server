@@ -152,8 +152,15 @@ class PriceController {
     }
   }
   async getPriceHeader(req, res, next) {
+    const { code } = req.query;
+    var priceHeader;
     try {
-      const priceHeader = await PriceHeader.find();
+      if (code) {
+        priceHeader = await PriceHeader.find({ code: code });
+      } else {
+        priceHeader = await PriceHeader.find();
+      }
+
       for (const priceHd of priceHeader) {
         if (new Date(priceHd.endDate) < new Date()) {
           await PriceHeader.updateOne(

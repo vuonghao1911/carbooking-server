@@ -212,7 +212,11 @@ class PromotionController {
   }
   async getPromotionHeader(req, res, next) {
     try {
+      const { code } = req.query;
+
+      var promotionResult;
       const promotionHeader = await PromotionHeader.find();
+
       //check date > current date update status
       for (const promotionHe of promotionHeader) {
         if (new Date(promotionHe.endDate) < new Date()) {
@@ -222,7 +226,11 @@ class PromotionController {
           );
         }
       }
-      const promotionResult = await PromotionHeader.find();
+      if (code) {
+        promotionResult = await PromotionHeader.find({ code: code });
+      } else {
+        promotionResult = await PromotionHeader.find();
+      }
       res.json(promotionResult);
     } catch (error) {
       next(error);
