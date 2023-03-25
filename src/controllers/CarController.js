@@ -81,6 +81,7 @@ class CarController {
             chair: { $size: "$chair" },
           },
         },
+        { $sort: { _id: -1 } },
       ]);
       res.json(cars);
     } catch (error) {

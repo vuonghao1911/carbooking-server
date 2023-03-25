@@ -233,6 +233,7 @@ class TicketController {
             price: "$prices.price",
           },
         },
+        { $sort: { _id: -1 } },
       ]);
       var listTicketResult = [];
       for (const ticket of tickets) {

@@ -29,19 +29,19 @@ class EmployeeController {
   }
   async getEmployee(req, res, next) {
     try {
-      const getEmps = await Employee.find();
+      const getEmps = await Employee.find().sort({ _id: -1 });
       return res.json(getEmps);
     } catch (error) {
       console.log(error);
       next(error);
     }
   }
-  async getCustomerById(req, res, next) {
+  async getEmployeeById(req, res, next) {
     const { userId } = req.params;
     console.log(userId);
 
     try {
-      const customer = await Customer.findById(userId);
+      const customer = await Employee.findById(userId);
 
       res.json(customer);
     } catch (error) {

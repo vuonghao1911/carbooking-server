@@ -164,6 +164,7 @@ const PromotionService = {
           promotionLHeader: "$promotionheaders",
         },
       },
+      { $sort: { _id: -1 } },
     ]);
     return promotion;
   },

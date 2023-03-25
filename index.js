@@ -59,8 +59,9 @@ app.post("/zalopay", (request, response) => {
 
       store_name: "Saigon Centre",
     },
+    bankgroup: "",
   };
-  const items = [{}];
+  const items = [{ hao: 12 }];
   const transID = Math.floor(Math.random() * 1000000);
   const order = {
     app_id: config.app_id,
@@ -71,9 +72,10 @@ app.post("/zalopay", (request, response) => {
     embed_data: JSON.stringify(embed_data),
     amount: Number(totalMoney),
     description: `Thanh toan ve ${moment().format("YYMMDD")}_${transID}`,
-    bank_code: "",
+
     title: "thanh toan ve #123455323432",
     redirecturl: "http://localhost:3000/",
+    bank_code: "",
   };
   const data =
     config.app_id +
@@ -147,6 +149,12 @@ app.post("/getStatusOrderZalopay", (req, res) => {
         console.log(error);
       });
   }, 15000);
+});
+
+app.use("/redirect", async (req, res, next) => {
+  console.log("Authenticate and Redirect");
+  res.redirect("/places/all/getPlace");
+  next();
 });
 
 // app.get("/user", async (req, res) => {

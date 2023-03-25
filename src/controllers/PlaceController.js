@@ -103,6 +103,7 @@ class PlaceController {
             code: "$code",
           },
         },
+        { $sort: { _id: -1 } },
       ]);
       if (departure_id != null && destination_id != null) {
         for (const elem of route) {

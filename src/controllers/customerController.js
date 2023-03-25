@@ -80,6 +80,7 @@ class CustomerController {
             quantityTicket: { $size: "$tickets" },
           },
         },
+        { $sort: { _id: -1 } },
       ]);
       res.json(customer);
     } catch (error) {

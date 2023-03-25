@@ -272,6 +272,10 @@ class VehicleRouteController {
   // get list vehicleRoute unique by start date and departure,destination (quan ly chhuyen xe)
   async getListVehicleRouteCurrenDate(req, res, next) {
     const { page, size } = req.query;
+
+    // departure_id, destination_id, startDate
+    const { depId, desId, date } = req.query;
+
     let arrrayFinal = [];
     const a = new Date().toLocaleDateString();
     console.log(a);
@@ -289,7 +293,6 @@ class VehicleRouteController {
         var listVehiceDate = await vehicleRouteService.getInfoVehicleCurrenDate(
           elem
         );
-
         for (var i = 0; i < listVehiceDate.length - 1; i++) {
           for (var j = i + 1; j < listVehiceDate.length; j++) {
             if (
@@ -304,13 +307,28 @@ class VehicleRouteController {
         }
         arrrayFinal.push(...listVehiceDate);
       }
+
       const { arrPagination, totalPages } = await utilService.pagination(
         parseInt(page),
         parseInt(size),
         arrrayFinal
       );
-
-      res.json({ arrPagination, totalPages });
+      if (desId !== "" && depId !== "" && date !== null) {
+        const listVehiceDate = [];
+        arrrayFinal.forEach((element) => {
+          if (
+            element.destination._id.toString() == desId &&
+            element.departure._id.toString() == depId &&
+            new Date(element.startDate).toLocaleDateString() ===
+              new Date(date).toLocaleDateString()
+          ) {
+            listVehiceDate.push(element);
+          }
+        });
+        res.json({ listVehice: listVehiceDate, totalPages });
+      } else {
+        res.json({ listVehice: arrPagination, totalPages });
+      }
     } catch (error) {
       next(error);
     }

@@ -91,6 +91,7 @@ const CarService = {
           licensePlates: "$car.licensePlates",
           carType: "$cartype.type",
           carTypeId: "$cartype._id",
+          chair: "$chair",
         },
       },
       { $sort: { startDate: -1 } },

@@ -140,6 +140,7 @@ class PriceController {
             priceHeaderId: "$priceHeaderId",
           },
         },
+        { $sort: { _id: -1 } },
       ]);
       const { arrPagination, totalPages } = await utilsService.pagination(
         parseInt(page),
@@ -153,14 +154,9 @@ class PriceController {
   }
   async getPriceHeader(req, res, next) {
     const { code } = req.query;
-    var priceHeader;
+    const { page, size } = req.query;
+    var priceHeader = (priceHeader = await PriceHeader.find());
     try {
-      if (code) {
-        priceHeader = await PriceHeader.find({ code: code });
-      } else {
-        priceHeader = await PriceHeader.find();
-      }
-
       for (const priceHd of priceHeader) {
         if (new Date(priceHd.endDate) < new Date()) {
           await PriceHeader.updateOne(
@@ -178,7 +174,19 @@ class PriceController {
           );
         }
       }
-      res.json(priceHeader);
+      if (code) {
+        priceHeader = await PriceHeader.find({ code: code });
+      } else {
+        priceHeader = await PriceHeader.find().sort({ _id: -1 });
+      }
+
+      const { arrPagination, totalPages } = await utilsService.pagination(
+        parseInt(page),
+        parseInt(size),
+        priceHeader
+      );
+
+      res.json({ priceHeader: arrPagination, totalPages });
     } catch (error) {
       next(error);
     }

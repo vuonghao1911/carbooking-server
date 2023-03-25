@@ -263,6 +263,7 @@ const VehicleRouteService = {
           chair: "$chair",
         },
       },
+      { $sort: { startDate: -1 } },
     ]);
     return vehicleRoute;
   },

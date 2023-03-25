@@ -15,6 +15,7 @@ const commonUtils = {
     const skip = page * size;
     const endPossiton = skip + size;
     const arrPagination = arr.slice(skip, endPossiton);
+
     return {
       arrPagination,
       totalPages,

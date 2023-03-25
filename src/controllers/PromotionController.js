@@ -229,7 +229,7 @@ class PromotionController {
       if (code) {
         promotionResult = await PromotionHeader.find({ code: code });
       } else {
-        promotionResult = await PromotionHeader.find();
+        promotionResult = await PromotionHeader.find().sort({ _id: -1 });
       }
       res.json(promotionResult);
     } catch (error) {
