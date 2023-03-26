@@ -18,7 +18,7 @@ const PromotionService = {
   },
   savePromotionResult: async (promotionId, ticketId, discountAmount) => {
     const promotionResult = new PromotionResult({
-      promotionId: promotionId,
+      promotionLineId: promotionId,
       ticketId: ticketId,
       discountAmount: discountAmount,
     });

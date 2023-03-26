@@ -272,16 +272,18 @@ const VehicleRouteService = {
       endDate: { $gte: new Date(currenDate) },
       startDate: { $lte: new Date(currenDate) },
     });
-
+    var price = null;
     for (const elem of priceHeader) {
-      const price = await Price.findOne({
+      const priceFind = await Price.findOne({
         priceHeaderId: elem._id,
         routeId: routeId,
         carTypeId: carTypeId,
       });
-      if (price) console.log("price", price);
-      return price;
+      if (priceFind) {
+        price = priceFind;
+      }
     }
+    return price;
   },
   checkPromotionsRoute: async (currenDate) => {
     const arrayFilters = [];
@@ -294,7 +296,6 @@ const VehicleRouteService = {
         promotionHeaderId: promotionHeader._id,
         endDate: { $gte: new Date(currenDate) },
         startDate: { $lte: new Date(currenDate) },
-        status: true,
       });
       //  console.log(promotionLine);
       if (promotionLine.length > 0) {

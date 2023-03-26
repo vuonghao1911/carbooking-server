@@ -12,6 +12,46 @@ const PromotionResults = require("../modal/PromotionResult");
 const PromotionLine = require("../modal/PromotionLine");
 
 class TicketController {
+  // body save tickets
+  // {
+  //  "vehicleRouteId":"640f28b6275c2402f5295703",
+  //  "customer":{
+  //            "firstNameCustomer":"Hao",
+  //            "lastNameCustomer":"Vuong"
+  //             },
+  //   "quantity":2,
+  //    "chair":
+  //          [
+  //            {
+  //           "seats":"A-08"
+  //              },
+  //            {
+  //           "seats":"B-16"
+  //              }
+  //            ],
+  //      "locationBus":{
+  //       "address": {
+  //                    "name": "Bến xe Miền Tây",
+  //                    "detailAddress": "số 395 Kinh Dương Vương",
+  //                    "ward": "Phường An Lạc",
+  //                    "district": "Quận Tân Bình",
+  //                    "province": "Thành phố Hồ Chí Minh",
+  //                    }
+  //                      },
+  //       "phoneNumber":"0373794680",
+  //       "promotion":[
+  //             {
+  //                 "idPromotion":"640e090fa1fb05eebee22aa7", // Id Promotion Line
+  //                 "discountAmount":15000
+  //             },
+  //             {
+  //                 "idPromotion":"640f19f71616703a11d29a03", // Id Promotion Line
+  //                  "discountAmount":25000
+  //             }
+  //                  ],
+  //        "priceId":"640de7ee0bc741d653d7bc53"
+  //  }
+
   async bookingTicket(req, res, next) {
     const {
       vehicleRouteId,
@@ -20,8 +60,7 @@ class TicketController {
       chair,
       locationBus,
       phoneNumber,
-      discountAmount,
-      idPromotion,
+      promotion,
       priceId,
     } = req.body;
     console.log(chair);
@@ -58,14 +97,13 @@ class TicketController {
         const newCustomer = await customerAdd.save();
 
         const saveticket = await ticketService.saveTicket(
-          idPromotion,
           vehicleRouteId,
           newCustomer._id,
           quantity,
           chair,
           locationBus,
           phoneNumber,
-          discountAmount,
+          promotion,
           code,
           priceId
         );
@@ -76,14 +114,13 @@ class TicketController {
         });
 
         const saveticket = await ticketService.saveTicket(
-          idPromotion,
           vehicleRouteId,
           customerFind._id,
           quantity,
           chair,
           locationBus,
           phoneNumber,
-          discountAmount,
+          promotion,
           code,
           priceId
         );
@@ -155,8 +192,8 @@ class TicketController {
 
         {
           $lookup: {
-            from: "promotions",
-            localField: "promotionresults.promotionId",
+            from: "promotionlines",
+            localField: "promotionresults.promotionLineId",
             foreignField: "_id",
             as: "promotions",
           },
@@ -205,12 +242,14 @@ class TicketController {
         {
           $unwind: "$prices",
         },
+
         {
           $project: {
             _id: "$_id",
             firstName: "$customer.firstName",
             lastName: "$customer.lastName",
             phoneNumber: "$customer.phoneNumber",
+            address: "$customer.address",
             departure: {
               _id: 1,
               name: 1,
@@ -229,11 +268,10 @@ class TicketController {
             createdAt: "$createdAt",
             updatedAt: "$updatedAt",
             promotionresults: "$promotionresults",
-            promotions: "$promotions",
             price: "$prices.price",
           },
         },
-        { $sort: { _id: -1 } },
+        { $sort: { startDate: -1 } },
       ]);
       var listTicketResult = [];
       for (const ticket of tickets) {
@@ -243,21 +281,24 @@ class TicketController {
           "destination._id": ObjectId(ticket.destination._id),
         });
         var pomrotionLine;
-
-        if (ticket.promotions.length > 0) {
-          pomrotionLine = await PromotionLine.findById(
-            ticket.promotions[0].promotionLineId
-          );
-
+        const listPromotions = [];
+        if (ticket.promotionresults.length > 0) {
+          for (const elem of ticket.promotionresults) {
+            pomrotionLine = await PromotionLine.findById(elem.promotionLineId);
+            listPromotions.push({
+              PromotionResults: elem,
+              PromotionLine: pomrotionLine,
+            });
+          }
           listTicketResult.push({
             ...ticket,
-            pomrotionLine,
+            listPromotions,
             intendTime: intendTime,
           });
         } else {
           listTicketResult.push({
             ...ticket,
-            pomrotionLine: null,
+            listPromotions: null,
             intendTime: intendTime,
           });
         }
@@ -271,10 +312,10 @@ class TicketController {
   async getAllTicketByUserId(req, res, next) {
     const { userId } = req.params;
     console.log(userId);
-
+    var listTicketResult = [];
     try {
       const listTicket = await ticketService.getTicketByUserId(userId);
-      var listTicketResult = [];
+
       for (const ticket of listTicket) {
         // get routeId
         const { _id, intendTime } = await Route.findOne({
@@ -282,21 +323,25 @@ class TicketController {
           "destination._id": ObjectId(ticket.destination._id),
         });
         var pomrotionLine;
-        console.log(ticket.promotions[0]?.promotionLineId);
-        if (ticket.promotions.length > 0) {
-          pomrotionLine = await PromotionLine.findById(
-            ticket.promotions[0].promotionLineId
-          );
+        const listPromotions = [];
+        if (ticket.promotionresults.length > 0) {
+          for (const elem of ticket.promotionresults) {
+            pomrotionLine = await PromotionLine.findById(elem.promotionLineId);
+            listPromotions.push({
+              PromotionResults: elem,
+              PromotionLine: pomrotionLine,
+            });
+          }
 
           listTicketResult.push({
             ...ticket,
-            pomrotionLine,
+            listPromotions,
             intendTime: intendTime,
           });
         } else {
           listTicketResult.push({
             ...ticket,
-            pomrotionLine: null,
+            listPromotions: null,
             intendTime: intendTime,
           });
         }

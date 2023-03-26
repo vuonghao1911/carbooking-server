@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
 
 const promotionResultSchema = new Schema({
-  promotionId: {
+  promotionLineId: {
     type: ObjectId,
   },
   ticketId: {

@@ -7,28 +7,27 @@ const VehicleRoute = require("../modal/VehicleRoute");
 const ObjectId = require("mongoose").Types.ObjectId;
 const TicketService = {
   saveTicket: async (
-    idPromotion,
     vehicleRouteId,
     customerId,
     quantity,
     chair,
     locationBus,
     phoneNumber,
-    discountAmount,
+    promotion,
     code,
     priceId
   ) => {
     var ticketSave;
-
+    console.log(phoneNumber);
     await Customer.updateOne(
       { _id: customerId },
       {
         $set: {
-          customerTypeId: "640e987e186ba7d1aee14309",
+          customerTypeId: new ObjectId("640e987e186ba7d1aee14309"),
         },
       }
     );
-    if (idPromotion) {
+    if (promotion.length > 0) {
       const ticket = new Ticket({
         vehicleRouteId: vehicleRouteId,
         customerId: customerId,
@@ -41,21 +40,25 @@ const TicketService = {
       });
 
       ticketSave = await ticket.save();
-      await PromotionService.savePromotionResult(
-        idPromotion,
-        ticketSave._id,
-        discountAmount
-      );
-      const { budget } = await Promotion.findById(idPromotion);
-      var budgetUpdate = budget - discountAmount;
-      await Promotion.updateOne(
-        { _id: idPromotion },
-        {
-          $set: {
-            budget: budgetUpdate,
-          },
-        }
-      );
+      for (const elem of promotion) {
+        await PromotionService.savePromotionResult(
+          elem.idPromotion,
+          ticketSave._id,
+          elem.discountAmount
+        );
+        const { remainingBudget, _id } = await Promotion.findOne({
+          promotionLineId: elem.idPromotion,
+        });
+        var budgetUpdate = remainingBudget - elem.discountAmount;
+        await Promotion.updateOne(
+          { _id: _id },
+          {
+            $set: {
+              remainingBudget: budgetUpdate,
+            },
+          }
+        );
+      }
     } else {
       const ticket = new Ticket({
         vehicleRouteId: vehicleRouteId,
@@ -127,8 +130,8 @@ const TicketService = {
 
       {
         $lookup: {
-          from: "promotions",
-          localField: "promotionresults.promotionId",
+          from: "promotionlines",
+          localField: "promotionresults.promotionLineId",
           foreignField: "_id",
           as: "promotions",
         },
@@ -203,7 +206,6 @@ const TicketService = {
           createdAt: "$createdAt",
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
-          promotions: "$promotions",
           price: "$prices.price",
         },
       },

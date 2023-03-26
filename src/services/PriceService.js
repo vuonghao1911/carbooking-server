@@ -28,6 +28,7 @@ const priceService = {
     const price = await PriceHeader.find({
       endDate: { $gte: new Date(startDate) },
       startDate: { $lte: new Date(startDate) },
+      status: true,
     });
     return price;
   },

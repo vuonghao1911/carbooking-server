@@ -64,6 +64,7 @@ class PromotionController {
         moneyReduced: moneyReduced,
         maximumDiscount: maximumDiscount,
         budget: budget,
+        remainingBudget: budget,
         promotionType: promotionType,
         promotionHeaderId: promotionHeaderId,
         promotionLineId: newPromotionLine._id,
@@ -124,16 +125,6 @@ class PromotionController {
           idProHeader
         );
       // console.log(promotion[1].promotionLine.startDate);
-
-      for (const promo of promotion) {
-        console.log(promo?.promotionLine?.startDate);
-        if (new Date(promo?.promotionLine?.endDate) < new Date()) {
-          await PromotionLine.updateOne(
-            { _id: promo?.promotionLine?._id },
-            { $set: { status: false } }
-          );
-        }
-      }
       const promotionResult =
         await PromotionService.getPromotionDetailsByPromotionHeaderId(
           idProHeader

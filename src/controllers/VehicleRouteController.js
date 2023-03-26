@@ -15,32 +15,20 @@ class VehicleRouteController {
     var message = "success";
     try {
       const routeChoose = await Route.findById(routeId);
-      const { typeCarId } = await Car.findById(carId);
+
       const departure = routeChoose.departure._id;
       const destination = routeChoose.destination._id;
-      const priceCheck = await vehicleRouteService.checkPriceRoute(
+
+      const route = await vehicleRouteService.addRoutes(
         startDate,
-        routeId,
-        typeCarId
+        startTimeId,
+        departure,
+        destination,
+        routeChoose.intendTime,
+        carId,
+        endDate
       );
-      console.log(priceCheck);
-      if (priceCheck) {
-        const route = await vehicleRouteService.addRoutes(
-          startDate,
-          startTimeId,
-          departure,
-          destination,
-          routeChoose.intendTime,
-          carId,
-          endDate
-        );
-        return res.json({ route, message });
-      } else {
-        return res.json({
-          route: null,
-          message: "Price  is not exist in this route and carType",
-        });
-      }
+      return res.json({ route, message });
     } catch (error) {
       console.log(error);
       next(error);
@@ -68,7 +56,7 @@ class VehicleRouteController {
           new Date(req.body.startDate).toLocaleDateString()
         ) {
           const price = await vehicleRouteService.checkPriceRoute(
-            startDate,
+            route.startDate,
             _id,
             route.carTypeId
           );
@@ -85,16 +73,16 @@ class VehicleRouteController {
             vehicleRouteSearch.push({
               ...route,
               intendTime,
-              priceId: price._id,
-              price: price.price,
+              priceId: price?._id ? price._id : null,
+              price: price?.price ? price?.price : null,
               promotion: arrayPromotions,
             });
           } else {
             vehicleRouteSearch.push({
               ...route,
               intendTime,
-              priceId: price._id,
-              price: price.price,
+              priceId: price?._id ? price._id : null,
+              price: price?.price ? price?.price : null,
               promotion: arrayPromotions,
             });
           }
@@ -187,16 +175,16 @@ class VehicleRouteController {
           vehicleRouteSearch.push({
             ...route,
             intendTime,
-            priceId: price._id,
-            price: price.price,
+            priceId: price?._id ? price._id : null,
+            price: price?.price ? price?.price : null,
             promotion: arrayPromotions,
           });
         } else {
           vehicleRouteSearch.push({
             ...route,
             intendTime,
-            priceId: price._id,
-            price: price.price,
+            priceId: price?._id ? price._id : null,
+            price: price?.price ? price?.price : null,
             promotion: arrayPromotions,
           });
         }

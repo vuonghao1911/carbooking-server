@@ -33,6 +33,9 @@ const promotionSchema = new Schema(
     promotionLineId: {
       type: ObjectId,
     },
+    remainingBudget: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );
