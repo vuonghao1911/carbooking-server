@@ -4,6 +4,7 @@ const Promotion = require("../modal/Promotion");
 const Customer = require("../modal/Customer");
 const Price = require("../modal/Price");
 const VehicleRoute = require("../modal/VehicleRoute");
+const TicketRefund = require("../modal/TicketRefund");
 const ObjectId = require("mongoose").Types.ObjectId;
 const TicketService = {
   saveTicket: async (
@@ -83,6 +84,7 @@ const TicketService = {
       {
         $match: {
           customerId: ObjectId(userId),
+          status: 1,
         },
       },
       {
@@ -224,31 +226,38 @@ const TicketService = {
     return price;
   },
 
-  cancleTicket: async (
-    idTicket,
-    idPromotion,
-    chair,
-    vehicleRouteId,
-    discountAmount
-  ) => {
-    if (idPromotion) {
-      console.log(idPromotion);
-      const { budget } = await Promotion.findById(idPromotion);
-      var budgetUpdate = budget + discountAmount;
-      await Promotion.updateOne(
-        { _id: idPromotion },
-        {
-          $set: {
-            budget: budgetUpdate,
-          },
-        }
-      );
+  cancleTicket: async (idTicket, returnAmount, note) => {
+    const ticket = await Ticket.findById(idTicket);
+    const promotion = await Promotion.find({ ticketId: idTicket });
+    const codeFind = await TicketRefund.find().sort({ _id: -1 }).limit(1);
+    var code;
+
+    if (codeFind[0]) {
+      code = codeFind[0].code;
+    } else {
+      code = 0;
     }
+    if (promotion.length > 0) {
+      for (const elem of promotion) {
+        const { remainingBudget, _id } = await Promotion.findOne({
+          promotionHeaderId: elem.promotionLineId,
+        });
+        var newRemainingBuget = remainingBudget + elem.discountAmount;
+
+        await Promotion.updateOne(
+          { _id: ObjectId(_id) },
+          {
+            $set: { remainingBudget: newRemainingBuget },
+          }
+        );
+      }
+    }
+
     const result = await Promise.all(
-      chair.map((e) => {
+      ticket.chair.map((e) => {
         const name = e.seats;
         const matchedCount = VehicleRoute.updateOne(
-          { _id: ObjectId(vehicleRouteId) },
+          { _id: ObjectId(ticket.vehicleRouteId) },
           {
             $set: { ["chair.$[elem].status"]: false },
           },
@@ -257,7 +266,16 @@ const TicketService = {
         return matchedCount;
       })
     );
-    await Ticket.updateOne({ _id: idTicket }, { $set: { status: false } });
+    await Ticket.updateOne({ _id: idTicket }, { $set: { status: 2 } });
+
+    const ticketRefund = new TicketRefund({
+      ticketId: idTicket,
+      chair: ticket.chair,
+      code: code + 1,
+      note: note,
+      returnAmount: returnAmount,
+    });
+    return await ticketRefund.save();
   },
   getTicketByVehicleRouteId: async (vehicleRoute) => {
     const ticket = await Ticket.aggregate([

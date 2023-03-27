@@ -353,39 +353,16 @@ class TicketController {
   }
 
   async CanceledTicket(req, res, next) {
-    const { ticketId } = req.params;
+    const { ticketId, note, returnAmount } = req.params;
 
     try {
-      // get idPromotion
-      const promotionresults = await PromotionResults.findOne({
-        ticketId: ticketId,
-      });
+      const cancleTicket = await ticketService.cancleTicket(
+        ticketId,
+        returnAmount,
+        note
+      );
 
-      const { chair, vehicleRouteId } = await Ticket.findById(ticketId);
-
-      if (vehicleRouteId) {
-        if (promotionresults) {
-          await ticketService.cancleTicket(
-            ticketId,
-            promotionresults.promotionId,
-            chair,
-            vehicleRouteId,
-            promotionresults.discountAmount
-          );
-        } else {
-          await ticketService.cancleTicket(
-            ticketId,
-            null,
-            chair,
-            vehicleRouteId,
-            null
-          );
-        }
-
-        res.json({ cancleTicket: true });
-      } else {
-        res.json({ cancleTicket: false });
-      }
+      res.json({ cancleTicket, message: " cancle success" });
     } catch (error) {
       next(error);
     }
