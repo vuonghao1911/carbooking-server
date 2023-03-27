@@ -25,6 +25,10 @@ const vehicleRouteSchema = new Schema({
   code: {
     type: Number,
   },
+  status: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const VehicleRoute = mongoose.model("VehicleRoute", vehicleRouteSchema);

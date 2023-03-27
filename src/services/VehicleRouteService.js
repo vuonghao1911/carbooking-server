@@ -271,6 +271,7 @@ const VehicleRouteService = {
     const priceHeader = await PriceHeader.find({
       endDate: { $gte: new Date(currenDate) },
       startDate: { $lte: new Date(currenDate) },
+      status: true,
     });
     var price = null;
     for (const elem of priceHeader) {
@@ -287,34 +288,36 @@ const VehicleRouteService = {
   },
   checkPromotionsRoute: async (currenDate) => {
     const arrayFilters = [];
-    const promotionHeader = await promotionsHeader.findOne({
+    const promotionHeader = await promotionsHeader.find({
       endDate: { $gte: new Date(currenDate) },
       startDate: { $lte: new Date(currenDate) },
     });
-    if (promotionHeader) {
-      const promotionLine = await PromotionsLine.find({
-        promotionHeaderId: promotionHeader._id,
-        endDate: { $gte: new Date(currenDate) },
-        startDate: { $lte: new Date(currenDate) },
-      });
-      //  console.log(promotionLine);
-      if (promotionLine.length > 0) {
-        for (const elem of promotionLine) {
-          const promotion = await Promotions.findOne({
-            promotionHeaderId: promotionHeader._id,
-            promotionLineId: elem._id,
-          });
-          //  console.log(elem._id);
-          if (promotion) {
-            arrayFilters.push({
-              promotionDetail: promotion,
-              promotionLine: elem,
+    if (promotionHeader.length > 0) {
+      for (const promoHeader of promotionHeader) {
+        const promotionLine = await PromotionsLine.find({
+          promotionHeaderId: promoHeader._id,
+          endDate: { $gte: new Date(currenDate) },
+          startDate: { $lte: new Date(currenDate) },
+        });
+        //  console.log(promotionLine);
+        if (promotionLine.length > 0) {
+          for (const elem of promotionLine) {
+            const promotion = await Promotions.findOne({
+              promotionHeaderId: promoHeader._id,
+              promotionLineId: elem._id,
             });
+            //  console.log(elem._id);
+            if (promotion) {
+              arrayFilters.push({
+                promotionDetail: promotion,
+                promotionLine: elem,
+              });
+            }
           }
+          return { promotion: arrayFilters };
+        } else {
+          return null;
         }
-        return { promotion: arrayFilters };
-      } else {
-        return null;
       }
     } else {
       return null;

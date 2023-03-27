@@ -38,24 +38,10 @@ class PriceController {
   }
   async addPrice(req, res, next) {
     var { routeId, price, priceHeaderId, carTypeId } = req.body;
-    var checkUnique = true;
+
     const codeFind = await Price.find().sort({ _id: -1 }).limit(1);
-    const priceHeader = await PriceHeader.findById(priceHeaderId);
-    const listpriceHeaer = await priceService.checkDatePrice(
-      priceHeader.startDate
-    );
-    for (const elem of listpriceHeaer) {
-      const priceCheck = await priceService.checkPriceRoute(
-        routeId,
-        elem._id,
-        carTypeId
-      );
-      if (priceCheck) {
-        checkUnique = false;
-        break;
-      }
-    }
     var code;
+
     if (codeFind[0]) {
       code = codeFind[0].code;
     } else {
@@ -69,13 +55,9 @@ class PriceController {
       code: code + 1,
     };
     try {
-      if (checkUnique) {
-        const price = new Price(data);
-        await price.save();
-        res.json({ price, message: "Success" });
-      } else {
-        res.json({ price: null, message: "price Is exists" });
-      }
+      const price = new Price(data);
+      await price.save();
+      res.json({ price, message: "Success" });
     } catch (error) {
       next(error);
     }
@@ -191,45 +173,94 @@ class PriceController {
       next(error);
     }
   }
+  // update price header
   async updatePriceHeader(req, res, next) {
-    const { startDate, endDate, idHeader } = req.body;
+    const { idHeader } = req.body;
+    const { startDate = "", endDate = "", status = null } = req.query;
+
     try {
       const priceHeader = await PriceHeader.findById(idHeader);
-      console.log(idHeader);
-      if (priceHeader.status) {
-        if (new Date(startDate) < new Date()) {
-          if (new Date(new Date(endDate).toLocaleDateString) < new Date()) {
-            res.json({ message: "endate < current date" });
-          } else {
-            await PriceHeader.updateOne(
-              { _id: idHeader },
-              { $set: { endDate: endDate } }
-            );
+
+      if (status == "false") {
+        await PriceHeader.updateOne(
+          { _id: idHeader },
+          {
+            $set: {
+              status: status,
+            },
           }
-          res.json({ message: "update Success with priceStatus true" });
-        } else {
-          res.json({ message: "status true : --- not update startDate" });
-        }
-      } else {
-        if (
-          new Date(startDate) <= new Date() ||
-          new Date(endDate) < new Date() ||
-          new Date(startDate) < new Date(endDate)
-        ) {
-          res.json({ message: "startDate and EndDate invalid" });
+        );
+        res.json({
+          massage: "update status false priceHeader success",
+        });
+      } else if (status === null) {
+        if (startDate == "") {
+          await PriceHeader.updateOne(
+            { _id: idHeader },
+            {
+              $set: {
+                endDate: endDate,
+              },
+            }
+          );
+          res.json({
+            massage: "update endDate priceHeader  success",
+          });
         } else {
           await PriceHeader.updateOne(
             { _id: idHeader },
             {
               $set: {
                 endDate: endDate,
-
                 startDate: startDate,
               },
             }
           );
+          res.json({
+            massage: "update endDate and startDate priceHeader success",
+          });
         }
-        res.json({ message: "update Success with priceStatus false" });
+      } else if (status == "true") {
+        var priceUnique = false;
+        var idPriceHeader = null;
+        const priceHeaderCheck = await priceService.checkDatePrice(
+          priceHeader.startDate
+        );
+        for (const header of priceHeaderCheck) {
+          const priceCheck = await Price.find({ priceHeaderId: header._id });
+          if (priceCheck.length > 0) {
+            for (const pirceDetails of priceCheck) {
+              const price = await priceService.checkPriceRoute(
+                pirceDetails.routeId,
+                pirceDetails.priceHeaderId,
+                pirceDetails.carTypeId
+              );
+              if (price) {
+                priceUnique = true;
+                idPriceHeader = header._id;
+                break;
+              }
+            }
+          }
+          if (priceUnique) break;
+        }
+        if (priceUnique) {
+          res.json({
+            massage: `price is exist in priceHeader id: ${idPriceHeader}`,
+          });
+        } else {
+          await PriceHeader.updateOne(
+            { _id: idHeader },
+            {
+              $set: {
+                status: status,
+              },
+            }
+          );
+          res.json({
+            massage: "update status true priceHeader success",
+          });
+        }
       }
     } catch (error) {
       next(error);

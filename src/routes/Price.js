@@ -7,7 +7,10 @@ router.post("/addPrice", PriceController.addPrice);
 router.get("/all/getPrice/:priceHeaderId", PriceController.getPriceByIdHeader);
 //get list priceHeader
 router.get("/all/getPriceHeader", PriceController.getPriceHeader);
+
 // update priceHeader
+// query startDate, endDate, status
+// body idHeader
 router.patch("/updateHeader", PriceController.updatePriceHeader);
 
 module.exports = router;

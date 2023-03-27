@@ -98,19 +98,9 @@ class PromotionController {
         description: description,
         imgUrl: urlImg,
       };
-      const promotionCheck =
-        await promotionService.checkDateisExistPromotionsHeader(startDate);
-      console.log(promotionCheck);
-      if (promotionCheck) {
-        res.json({
-          promotionsHeader: null,
-          message: "promotionHeader Is exists",
-        });
-      } else {
-        const promotionsHeader = new PromotionHeader(data);
-        await promotionsHeader.save();
-        res.json({ promotionsHeader, message: "Success" });
-      }
+      const promotionsHeader = new PromotionHeader(data);
+      await promotionsHeader.save();
+      res.json({ promotionsHeader, message: "Success" });
     } catch (error) {
       next(error);
     }
@@ -120,10 +110,6 @@ class PromotionController {
     const { idProHeader } = req.params;
     const result = [];
     try {
-      const promotion =
-        await PromotionService.getPromotionDetailsByPromotionHeaderId(
-          idProHeader
-        );
       // console.log(promotion[1].promotionLine.startDate);
       const promotionResult =
         await PromotionService.getPromotionDetailsByPromotionHeaderId(
@@ -206,17 +192,7 @@ class PromotionController {
       const { code } = req.query;
 
       var promotionResult;
-      const promotionHeader = await PromotionHeader.find();
 
-      //check date > current date update status
-      for (const promotionHe of promotionHeader) {
-        if (new Date(promotionHe.endDate) < new Date()) {
-          await PromotionHeader.updateOne(
-            { _id: promotionHe._id },
-            { $set: { status: false } }
-          );
-        }
-      }
       if (code) {
         promotionResult = await PromotionHeader.find({ code: code });
       } else {
@@ -227,114 +203,101 @@ class PromotionController {
       next(error);
     }
   }
+  // update promotion header
   async updatePromotionHeader(req, res, next) {
-    const { startDate, endDate, status, id } = req.body;
-    var message = "status: active -- not update";
-    const promoHeader = await PromotionHeader.findById(id);
-    const promoLine = await PromotionLine.find({
-      promotionHeaderId: promoHeader._id,
-    });
-    console.log(promoLine);
-    try {
-      if (
-        new Date(promoHeader.endDate) >= new Date() &&
-        new Date(promoHeader.startDate) <= new Date()
-      ) {
-        if (new Date(new Date(endDate).toLocaleDateString) < new Date()) {
-          message = "update false : endDate < currendate ";
-          res.json(message);
-        } else if (new Date(startDate) > new Date()) {
-          message = "update false: promotion Actice ---not update StartDate ";
-          res.json(message);
-        } else {
-          await promotionService.updatePromotionHeader(status, endDate, id);
+    const { idHeader } = req.body;
+    const { startDate = "", endDate = "", status = null } = req.query;
 
-          message = "update success ";
-          res.json(message);
-        }
-      } else {
-        if (
-          new Date(startDate) < new Date() ||
-          new Date(endDate) < new Date()
-        ) {
-          message =
-            "update false : startDate < currendate || endDate < currendate";
-          res.json(message);
-        }
-        await promotionService.updatePromotionHeaderWithStartDateEndDate(
-          status,
-          startDate,
-          endDate,
-          id
+    try {
+      if (status == "false" || status == "true") {
+        await PromotionHeader.updateOne(
+          { _id: idHeader },
+          {
+            $set: {
+              status: status,
+            },
+          }
         );
-        for (const elem of promoLine) {
-          await promotionService.updateStatusPromotionLine(status, elem._id);
+        res.json({
+          massage: `update status ${status}  promotionHeader success`,
+        });
+      } else if (status === null) {
+        if (startDate == "") {
+          await PromotionHeader.updateOne(
+            { _id: idHeader },
+            {
+              $set: {
+                endDate: endDate,
+              },
+            }
+          );
+          res.json({
+            massage: "update endDate promotionHeader  success",
+          });
+        } else {
+          await PromotionHeader.updateOne(
+            { _id: idHeader },
+            {
+              $set: {
+                endDate: endDate,
+                startDate: startDate,
+              },
+            }
+          );
+          res.json({
+            massage: "update endDate and startDate promotionsHeader success",
+          });
         }
-        message = "update success ";
-        res.json(message);
       }
     } catch (error) {
       next(error);
     }
   }
+  //update promotion line
   async updatePromotionLine(req, res, next) {
-    const { startDate, endDate, status, id } = req.body;
-    var message = "status: active -- not update";
+    const { idLine } = req.body;
+    const { startDate = "", endDate = "", status = null } = req.query;
 
     try {
-      const promoLine = await PromotionLine.findById(id);
-      const promoHeader = await PromotionHeader.findById(
-        promoLine.promotionHeaderId
-      );
-
-      if (promoHeader.status) {
-        if (
-          new Date(promoLine.endDate) >= new Date() &&
-          new Date(promoLine.startDate) <= new Date()
-        ) {
-          if (new Date(new Date(endDate).toLocaleDateString) < new Date()) {
-            message = "endDate < currendate ";
-            res.json(message);
-          } else if (
-            new Date(new Date(endDate).toLocaleDateString) >
-            new Date(promoHeader.endDate)
-          ) {
-            message = "endDate > endDatePromotionHeader ";
-            res.json(message);
-          } else if (
-            new Date(new Date(startDate).toLocaleDateString) > new Date()
-          ) {
-            message = "update false: promotion Actice ---not update StartDate ";
-            res.json(message);
-          } else {
-            await promotionService.updatePromotionLine(status, endDate, id);
-
-            message = "update success with status: true";
-            res.json(message);
+      if (status == "false" || status == "true") {
+        await Promotion.updateOne(
+          { _id: idLine },
+          {
+            $set: {
+              status: status,
+            },
           }
-        } else {
-          if (
-            new Date(new Date(startDate).toLocaleDateString) < new Date() ||
-            new Date(new Date(endDate).toLocaleDateString) < new Date()
-          ) {
-            message =
-              "update false : startDate < currendate || endDate < currendate";
-            res.json(message);
-          }
-          await promotionService.updatePromotionLineStartDateEndDate(
-            startDate,
-            status,
-            endDate,
-            id
+        );
+        res.json({
+          massage: `update status ${status} promotionLine success`,
+        });
+      } else if (status === null) {
+        if (startDate == "") {
+          await Promotion.updateOne(
+            { _id: idLine },
+            {
+              $set: {
+                endDate: endDate,
+              },
+            }
           );
-
-          message = "update success with status: false";
-          res.json(message);
+          res.json({
+            massage: "update endDate promotionLine success",
+          });
+        } else {
+          await Promotion.updateOne(
+            { _id: idLine },
+            {
+              $set: {
+                endDate: endDate,
+                startDate: startDate,
+              },
+            }
+          );
+          res.json({
+            massage: "update endDate and startDate promotionsLine success",
+          });
         }
-      } else {
-        message =
-          "Can not update PromotionLine because status of PromotionsHeader is false";
-        res.json(message);
       }
     } catch (error) {
       next(error);
