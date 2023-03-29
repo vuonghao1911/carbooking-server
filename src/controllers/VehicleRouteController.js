@@ -9,6 +9,7 @@ const VehicleRoute = require("../modal/VehicleRoute");
 const DepartureTime = require("../modal/DepartureTime");
 const Car = require("../modal/Car");
 class VehicleRouteController {
+  // save vehicle route
   async addVehicleRoute(req, res, next) {
     const { startDate, startTimeId, routeId, carId, endDate } = req.body;
     console.log(routeId);
@@ -34,6 +35,7 @@ class VehicleRouteController {
       next(error);
     }
   }
+  // search vehicle route
   async searchVehicleRoute(req, res, next) {
     const { departure, destination, startDate } = req.body;
     let vehicleRouteSearch = [];
@@ -94,6 +96,7 @@ class VehicleRouteController {
       next(error);
     }
   }
+  // add department time
   async addDepartureTime(req, res, next) {
     const { code, time } = req.body;
 
@@ -109,6 +112,7 @@ class VehicleRouteController {
       next(error);
     }
   }
+  // add route type
   async addRouteType(req, res, next) {
     const { code, type, description } = req.body;
 
@@ -262,15 +266,13 @@ class VehicleRouteController {
     const { page, size } = req.query;
 
     // departure_id, destination_id, startDate
-    const { depId, desId, date } = req.query;
+    const { depId = "", desId = "", date = "" } = req.query;
 
     let arrrayFinal = [];
     const a = new Date().toLocaleDateString();
     console.log(a);
     try {
-      var vehicleRoute = await VehicleRoute.find({
-        startDate: { $gte: new Date(a) },
-      }).sort({ startDate: 1 });
+      var vehicleRoute = await VehicleRoute.find().sort({ startDate: -1 });
 
       let cachedObject = {};
       vehicleRoute.map(
@@ -301,19 +303,41 @@ class VehicleRouteController {
         parseInt(size),
         arrrayFinal
       );
-      if (desId !== "" && depId !== "" && date !== null) {
-        const listVehiceDate = [];
+      const listVehiceDateFinal = [];
+      if (desId !== "" && depId !== "") {
+        if (date !== "") {
+          arrrayFinal.forEach((element) => {
+            if (
+              element.destination._id.toString() == desId &&
+              element.departure._id.toString() == depId &&
+              new Date(element.startDate).toLocaleDateString() ===
+                new Date(date).toLocaleDateString()
+            ) {
+              listVehiceDateFinal.push(element);
+            }
+          });
+          res.json({ listVehice: listVehiceDateFinal, totalPages });
+        } else {
+          arrrayFinal.forEach((element) => {
+            if (
+              element.destination._id.toString() == desId &&
+              element.departure._id.toString() == depId
+            ) {
+              listVehiceDateFinal.push(element);
+            }
+          });
+          res.json({ listVehice: listVehiceDateFinal, totalPages });
+        }
+      } else if (date !== "") {
         arrrayFinal.forEach((element) => {
           if (
-            element.destination._id.toString() == desId &&
-            element.departure._id.toString() == depId &&
             new Date(element.startDate).toLocaleDateString() ===
-              new Date(date).toLocaleDateString()
+            new Date(date).toLocaleDateString()
           ) {
-            listVehiceDate.push(element);
+            listVehiceDateFinal.push(element);
           }
         });
-        res.json({ listVehice: listVehiceDate, totalPages });
+        res.json({ listVehice: listVehiceDateFinal, totalPages });
       } else {
         res.json({ listVehice: arrPagination, totalPages });
       }

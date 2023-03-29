@@ -6,16 +6,20 @@ const PromotionLine = require("../modal/PromotionLine");
 const ObjectId = require("mongoose").Types.ObjectId;
 
 const PromotionService = {
+  // save promotionDetails promotion line
   savePromotion: async (pormotion) => {
     return await pormotion.save();
   },
+  // save promotion header
   savePromotionHeader: async (pormotionHeader) => {
     return await pormotionHeader.save();
   },
+  // save promotion type
   savePromotionType: async (name) => {
     const promotionType = new PromotionType({ name: name });
     return await promotionType.save();
   },
+  //save promotion result
   savePromotionResult: async (promotionId, ticketId, discountAmount) => {
     const promotionResult = new PromotionResult({
       promotionLineId: promotionId,
@@ -24,6 +28,7 @@ const PromotionService = {
     });
     return await promotionResult.save();
   },
+  // get all promotion
   getPromotion: async () => {
     const promotion = await Promotion.aggregate([
       {
@@ -81,7 +86,7 @@ const PromotionService = {
 
     return promotion;
   },
-
+  // check date promotion header
   checkDateisExistPromotionsHeader: async (startDate) => {
     const promotion = await PromotionHeader.findOne({
       endDate: { $gte: new Date(startDate) },
@@ -90,6 +95,7 @@ const PromotionService = {
     });
     return promotion;
   },
+  // check date promotion line valid promotion header
   checDatePromotionsHeader: async (startDate, endDate) => {
     const promotionDetails = await PromotionHeader.findOne({
       endDate: { $gte: new Date(startDate), $gte: new Date(endDate) },
@@ -97,6 +103,7 @@ const PromotionService = {
     });
     return promotionDetails;
   },
+  // check date promotion line valid promotion header
   checDatePromotionsLine: async (startDate) => {
     const promotion = await PromotionLine.findOne({
       endDate: { $gte: new Date(startDate) },
@@ -105,7 +112,7 @@ const PromotionService = {
     });
     return promotion;
   },
-
+  // get promotion details by promotion header id
   getPromotionDetailsByPromotionHeaderId: async (promotionHeaderId) => {
     const promotion = await Promotion.aggregate([
       {
@@ -168,6 +175,7 @@ const PromotionService = {
     ]);
     return promotion;
   },
+  // update promotion headers
   updatePromotionHeader: async (status, endDate, id) => {
     return await PromotionHeader.updateOne(
       { _id: id },
@@ -179,6 +187,7 @@ const PromotionService = {
       }
     );
   },
+  // update start date, end date promotion header
   updatePromotionHeaderWithStartDateEndDate: async (
     status,
     startDate,
@@ -196,6 +205,7 @@ const PromotionService = {
       }
     );
   },
+  // update promotion line
   updatePromotionLine: async (status, endDate, id) => {
     return await PromotionLine.updateOne(
       { _id: id },
@@ -207,6 +217,7 @@ const PromotionService = {
       }
     );
   },
+  // update start date, end date promotion line
   updatePromotionLineStartDateEndDate: async (
     startDate,
     status,
@@ -224,6 +235,7 @@ const PromotionService = {
       }
     );
   },
+  // update status promotion line
   updateStatusPromotionLine: async (status, id) => {
     return await PromotionLine.updateOne(
       { _id: id },
@@ -233,6 +245,23 @@ const PromotionService = {
         },
       }
     );
+  },
+  // get total discount amount by id promotion line
+  getTotalDiscountAmountByIdPromotionLine: async (idLine) => {
+    return await PromotionResult.aggregate([
+      {
+        $match: {
+          promotionLineId: ObjectId(idLine),
+        },
+      },
+      {
+        $group: {
+          _id: "$promotionLineId",
+          totalDiscountAmount: { $sum: "$discountAmount" },
+          count: { $count: {} },
+        },
+      },
+    ]);
   },
 };
 

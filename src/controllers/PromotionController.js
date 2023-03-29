@@ -6,6 +6,7 @@ const PromotionService = require("../services/PromotionService");
 const PromotionType = require("../modal/PromotionType");
 const RouteType = require("../modal/RouteType");
 const PromotionLine = require("../modal/PromotionLine");
+const utilsService = require("../utils/utils");
 
 class PromotionController {
   // add promotion details and promotion line
@@ -29,58 +30,56 @@ class PromotionController {
 
     var status;
     var message = "Success";
+    try {
+      const codeFindDetails = await PromotionLine.find()
+        .sort({ _id: -1 })
+        .limit(1);
+      var codeDetails;
+      if (codeFindDetails[0]) {
+        codeDetails = codeFindDetails[0].code;
+      } else {
+        codeDetails = 0;
+      }
 
-    const codeFindDetails = await PromotionLine.find()
-      .sort({ _id: -1 })
-      .limit(1);
-    var codeDetails;
-    if (codeFindDetails[0]) {
-      codeDetails = codeFindDetails[0].code;
-    } else {
-      codeDetails = 0;
-    }
+      const checkDate = await promotionService.checDatePromotionsHeader(
+        startDate,
+        endDate
+      );
+      if (checkDate) {
+        const promotionLine = new PromotionLine({
+          startDate: startDate,
+          endDate: endDate,
+          title: title,
+          code: codeLine,
+          title: title,
+          promotionTypeId: promotionType,
+          promotionHeaderId: promotionHeaderId,
+          description: description,
+          routeTypeId: routeTypeId,
+        });
+        const newPromotionLine = await promotionLine.save();
+        const promotion = new Promotion({
+          percentDiscount: percentDiscount,
+          quantityTicket: quantityTicket,
+          purchaseAmount: purchaseAmount,
+          moneyReduced: moneyReduced,
+          maximumDiscount: maximumDiscount,
+          budget: budget,
+          remainingBudget: budget,
+          promotionType: promotionType,
+          promotionHeaderId: promotionHeaderId,
+          promotionLineId: newPromotionLine._id,
+        });
 
-    const checkDate = await promotionService.checDatePromotionsHeader(
-      startDate,
-      endDate
-    );
-    if (checkDate) {
-      const promotionLine = new PromotionLine({
-        startDate: startDate,
-        endDate: endDate,
-        title: title,
-        code: codeLine,
-        title: title,
-        promotionTypeId: promotionType,
-        promotionHeaderId: promotionHeaderId,
-        description: description,
-        routeTypeId: routeTypeId,
-      });
-      const newPromotionLine = await promotionLine.save();
-      const promotion = new Promotion({
-        percentDiscount: percentDiscount,
-        quantityTicket: quantityTicket,
-        purchaseAmount: purchaseAmount,
-        moneyReduced: moneyReduced,
-        maximumDiscount: maximumDiscount,
-        budget: budget,
-        remainingBudget: budget,
-        promotionType: promotionType,
-        promotionHeaderId: promotionHeaderId,
-        promotionLineId: newPromotionLine._id,
-      });
+        const newPromotion = await promotion.save();
 
-      const newPromotion = await promotion.save();
-
-      res.json({ newPromotionLine, newPromotion, message });
-    } else {
-      message =
-        "startDate and EndDate promotionLine or PromotionDetails invalid ";
-      res.json({ newPromotionLine: null, newPromotion: null, message });
-    }
-  }
-  catch(error) {
-    next(error);
+        res.json({ newPromotionLine, newPromotion, message });
+      } else {
+        message =
+          "startDate and EndDate promotionLine or PromotionDetails invalid ";
+        res.json({ newPromotionLine: null, newPromotion: null, message });
+      }
+    } catch (error) {}
   }
   // add promotion header
   async addPromotionHeader(req, res, next) {
@@ -105,7 +104,7 @@ class PromotionController {
       next(error);
     }
   }
-
+  // get all  promotion by header id
   async getPromotion(req, res, next) {
     const { idProHeader } = req.params;
     const result = [];
@@ -130,6 +129,7 @@ class PromotionController {
       next(error);
     }
   }
+  // add promotion type
   async addPromotionType(req, res, next) {
     const { name } = req.body;
 
@@ -140,6 +140,7 @@ class PromotionController {
       next(error);
     }
   }
+  // get promotion type
   async getPromotionType(req, res, next) {
     try {
       const promotionType = await PromotionType.find();
@@ -148,6 +149,7 @@ class PromotionController {
       next(error);
     }
   }
+  // add promotion result
   async addPromotionResult(req, res, next) {
     const { promotionId, ticketId, discountAmount } = req.body;
     const codeFind = await Promotion.find().sort({ _id: -1 }).limit(1);
@@ -168,7 +170,7 @@ class PromotionController {
       next(error);
     }
   }
-
+  // get promotion curren date
   async getPromotionByCurrentDate(req, res, next) {
     const result = [];
     try {
@@ -187,18 +189,25 @@ class PromotionController {
       next(error);
     }
   }
+  // get all promotion header
   async getPromotionHeader(req, res, next) {
     try {
-      const { code } = req.query;
+      const { page, size, code } = req.query;
 
       var promotionResult;
 
       if (code) {
         promotionResult = await PromotionHeader.find({ code: code });
+        res.json({ promotionsHeader: promotionResult });
       } else {
         promotionResult = await PromotionHeader.find().sort({ _id: -1 });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          priceHeader
+        );
+        res.json({ promotionsHeader: arrPagination, totalPages });
       }
-      res.json(promotionResult);
     } catch (error) {
       next(error);
     }
@@ -298,6 +307,31 @@ class PromotionController {
             massage: "update endDate and startDate promotionsLine success",
           });
         }
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async statisticPromotion(req, res, next) {
+    try {
+      const promotionLine = await PromotionLine.find();
+      console.log(promotionLine);
+      const arrayResult = [];
+      if (promotionLine.length > 0) {
+        for (const line of promotionLine) {
+          const statistic =
+            await promotionService.getTotalDiscountAmountByIdPromotionLine(
+              line._id
+            );
+          if (statistic.length > 0) {
+            arrayResult.push({ Line: line, statistic: statistic[0] });
+          } else {
+            arrayResult.push({ Line: line, statistic: [] });
+          }
+        }
+
+        res.json({ data: arrayResult, message: "success" });
       }
     } catch (error) {
       next(error);

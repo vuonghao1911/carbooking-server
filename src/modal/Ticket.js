@@ -17,8 +17,8 @@ const ticketSchema = new Schema(
     chair: [],
     locationBus: {},
     status: {
-      type: Number,
-      default: 1, // 0 chua thanh toan  1. Da thanh toan  2. Da huy ve  3. Tra ve
+      type: Boolean,
+      default: true, // true thanh cong    false  da huy
     },
     phoneNumber: {
       type: String,

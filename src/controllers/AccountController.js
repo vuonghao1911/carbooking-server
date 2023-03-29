@@ -7,6 +7,7 @@ const Customer = require("../modal/Customer");
 const { truncate } = require("fs/promises");
 
 class AccountController {
+  // register
   async Register(req, res, next) {
     const {
       role,
@@ -81,6 +82,7 @@ class AccountController {
       next(error);
     }
   }
+  // login
   async Login(req, res, next) {
     const { phoneNumber, passWord } = req.body;
 
@@ -115,7 +117,7 @@ class AccountController {
       next(error);
     }
   }
-
+  // change password
   async ChangePass(req, res, next) {
     const { phoneNumber, newPass, oldPass } = req.body;
 
@@ -145,7 +147,7 @@ class AccountController {
       next(error);
     }
   }
-
+  // forgotPassword
   async forgotPass(req, res, next) {
     const { phoneNumber, newPass } = req.body;
 

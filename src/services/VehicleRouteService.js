@@ -184,7 +184,7 @@ const VehicleRouteService = {
 
     return result;
   },
-
+  // search vehicle route
   findVehicleRoute: async (departure, destination) => {
     const vehicleRoute = await VehicleRoute.aggregate([
       {
@@ -267,6 +267,7 @@ const VehicleRouteService = {
     ]);
     return vehicleRoute;
   },
+  // check price route
   checkPriceRoute: async (currenDate, routeId, carTypeId) => {
     const priceHeader = await PriceHeader.find({
       endDate: { $gte: new Date(currenDate) },
@@ -286,11 +287,13 @@ const VehicleRouteService = {
     }
     return price;
   },
+  // check promotion route
   checkPromotionsRoute: async (currenDate) => {
     const arrayFilters = [];
     const promotionHeader = await promotionsHeader.find({
       endDate: { $gte: new Date(currenDate) },
       startDate: { $lte: new Date(currenDate) },
+      status: true,
     });
     if (promotionHeader.length > 0) {
       for (const promoHeader of promotionHeader) {
@@ -298,6 +301,7 @@ const VehicleRouteService = {
           promotionHeaderId: promoHeader._id,
           endDate: { $gte: new Date(currenDate) },
           startDate: { $lte: new Date(currenDate) },
+          status: true,
         });
         //  console.log(promotionLine);
         if (promotionLine.length > 0) {
@@ -323,7 +327,7 @@ const VehicleRouteService = {
       return null;
     }
   },
-
+  // get info vehicle by id vehicle
   getInfoVehicleById: async (vehicleRouteId) => {
     const vehicleRoute = await VehicleRoute.aggregate([
       {
@@ -404,7 +408,7 @@ const VehicleRouteService = {
     ]);
     return vehicleRoute;
   },
-
+  // get infor vehicle unique start date
   getInfoVehicleCurrenDate: async (startDate) => {
     const vehicleRoute = await VehicleRoute.aggregate([
       {
@@ -463,6 +467,9 @@ const VehicleRouteService = {
             name: 1,
           },
         },
+      },
+      {
+        $sort: { startDate: -1 },
       },
     ]);
     return vehicleRoute;

@@ -4,6 +4,7 @@ const PriceHeader = require("../modal/PriceHeader");
 // car and car type services
 
 const priceService = {
+  // save price
   savePrice: async (price, routeId, carTypeId, code, priceHeaderId) => {
     const newprice = new Price({
       price: price,
@@ -14,6 +15,7 @@ const priceService = {
     });
     return await newprice.save();
   },
+  // save price header
   savePriceHeader: async (startDate, endDate, status, title, code) => {
     const newprice = new Price({
       startDate: startDate,
@@ -24,6 +26,7 @@ const priceService = {
     });
     return await newprice.save();
   },
+  // check date price header
   checkDatePrice: async (startDate) => {
     const price = await PriceHeader.find({
       endDate: { $gte: new Date(startDate) },
@@ -32,6 +35,7 @@ const priceService = {
     });
     return price;
   },
+  // check price route and cartype
   checkPriceRoute: async (routeId, priceHeaderId, carTypeId) => {
     const price = await Price.findOne({
       routeId: routeId,
