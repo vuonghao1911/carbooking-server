@@ -204,7 +204,7 @@ class PromotionController {
         const { arrPagination, totalPages } = await utilsService.pagination(
           parseInt(page),
           parseInt(size),
-          priceHeader
+          promotionResult
         );
         res.json({ promotionsHeader: arrPagination, totalPages });
       }

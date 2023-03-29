@@ -41,6 +41,10 @@ const employeeSchema = new Schema({
     type: Boolean,
     default: true,
   },
+  role: {
+    type: Boolean,
+    default: false, // true manage // false employee
+  },
   code: {
     type: Number,
   },

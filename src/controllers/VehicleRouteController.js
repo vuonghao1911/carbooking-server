@@ -240,8 +240,8 @@ class VehicleRouteController {
         vehicleRouteSearch = {
           vehicle,
           intendTime,
-          priceId: price._id,
-          price: price.price,
+          priceId: price?._id ? price._id : null,
+          price: price?.price ? price?.price : null,
           promotion: arrayPromotions,
           listTicketUser,
         };
@@ -249,8 +249,8 @@ class VehicleRouteController {
         vehicleRouteSearch = {
           vehicle,
           intendTime,
-          priceId: price._id,
-          price: price.price,
+          priceId: price?._id ? price._id : null,
+          price: price?.price ? price?.price : null,
           promotion: arrayPromotions,
           listTicketUser,
         };
