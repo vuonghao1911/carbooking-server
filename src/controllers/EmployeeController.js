@@ -49,7 +49,8 @@ class EmployeeController {
     }
   }
   async addEmployee(req, res, next) {
-    const { firstName, lastName, phoneNumber, typeId, address } = req.body;
+    const { firstName, lastName, phoneNumber, typeId, address, role } =
+      req.body;
     //console.log(number);
     const codeFind = await Employee.find().sort({ _id: -1 }).limit(1);
     var code;
@@ -65,12 +66,39 @@ class EmployeeController {
         phoneNumber: phoneNumber,
         typeId: typeId,
         address: address,
+        role: role,
         code: code + 1,
       });
 
       const saveEmp = await employeeService.saveEmployee(employee);
       console.log(saveEmp);
       return res.json(saveEmp);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  // update employee
+  async updateEmloyee(req, res, next) {
+    const { firstName, lastName, phoneNumber, typeId, address, status, id } =
+      req.body;
+    try {
+      await Employee.updateOne(
+        {
+          _id: id,
+        },
+        {
+          $set: {
+            status: status,
+            firstName: firstName,
+            lastName: lastName,
+            phoneNumber: phoneNumber,
+            typeId: typeId,
+            address: address,
+          },
+        }
+      );
+      return res.json({ message: "success" });
     } catch (error) {
       console.log(error);
       next(error);

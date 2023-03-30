@@ -122,6 +122,30 @@ class CarController {
       next(error);
     }
   }
+  // update car
+  async updateCar(req, res, next) {
+    const { idCar, licensePlates, description, purchaseDate, status } =
+      req.body;
+
+    try {
+      await Car.updateOne(
+        { _id: idCar },
+        {
+          $set: {
+            licensePlates: licensePlates,
+            typeCarId: idTypeCar,
+            description: description,
+            purchaseDate: purchaseDate,
+            status: status,
+          },
+        }
+      );
+
+      res.json({ message: "success" });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new CarController();

@@ -6,10 +6,6 @@ const https = require("https");
 var bodyParser = require("body-parser");
 //const serverTest = http.createServer(app);
 const server = http.createServer(app);
-const axios = require("axios"); // npm install axios
-const CryptoJS = require("crypto-js"); // npm install crypto-js
-const moment = require("moment"); // npm install moment
-const qs = require("qs");
 require("dotenv").config();
 const path = require("path");
 const handleEror = require("./src/middleware/handleEror");
@@ -43,118 +39,6 @@ routes(app);
 let dataZalo = {};
 app.get("/", (req, res) => {
   res.json({ test: "Hello World 123 !" });
-});
-
-app.post("/zalopay", (request, response) => {
-  let totalMoney = request.body.totalMoney;
-  const config = {
-    app_id: "2553",
-    key1: "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
-    key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
-    endpoint: "https://sb-openapi.zalopay.vn/v2/create",
-  };
-  const embed_data = {
-    columninfo: {
-      branch_id: "HCM",
-
-      store_name: "Saigon Centre",
-    },
-    bankgroup: "",
-  };
-  const items = [{ hao: 12 }];
-  const transID = Math.floor(Math.random() * 1000000);
-  const order = {
-    app_id: config.app_id,
-    app_trans_id: `${moment().format("YYMMDD")}_${transID}`,
-    app_user: "user123",
-    app_time: Date.now(), // miliseconds
-    item: JSON.stringify(items),
-    embed_data: JSON.stringify(embed_data),
-    amount: Number(totalMoney),
-    description: `Thanh toan ve ${moment().format("YYMMDD")}_${transID}`,
-
-    title: "thanh toan ve #123455323432",
-    redirecturl: "http://localhost:3000/",
-    bank_code: "",
-  };
-  const data =
-    config.app_id +
-    "|" +
-    order.app_trans_id +
-    "|" +
-    order.app_user +
-    "|" +
-    order.amount +
-    "|" +
-    order.app_time +
-    "|" +
-    order.embed_data +
-    "|" +
-    order.item;
-  order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
-  axios
-    .post(config.endpoint, null, { params: order })
-    .then((res) => {
-      console.log(res);
-      response.json({
-        zalo: res.data,
-        appTransId: order.app_trans_id,
-        appTime: order.app_time,
-      });
-    })
-    .catch((err) => console.log(err));
-});
-
-app.post("/getStatusOrderZalopay", (req, res) => {
-  let appTransId = req.body.appTransId;
-  let appTime = req.body.appTime;
-  let customer = req.body.customer;
-  const config = {
-    app_id: "2553",
-    key1: "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
-    key2: "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
-    endpoint: "https://sb-openapi.zalopay.vn/v2/query",
-  };
-  let postData = {
-    app_id: config.app_id,
-    app_trans_id: appTransId, // Input your app_trans_id
-  };
-  let data = postData.app_id + "|" + postData.app_trans_id + "|" + config.key1; // appid|app_trans_id|key1
-  postData.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
-  let postConfig = {
-    method: "post",
-    url: config.endpoint,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    data: qs.stringify(postData),
-  };
-  const check = setInterval(() => {
-    axios(postConfig)
-      .then(function (response) {
-        if (response.data.return_code === 1) {
-          clearInterval(check);
-          axios
-            .post("http://localhost:5005/tickets/booking", customer)
-            .then(function (response) {
-              console.log(response);
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-        } else if (Date.now() > appTime + 15 * 60 * 1000) clearInterval(check);
-        console.log(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }, 15000);
-});
-
-app.use("/redirect", async (req, res, next) => {
-  console.log("Authenticate and Redirect");
-  res.redirect("/places/all/getPlace");
-  next();
 });
 
 // app.get("/user", async (req, res) => {

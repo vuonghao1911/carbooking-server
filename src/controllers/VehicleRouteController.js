@@ -345,6 +345,25 @@ class VehicleRouteController {
       next(error);
     }
   }
+  // cancle vehicle route
+  async cancleVehicleRoute(req, res, next) {
+    const { idVehicleRoute, status = false } = req.body;
+
+    try {
+      await VehicleRoute.updateOne(
+        { _id: idVehicleRoute },
+        {
+          $set: {
+            status: status,
+          },
+        }
+      );
+
+      res.json({ message: "success" });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new VehicleRouteController();

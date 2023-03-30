@@ -8,6 +8,7 @@ const route = (app) => {
   const promotionRoute = require("./Promotion");
   const accountRoute = require("./Account");
   const priceRoute = require("./Price");
+  const paymentRoute = require("./Payment");
 
   app.use("/customers", customerRouter);
   app.use("/cars", carRouter);
@@ -18,6 +19,7 @@ const route = (app) => {
   app.use("/promotions", promotionRoute);
   app.use("/", accountRoute);
   app.use("/prices", priceRoute);
+  app.use("/payments", paymentRoute);
 };
 
 module.exports = route;

@@ -8,5 +8,7 @@ router.get("/all/getCars", carController.getCar);
 
 router.get("/:id", carController.getCarById);
 router.get("/getVehicle/:id", carController.getVehicleByCarId);
+// update car
+router.patch("/update", carController.updateCar);
 
 module.exports = router;

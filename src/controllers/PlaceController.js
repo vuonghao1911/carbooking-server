@@ -23,14 +23,8 @@ class PlaceController {
   }
 
   async addRoute(req, res, next) {
-    const {
-      carTypeId,
-      intendTime,
-      departureId,
-      destinationId,
-      code,
-      routeTypeId,
-    } = req.body;
+    const { intendTime, departureId, destinationId, code, routeTypeId } =
+      req.body;
     //console.log(number);
 
     // const Arrayplace = await Promise.all(
@@ -44,7 +38,6 @@ class PlaceController {
 
     try {
       const route = new Route({
-        carTypeId: carTypeId,
         intendTime: intendTime,
         departure: departure,
         destination: destination,
@@ -124,6 +117,7 @@ class PlaceController {
       next(error);
     }
   }
+  // add busStation
   async addBusStation(req, res, next) {
     const { idPlace, address } = req.body;
 
@@ -144,6 +138,50 @@ class PlaceController {
       } else {
         res.json({ message: "Update false : place not found" });
       }
+    } catch (error) {
+      next(error);
+    }
+  }
+  // update route
+  async updateRoute(req, res, next) {
+    const { idroute, intendTime, routeTypeId } = req.body;
+
+    try {
+      await Route.updateOne(
+        {
+          _id: idroute,
+        },
+        {
+          $set: {
+            intendTime: intendTime,
+
+            routeType: routeTypeId,
+          },
+        }
+      );
+      res.json({ message: "Update Success" });
+    } catch (error) {
+      next(error);
+    }
+  }
+  // delete BusStation
+  async deleteBusStation(req, res, next) {
+    const { idPlace, idAddress } = req.body;
+
+    try {
+      await Place.updateOne(
+        {
+          _id: idPlace,
+        },
+        {
+          $pull: {
+            busStation: {
+              _id: idAddress,
+            },
+          },
+        }
+      );
+      res.json({ message: "Update Success" });
     } catch (error) {
       next(error);
     }

@@ -11,6 +11,9 @@ const ticketSchema = new Schema(
     customerId: {
       type: ObjectId,
     },
+    employeeId: {
+      type: ObjectId,
+    },
     quantity: {
       type: Number,
     },

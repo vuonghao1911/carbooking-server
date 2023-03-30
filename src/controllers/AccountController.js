@@ -17,6 +17,7 @@ class AccountController {
       lastName,
       address,
       typeId,
+      roleEmloyee,
     } = req.body;
 
     var newAccount;
@@ -26,27 +27,39 @@ class AccountController {
       const salt = await AccountService.generateSalt();
       const passHash = await AccountService.hashPassword(passWord, salt);
       const customerFind = await Customer.findOne({ phoneNumber: phoneNumber });
+      var employeeFind = await Employee.findOne({ phoneNumber: phoneNumber });
       if (checkRegister != null) {
         return res.json({ checkRegister: false });
       } else {
         if (role) {
-          const employee = new Employee({
-            firstName: firstName,
-            lastName: lastName,
-            phoneNumber: phoneNumber,
-            typeId: typeId,
-            address: address,
-          });
-          const user = await EmployeeService.saveEmployee(employee);
+          var account;
+          if (employeeFind) {
+            account = new Account({
+              phoneNumber: phoneNumber,
+              passWord: passHash,
+              role: role,
+              idUser: employeeFind._id,
+            });
+          } else {
+            const employee = new Employee({
+              firstName: firstName,
+              lastName: lastName,
+              phoneNumber: phoneNumber,
+              typeId: typeId,
+              address: address,
+              role: roleEmloyee,
+            });
+            employeeFind = await EmployeeService.saveEmployee(employee);
 
-          const account = new Account({
-            phoneNumber: phoneNumber,
-            passWord: passHash,
-            role: role,
-            idUser: user._id,
-          });
+            account = new Account({
+              phoneNumber: phoneNumber,
+              passWord: passHash,
+              role: role,
+              idUser: employeeFind._id,
+            });
+          }
           const saveAccount = await AccountService.saveAccount(account);
-          newAccount = { user: user, checkRegister: true };
+          newAccount = { user: employeeFind, checkRegister: true };
         } else if (customerFind) {
           const account = new Account({
             phoneNumber: phoneNumber,

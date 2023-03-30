@@ -7,6 +7,11 @@ router.post("/addRoute", placeController.addRoute);
 router.get("/all/getRoute", placeController.getRoute);
 //add busStation
 router.post("/addBusStation", placeController.addBusStation);
+// update route
+
+router.patch("/updateRoute", placeController.updateRoute);
+
+router.delete("/deleteBusStation", placeController.deleteBusStation);
 
 //router.get("/:id", carController.getCarById);
 

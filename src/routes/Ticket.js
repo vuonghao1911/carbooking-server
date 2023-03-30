@@ -17,4 +17,6 @@ router.get("/all/ticketRefund", ticketController.getAllTicketRefund);
 router.post("/createOrder", ticketController.createOrderTicket);
 // update order when payment
 router.patch("/updateOrder", ticketController.updateStatusOrderTicket);
+//
+router.get("/statistic/ticket", ticketController.statisticTicketByAllCustomer);
 module.exports = router;

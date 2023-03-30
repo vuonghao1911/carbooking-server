@@ -27,120 +27,94 @@
 //           },
 //         }
 //       );
-// db.tickets.aggregate([
-
-//    {
-//           $match: {
-//             customerId: ObjectId("63f5b52a0437997420cf95df"),
-            
-//           },
-//         },
-//         {
-//           $lookup: {
-//             from: "customers",
-//             localField: "customerId",
-//             foreignField: "_id",
-//             as: "customer",
-//           },
-//         },
-//         {
-//           $unwind: "$customer",
-//         },
-//         {
-//           $lookup: {
-//             from: "vehicleroutes",
-//             localField: "vehicleRouteId",
-//             foreignField: "_id",
-//             as: "vehicleroute",
-//           },
-//         },
-//          {
-//           $unwind: "$vehicleroute",
-//         },
-//          {
-//           $lookup: {
-//             from: "promotionresults",
-//             localField: "_id",
-//             foreignField: "ticketId",
-//             as: "promotionresults",
-//           },
-//         },
-
-//          {
-//           $lookup: {
-//             from: "promotions",
-//             localField: "promotionresults.promotionId",
-//             foreignField: "_id",
-//             as: "promotions",
-//           },
-//         },
-//         {
-//           $lookup: {
-//             from: "places",
-//             localField: "vehicleroute.departure",
-//             foreignField: "_id",
-//             as: "departure",
-//           },
-//         },
-//         {
-//           $unwind: "$departure",
-//         },
-//         {
-//           $lookup: {
-//             from: "places",
-//             localField: "vehicleroute.destination",
-//             foreignField: "_id",
-//             as: "destination",
-//           },
-//         },
-//         {
-//           $unwind: "$destination",
-//         },
-//         {
-//           $lookup: {
-//             from: "cars",
-//             localField: "vehicleroute.carId",
-//             foreignField: "_id",
-//             as: "car",
-//           },
-//         },
-//         {
-//           $unwind: "$car",
-//         },
-//          {
-//           $lookup: {
-//             from: "prices",
-//             localField: "priceId",
-//             foreignField: "_id",
-//             as: "prices",
-//           },
-//         },
-//         {
-//           $unwind: "$prices",
-//         },
-//         {
-//           $project: {
-//             _id: "$_id",
-//             firstName: "$customer.firstName",
-//             lastName: "$customer.lastName",
-//             phoneNumber: "$customer.phoneNumber",
-//             departure: "$departure",
-//             destination: "$destination",
-//             licensePlates: "$car.licensePlates",
-//             startDate: "$vehicleroute.startDate",
-//             endDate: "$vehicleroute.endDate",
-//             status:"$status",
-//             locaDeparture: "$locationBus",
-          
-//             chair: "$chair",
-//             createdAt: "$createdAt",
-//             updatedAt: "$updatedAt",
-//             promotionresults: "$promotionresults",
-//             promotions: "$promotions",
-//             prices: "$prices",
-//           },
-//         },
-//       ]);
+db.tickets.aggregate([
+        {
+          $lookup: {
+            from: "customers",
+            localField: "customerId",
+            foreignField: "_id",
+            as: "customer",
+          },
+        },
+        {
+          $unwind: "$customer",
+        },
+        {
+          $lookup: {
+            from: "vehicleroutes",
+            localField: "vehicleRouteId",
+            foreignField: "_id",
+            as: "vehicleroute",
+          },
+        },
+         {
+          $unwind: "$vehicleroute",
+        },
+         {
+          $lookup: {
+            from: "promotionresults",
+            localField: "_id",
+            foreignField: "ticketId",
+            as: "promotionresults",
+          },
+        },
+        {
+          $lookup: {
+            from: "places",
+            localField: "vehicleroute.departure",
+            foreignField: "_id",
+            as: "departure",
+          },
+        },
+        {
+          $unwind: "$departure",
+        },
+        {
+          $lookup: {
+            from: "places",
+            localField: "vehicleroute.destination",
+            foreignField: "_id",
+            as: "destination",
+          },
+        },
+        {
+          $unwind: "$destination",
+        },
+         {
+          $lookup: {
+            from: "prices",
+            localField: "priceId",
+            foreignField: "_id",
+            as: "prices",
+          },
+        },
+        {
+          $unwind: "$prices",
+        },
+        {
+          $project: {
+            _id: "$_id",
+            firstName: "$customer.firstName",
+            lastName: "$customer.lastName",
+            phoneNumber: "$customer.phoneNumber",
+            address: "$customer.address",
+            departure: {
+              id:"$departure._id",
+              name:"$departure.name"
+            },
+            destination:{
+              id: "$destination._id",
+              name:"$destination.name"
+            },
+            status:"$status",  
+            chair: "$chair",
+            createdAt: "$createdAt",
+            updatedAt: "$updatedAt",
+            promotionresults: "$promotionresults",
+            prices: "$prices.price",
+          },
+        },
+      ]);
 
 // db.prices.findOne({
 //       routeId: ObjectId("63e12dc694ff2132f39477d5"),
@@ -409,17 +383,17 @@
 // db.customers.find( { $text: { $search: "Vuong" } } )
 
 
-db.promotionresults.aggregate([
-  {
-    $match: {
-      promotionLineId:ObjectId("640e090fa1fb05eebee22aa7")
-    }
-  },
- {
-    $group: {
-       _id:"$promotionLineId" ,
-        totalSaleAmount: { $sum: "$discountAmount" },
-         count: { $count: { } } 
-    }
-  },
-    ]);
+// db.promotionresults.aggregate([
+//   {
+//     $match: {
+//       promotionLineId:ObjectId("640e090fa1fb05eebee22aa7")
+//     }
+//   },
+//  {
+//     $group: {
+//        _id:"$promotionLineId" ,
+//         totalSaleAmount: { $sum: "$discountAmount" },
+//          count: { $count: { } } 
+//     }
+//   },
+//     ]);

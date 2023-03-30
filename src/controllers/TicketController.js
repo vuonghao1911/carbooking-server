@@ -64,6 +64,7 @@ class TicketController {
       phoneNumber,
       promotion,
       priceId,
+      employeeId,
     } = req.body;
     console.log(chair);
     console.log(customer);
@@ -107,7 +108,8 @@ class TicketController {
           phoneNumber,
           promotion,
           code,
-          priceId
+          priceId,
+          employeeId
         );
         return res.json(saveticket);
       } else {
@@ -124,7 +126,8 @@ class TicketController {
           phoneNumber,
           promotion,
           code,
-          priceId
+          priceId,
+          employeeId
         );
 
         return res.json(saveticket);
@@ -501,6 +504,46 @@ class TicketController {
         res.json({ message: "order payment successfully" });
       } else {
         res.json({ message: "order payment failed, update status success" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+  // statistic ticket by customer
+  async statisticTicketByAllCustomer(req, res, next) {
+    const { startDate, endDate, page, size } = req.query;
+    const arrayFinal = [];
+    try {
+      const listTicket = await ticketService.statisticTicketByCustomer();
+
+      for (const ticket of listTicket) {
+        var totalDiscount = 0;
+        if (ticket.promotionresults.length > 0) {
+          for (const promotionResult of ticket.promotionresults) {
+            totalDiscount += promotionResult.discountAmount;
+          }
+        }
+        const total = ticket.prices * ticket.chair.length;
+        const totalAfterDiscount = total - totalDiscount;
+
+        arrayFinal.push({
+          customer: ticket.customer,
+          totalDiscount: totalDiscount,
+          totalAfterDiscount: totalAfterDiscount,
+          total: total,
+          route: {
+            departure: ticket.departure,
+            destination: ticket.destination,
+          },
+        });
+      }
+      if (page != "" && size != "") {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          arrayFinal
+        );
+        res.json({ data: arrPagination, messages: "success", totalPages });
       }
     } catch (error) {
       next(error);
