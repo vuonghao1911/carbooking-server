@@ -216,7 +216,7 @@ class PromotionController {
   async updatePromotionHeader(req, res, next) {
     const { idHeader } = req.body;
     const { startDate = "", endDate = "", status = null } = req.query;
-
+    console.log(endDate);
     try {
       if (status == "false" || status == "true") {
         await PromotionHeader.updateOne(
@@ -232,6 +232,22 @@ class PromotionController {
         });
       } else if (status === null) {
         if (startDate == "") {
+          const listPromoLine = await PromotionLine.find({
+            promotionHeaderId: idHeader,
+            endDate: { $gt: new Date(endDate) },
+          });
+          if (listPromoLine?.length > 0) {
+            for (const elem of listPromoLine) {
+              await PromotionLine.updateOne(
+                { _id: elem._id },
+                {
+                  $set: {
+                    endDate: endDate,
+                  },
+                }
+              );
+            }
+          }
           await PromotionHeader.updateOne(
             { _id: idHeader },
             {

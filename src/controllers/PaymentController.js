@@ -51,15 +51,15 @@ class PaymentController {
         .post(config.endpoint, null, { params: order })
         .then((result) => {
           console.log(result.data);
-          axios
-            .post(process.env.URL_GET_STATUS, {
-              appTransId: order.app_trans_id,
-              appTime: order.app_time,
-              ticket,
-            })
-            .then((res) => {
-              console.log(res.data);
-            });
+          // axios
+          //   .post(process.env.URL_GET_STATUS, {
+          //     appTransId: order.app_trans_id,
+          //     appTime: order.app_time,
+          //     ticket,
+          //   })
+          //   .then((res) => {
+          //     console.log(res.data);
+          //   });
           res.json({
             zalo: result.data,
             appTransId: order.app_trans_id,

@@ -850,7 +850,7 @@ const TicketService = {
 
     return status;
   },
-
+  // statistic ticket with all customer
   statisticTicketByCustomer: async () => {
     const ticket = await Ticket.aggregate([
       {
@@ -939,6 +939,112 @@ const TicketService = {
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
           prices: "$prices.price",
+        },
+      },
+    ]);
+    return ticket;
+  },
+  // statistic ticket with all employees
+  statisticTicketByEmployee: async () => {
+    const ticket = await Ticket.aggregate([
+      {
+        $match: {
+          status: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "customers",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customer",
+        },
+      },
+      {
+        $unwind: "$customer",
+      },
+      {
+        $lookup: {
+          from: "vehicleroutes",
+          localField: "vehicleRouteId",
+          foreignField: "_id",
+          as: "vehicleroute",
+        },
+      },
+      {
+        $unwind: "$vehicleroute",
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "employeeId",
+          foreignField: "_id",
+          as: "employees",
+        },
+      },
+      {
+        $unwind: "$employees",
+      },
+      {
+        $lookup: {
+          from: "promotionresults",
+          localField: "_id",
+          foreignField: "ticketId",
+          as: "promotionresults",
+        },
+      },
+      {
+        $lookup: {
+          from: "places",
+          localField: "vehicleroute.departure",
+          foreignField: "_id",
+          as: "departure",
+        },
+      },
+      {
+        $unwind: "$departure",
+      },
+      {
+        $lookup: {
+          from: "places",
+          localField: "vehicleroute.destination",
+          foreignField: "_id",
+          as: "destination",
+        },
+      },
+      {
+        $unwind: "$destination",
+      },
+      {
+        $lookup: {
+          from: "prices",
+          localField: "priceId",
+          foreignField: "_id",
+          as: "prices",
+        },
+      },
+      {
+        $unwind: "$prices",
+      },
+      {
+        $project: {
+          _id: "$_id",
+          customer: "$customer",
+          departure: {
+            id: "$departure._id",
+            name: "$departure.name",
+          },
+          destination: {
+            id: "$destination._id",
+            name: "$destination.name",
+          },
+          status: "$status",
+          chair: "$chair",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          promotionresults: "$promotionresults",
+          prices: "$prices.price",
+          employee: "$employees",
         },
       },
     ]);
