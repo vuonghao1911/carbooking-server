@@ -153,11 +153,21 @@ class TicketController {
   }
   // get all ticket with query parameters
   async getTicket(req, res, next) {
-    const { page = "", size = "", name = "" } = req.query;
+    const { page = "", size = "", name = "", phone = "" } = req.query;
     try {
       var tickets = [];
-      if (name != "") {
+      if (name != "" && phone == "") {
         const customer = await Customer.find({ $text: { $search: name } });
+        for (const elem of customer) {
+          const customerFind = await TicketService.getTicketByUserIdForAdmin(
+            elem._id
+          );
+          if (customerFind.length > 0) {
+            tickets.push(...customerFind);
+          }
+        }
+      } else if (name == "" && sdt != "") {
+        const customer = await Customer.find({ phoneNumber: phone });
         for (const elem of customer) {
           const customerFind = await TicketService.getTicketByUserIdForAdmin(
             elem._id
@@ -431,10 +441,10 @@ class TicketController {
   }
   // get all ticket refund  with query parameters
   async getAllTicketRefund(req, res, next) {
-    const { page = "", size = "", name = "" } = req.query;
+    const { page = "", size = "", name = "", phone = "" } = req.query;
     try {
       var tickets = [];
-      if (name != "") {
+      if (name != "" && phone == "") {
         const customer = await Customer.find({ $text: { $search: name } });
         for (const elem of customer) {
           const customerFind = await TicketService.getTicketRefundByUserId(
@@ -444,6 +454,9 @@ class TicketController {
             tickets.push(...customerFind);
           }
         }
+      } else if (phone != "" && name == "") {
+        const customer = await Customer.findOne({ phoneNumber: phone });
+        tickets = await ticketService.getTicketRefundByUserId(customer._id);
       } else {
         tickets = await TicketService.getAllTicketRefund();
       }
