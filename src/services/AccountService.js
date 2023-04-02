@@ -1,5 +1,9 @@
 const Account = require("../modal/Account");
 const bcrypt = require("bcrypt");
+const twilio = require("twilio")(
+  process.env.ACCOUNT_SID,
+  process.env.AUTH_TOKEN
+);
 
 const AccountService = {
   // save account
@@ -29,6 +33,36 @@ const AccountService = {
   // compare pass
   comparePassword: async (passWord, passWordHash) => {
     return await bcrypt.compare(passWord, passWordHash);
+  },
+  async sendOTP(phone) {
+    console.log("phone::" + phone);
+    twilio.verify.v2
+      .services(process.env.SERVICE_SID)
+      .verifications.create({
+        to: "+84" + phone.substring(1),
+        channel: "sms",
+      })
+      .then((verification) => console.log(verification))
+      .catch((err) => console.log(err));
+  },
+
+  async VerifyOTP(otp, phone) {
+    var verificationPhone = false;
+    twilio.verify.v2
+      .services(process.env.SERVICE_SID)
+      .verificationChecks.create({
+        to: "+84" + phone.substring(1),
+        code: otp,
+      })
+      .then((verification) => {
+        if (verification.valid) {
+          console.log("vao");
+          verificationPhone = true;
+          console.log("vetify", verificationPhone);
+          return { status: true, message: "verify success" };
+        }
+      })
+      .catch((err) => console.log(err));
   },
 };
 

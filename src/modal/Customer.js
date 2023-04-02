@@ -14,6 +14,13 @@ const customerSchema = new Schema({
   phoneNumber: {
     type: String,
   },
+  email: {
+    type: String,
+  },
+
+  dateOfBirth: {
+    type: Date,
+  },
 
   address: {
     type: {

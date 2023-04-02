@@ -334,13 +334,13 @@ class PromotionController {
       const promotionLine = await PromotionLine.find();
       console.log(promotionLine);
       const arrayResult = [];
-      if (promotionLine.length > 0) {
+      if (promotionLine?.length > 0) {
         for (const line of promotionLine) {
           const statistic =
             await promotionService.getTotalDiscountAmountByIdPromotionLine(
               line._id
             );
-          if (statistic.length > 0) {
+          if (statistic?.length > 0) {
             arrayResult.push({ Line: line, statistic: statistic[0] });
           } else {
             arrayResult.push({ Line: line, statistic: [] });

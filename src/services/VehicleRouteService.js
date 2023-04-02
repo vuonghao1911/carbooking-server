@@ -107,7 +107,7 @@ const VehicleRouteService = {
     }
 
     // check listVehcle ==0? find vehicleRoute of ListCar
-    if (listVehcle.length == 0) {
+    if (listVehcle?.length == 0) {
       for (const e of listCar) {
         const carTrip = await VehicleRoute.findOne({
           carId: e._id,
@@ -127,7 +127,7 @@ const VehicleRouteService = {
         } else {
           //find car already have a route in date body
           // console.log("listCarDate", arryListCarDate);
-          if (arryListCarDate.length > 0) {
+          if (arryListCarDate?.length > 0) {
             for (const e of arryListCarDate) {
               //   // get list car unique
               removeObjectWithId(listCar, e.carId.toString());
@@ -295,7 +295,7 @@ const VehicleRouteService = {
       startDate: { $lte: new Date(currenDate) },
       status: true,
     });
-    if (promotionHeader.length > 0) {
+    if (promotionHeader?.length > 0) {
       for (const promoHeader of promotionHeader) {
         const promotionLine = await PromotionsLine.find({
           promotionHeaderId: promoHeader._id,
@@ -304,7 +304,7 @@ const VehicleRouteService = {
           status: true,
         });
         //  console.log(promotionLine);
-        if (promotionLine.length > 0) {
+        if (promotionLine?.length > 0) {
           for (const elem of promotionLine) {
             const promotion = await Promotions.findOne({
               promotionHeaderId: promoHeader._id,

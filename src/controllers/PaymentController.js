@@ -114,7 +114,10 @@ class PaymentController {
                 });
 
               console.log("ok");
-            } else if (Date.now() > appTime + 15 * 60 * 1000) {
+            } else if (
+              Date.now() > appTime + 15 * 60 * 1000 ||
+              response.data.return_code == 2
+            ) {
               clearInterval(check);
 
               res.json({ data: null, status: false });

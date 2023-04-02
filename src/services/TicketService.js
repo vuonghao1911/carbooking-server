@@ -33,7 +33,7 @@ const TicketService = {
         },
       }
     );
-    if (promotion.length > 0) {
+    if (promotion?.length > 0) {
       const ticket = new Ticket({
         vehicleRouteId: vehicleRouteId,
         customerId: customerId,
@@ -383,7 +383,7 @@ const TicketService = {
     } else {
       code = 0;
     }
-    if (promotion.length > 0) {
+    if (promotion?.length > 0) {
       for (const elem of promotion) {
         const { remainingBudget, _id } = await Promotion.findOne({
           promotionLineId: elem.promotionLineId,
@@ -452,7 +452,7 @@ const TicketService = {
     } else {
       code = 0;
     }
-    if (arrayPormoResult.length > 0) {
+    if (arrayPormoResult?.length > 0) {
       for (const elem of arrayPormoResult) {
         const { remainingBudget, _id } = await Promotion.findOne({
           promotionLineId: elem.promotionLineId,

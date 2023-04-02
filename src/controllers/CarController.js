@@ -113,7 +113,7 @@ class CarController {
     const { id } = req.params;
     try {
       const listVehcle = await carService.findVehicleRouteByIdCar(id);
-      if (listVehcle.length > 0) {
+      if (listVehcle?.length > 0) {
         res.json({ listVehcle, message: "success" });
       } else {
         res.json({ listVehcle: null, message: "This car has no trips" });

@@ -5,6 +5,10 @@ const Account = require("../modal/Account");
 const Employee = require("../modal/Employee");
 const Customer = require("../modal/Customer");
 const { truncate } = require("fs/promises");
+const twilio = require("twilio")(
+  process.env.ACCOUNT_SID,
+  process.env.AUTH_TOKEN
+);
 
 class AccountController {
   // register
@@ -180,6 +184,46 @@ class AccountController {
       }
     } catch (error) {
       next(error);
+    }
+  }
+  // send opt
+  async sendPhoneOTP(req, res, next) {
+    const { phoneNumber = "" } = req.body;
+
+    try {
+      await AccountService.sendOTP(phoneNumber);
+
+      res.json({ message: "message was sent" });
+    } catch (error) {
+      next(error);
+    }
+  }
+  // verify otp
+  async verifyPhoneOTP(req, res, next) {
+    const { phoneNumber, otp } = req.query;
+    try {
+      twilio.verify.v2
+        .services(process.env.SERVICE_SID)
+        .verificationChecks.create({
+          to: "+84" + phoneNumber.substring(1),
+          code: otp,
+        })
+        .then((verification) => {
+          if (verification.valid) {
+            console.log("vao");
+
+            res.json({ status: true, message: "verify success" });
+          } else {
+            res.json({ status: false, message: "verify falis" });
+          }
+        })
+        .catch((err) => console.log(err));
+    } catch (error) {
+      next(error);
+      res.status(500).json({
+        status: 500,
+        message: err.message,
+      });
     }
   }
 }

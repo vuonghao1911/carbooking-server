@@ -69,13 +69,8 @@ class TicketController {
     } = req.body;
     console.log(chair);
     console.log(customer);
-    const codeFind = await Ticket.find().sort({ _id: -1 }).limit(1);
-    var code;
-    if (codeFind[0]) {
-      code = codeFind[0].code;
-    } else {
-      code = 0;
-    }
+
+    var code = new Date().getTime();
 
     try {
       const Arrayplace = await Promise.all(
@@ -162,7 +157,7 @@ class TicketController {
           const customerFind = await TicketService.getTicketByUserIdForAdmin(
             elem._id
           );
-          if (customerFind.length > 0) {
+          if (customerFind?.length > 0) {
             tickets.push(...customerFind);
           }
         }
@@ -172,7 +167,7 @@ class TicketController {
           const customerFind = await TicketService.getTicketByUserIdForAdmin(
             elem._id
           );
-          if (customerFind.length > 0) {
+          if (customerFind?.length > 0) {
             tickets.push(...customerFind);
           }
         }
@@ -315,7 +310,7 @@ class TicketController {
         });
         var pomrotionLine;
         const listPromotions = [];
-        if (ticket.promotionresults.length > 0) {
+        if (ticket.promotionresults?.length > 0) {
           for (const elem of ticket.promotionresults) {
             pomrotionLine = await PromotionLine.findById(elem.promotionLineId);
             listPromotions.push({
@@ -366,7 +361,7 @@ class TicketController {
         });
         var pomrotionLine;
         const listPromotions = [];
-        if (ticket.promotionresults.length > 0) {
+        if (ticket.promotionresults?.length > 0) {
           for (const elem of ticket.promotionresults) {
             pomrotionLine = await PromotionLine.findById(elem.promotionLineId);
             listPromotions.push({
@@ -450,7 +445,7 @@ class TicketController {
           const customerFind = await TicketService.getTicketRefundByUserId(
             elem._id
           );
-          if (customerFind.length > 0) {
+          if (customerFind?.length > 0) {
             tickets.push(...customerFind);
           }
         }
@@ -532,12 +527,12 @@ class TicketController {
 
       for (const ticket of listTicket) {
         var totalDiscount = 0;
-        if (ticket.promotionresults.length > 0) {
+        if (ticket.promotionresults?.length > 0) {
           for (const promotionResult of ticket.promotionresults) {
             totalDiscount += promotionResult.discountAmount;
           }
         }
-        const total = ticket.prices * ticket.chair.length;
+        const total = ticket.prices * ticket.chair?.length;
         const totalAfterDiscount = total - totalDiscount;
 
         arrayFinal.push({
@@ -572,12 +567,12 @@ class TicketController {
 
       for (const ticket of listTicket) {
         var totalDiscount = 0;
-        if (ticket.promotionresults.length > 0) {
+        if (ticket.promotionresults?.length > 0) {
           for (const promotionResult of ticket.promotionresults) {
             totalDiscount += promotionResult.discountAmount;
           }
         }
-        const total = ticket.prices * ticket.chair.length;
+        const total = ticket.prices * ticket.chair?.length;
         const totalAfterDiscount = total - totalDiscount;
 
         arrayFinal.push({

@@ -49,8 +49,16 @@ class EmployeeController {
     }
   }
   async addEmployee(req, res, next) {
-    const { firstName, lastName, phoneNumber, typeId, address, role } =
-      req.body;
+    const {
+      firstName,
+      lastName,
+      phoneNumber,
+      typeId,
+      address,
+      role,
+      dateOfBirth,
+      email,
+    } = req.body;
     //console.log(number);
     const codeFind = await Employee.find().sort({ _id: -1 }).limit(1);
     var code;
@@ -68,6 +76,8 @@ class EmployeeController {
         address: address,
         role: role,
         code: code + 1,
+        email: email,
+        dateOfBirth: dateOfBirth,
       });
 
       const saveEmp = await employeeService.saveEmployee(employee);
@@ -80,8 +90,17 @@ class EmployeeController {
   }
   // update employee
   async updateEmloyee(req, res, next) {
-    const { firstName, lastName, phoneNumber, typeId, address, status, id } =
-      req.body;
+    const {
+      firstName,
+      lastName,
+      phoneNumber,
+      typeId,
+      address,
+      status,
+      id,
+      dateOfBirth,
+      email,
+    } = req.body;
     try {
       await Employee.updateOne(
         {
@@ -95,6 +114,8 @@ class EmployeeController {
             phoneNumber: phoneNumber,
             typeId: typeId,
             address: address,
+            email: email,
+            dateOfBirth: dateOfBirth,
           },
         }
       );

@@ -64,7 +64,7 @@ class VehicleRouteController {
           );
           console.log(promotion);
           const arrayPromotions = [];
-          if (promotion?.promotion.length > 0) {
+          if (promotion?.promotion?.length > 0) {
             for (const elem of promotion.promotion) {
               if (
                 elem.promotionLine.routeTypeId === routeType ||
@@ -168,7 +168,7 @@ class VehicleRouteController {
           route.startDate
         );
         const arrayPromotions = [];
-        if (promotion.promotion.length > 0) {
+        if (promotion.promotion?.length > 0) {
           for (const elem of promotion.promotion) {
             if (
               elem.promotionLine.routeTypeId === routeType ||
@@ -229,7 +229,7 @@ class VehicleRouteController {
       );
 
       const arrayPromotions = [];
-      if (promotion.promotion.length > 0) {
+      if (promotion.promotion?.length > 0) {
         for (const elem of promotion.promotion) {
           if (
             elem.promotionLine.routeTypeId === routeType ||
@@ -284,8 +284,8 @@ class VehicleRouteController {
         var listVehiceDate = await vehicleRouteService.getInfoVehicleCurrenDate(
           elem
         );
-        for (var i = 0; i < listVehiceDate.length - 1; i++) {
-          for (var j = i + 1; j < listVehiceDate.length; j++) {
+        for (var i = 0; i < listVehiceDate?.length - 1; i++) {
+          for (var j = i + 1; j < listVehiceDate?.length; j++) {
             if (
               listVehiceDate[i].departure._id.toString() ===
                 listVehiceDate[j].departure._id.toString() &&

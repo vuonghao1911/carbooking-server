@@ -211,7 +211,7 @@ class PriceController {
         );
         for (const header of priceHeaderCheck) {
           const priceCheck = await Price.find({ priceHeaderId: header._id });
-          if (priceCheck.length > 0) {
+          if (priceCheck?.length > 0) {
             for (const pirceDetails of priceCheck) {
               const price = await priceService.checkPriceRoute(
                 pirceDetails.routeId,

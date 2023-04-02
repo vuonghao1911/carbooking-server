@@ -4,7 +4,8 @@ const Customer = require("../modal/Customer");
 const CustomerType = require("../modal/CustomerType");
 class CustomerController {
   async addCustomer(req, res, next) {
-    const { firstName, lastName, phoneNumber, address } = req.body;
+    const { firstName, lastName, phoneNumber, address, email, dateOfBirth } =
+      req.body;
     const codeFind = await Customer.find().sort({ _id: -1 }).limit(1);
     var code;
     if (codeFind[0]) {
@@ -20,6 +21,8 @@ class CustomerController {
         lastName: lastName,
         phoneNumber: phoneNumber,
         address: address,
+        email: email,
+        dateOfBirth: dateOfBirth,
         code: code + 1,
       });
 
@@ -89,7 +92,7 @@ class CustomerController {
   }
 
   async updateInfo(req, res, next) {
-    const { firstName, lastName, id, address } = req.body;
+    const { firstName, lastName, id, address, dateOfBirth, email } = req.body;
     //console.log(number);
     try {
       await Customer.updateOne(
@@ -99,6 +102,8 @@ class CustomerController {
             lastName: lastName,
             firstName: firstName,
             address: address,
+            email: email,
+            dateOfBirth: dateOfBirth,
           },
         }
       );

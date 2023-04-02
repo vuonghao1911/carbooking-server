@@ -21,13 +21,8 @@ const PaymentService = {
   }) {
     console.log(chair);
     console.log(customer);
-    const codeFind = await Ticket.find().sort({ _id: -1 }).limit(1);
-    var code;
-    if (codeFind[0]) {
-      code = codeFind[0].code;
-    } else {
-      code = 0;
-    }
+
+    var code = new Date().getTime();
 
     try {
       const Arrayplace = await Promise.all(
