@@ -161,7 +161,7 @@ class TicketController {
             tickets.push(...customerFind);
           }
         }
-      } else if (name == "" && sdt != "") {
+      } else if (name == "" && phone != "") {
         const customer = await Customer.find({ phoneNumber: phone });
         for (const elem of customer) {
           const customerFind = await TicketService.getTicketByUserIdForAdmin(
