@@ -21,6 +21,16 @@ const commonUtils = {
       totalPages,
     };
   },
+  totalAmountTicket: async (chair, price, promotion) => {
+    var totalAmountDiscount = 0;
+    var totalAmount = chair.length * price;
+    if (promotion.length > 0 && promotion) {
+      for (const elm of promotion) {
+        totalAmountDiscount += elm.discountAmount;
+      }
+    }
+    return totalAmount - totalAmountDiscount;
+  },
 };
 
 module.exports = commonUtils;

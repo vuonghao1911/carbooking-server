@@ -24,4 +24,6 @@ router.get(
   "/statistic/ticket-empl",
   ticketController.statisticTicketByAllEmployee
 );
+// statistic revenue month
+router.get("/statistic/revenue", ticketController.revenueStatisticsMonth);
 module.exports = router;

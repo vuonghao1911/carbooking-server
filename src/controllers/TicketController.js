@@ -6,12 +6,11 @@ const Customer = require("../modal/Customer");
 const VehicleRoute = require("../modal/VehicleRoute");
 const Order = require("../modal/Order");
 
-const moment = require("moment");
-
 const Route = require("../modal/Route");
 const PromotionResults = require("../modal/PromotionResult");
 const PromotionLine = require("../modal/PromotionLine");
 const TicketService = require("../services/TicketService");
+const statisticServie = require("../services/StatisticService");
 
 class TicketController {
   // body save tickets
@@ -470,7 +469,6 @@ class TicketController {
       next(error);
     }
   }
-
   // create order
   async createOrderTicket(req, res, next) {
     const { customerId = null, chair, vehicleRouteId } = req.body;
@@ -558,7 +556,7 @@ class TicketController {
       next(error);
     }
   }
-
+  // statistic ticket by employee
   async statisticTicketByAllEmployee(req, res, next) {
     const { startDate, endDate, page, size } = req.query;
     const arrayFinal = [];
@@ -584,6 +582,7 @@ class TicketController {
             departure: ticket.departure,
             destination: ticket.destination,
           },
+          employee: ticket.employee,
         });
       }
       if (page != "" && size != "") {
@@ -594,6 +593,122 @@ class TicketController {
         );
         res.json({ data: arrPagination, messages: "success", totalPages });
       }
+    } catch (error) {
+      next(error);
+    }
+  }
+  // statistic revenue month
+  async revenueStatisticsMonth(req, res, next) {
+    const arrayTicketTotal = [];
+    const arrayFinal = [];
+    const arrayStatistic = [];
+    const arrayTopRoute = [];
+    var quantityRefunds = 0;
+    try {
+      const listTicket = await statisticServie.revenueStatistics(
+        new Date().getMonth(),
+        new Date().getFullYear()
+      );
+      const listTicketRefund = await statisticServie.getTotalRefundAmount(
+        new Date().getMonth(),
+        new Date().getFullYear()
+      );
+
+      if (listTicketRefund && listTicketRefund.length > 0) {
+        for (const elemRefund of listTicketRefund) {
+          quantityRefunds += elemRefund.count;
+          arrayTicketTotal.push({
+            date: elemRefund.ticketRefunds[0].date,
+            totalAmount: 0,
+            totalAmountRefund: elemRefund.returnAmount,
+          });
+        }
+      }
+      var quantityTicket = 0;
+      if (listTicket.length > 0 && listTicket) {
+        for (const elem of listTicket) {
+          var total = 0;
+          for (const elemTicket of elem.ticket) {
+            total += await utilsService.totalAmountTicket(
+              elemTicket.chair,
+              elemTicket.prices,
+              elemTicket.promotionresults
+            );
+            quantityTicket++;
+          }
+          arrayTicketTotal.push({
+            date: elem.ticket[0].date,
+            totalAmount: total,
+            totalAmountRefund: 0,
+          });
+        }
+      }
+      arrayFinal.push({
+        date: arrayTicketTotal[0].date,
+        totalAmountRefund: arrayTicketTotal[0].totalAmountRefund,
+        totalAmount: arrayTicketTotal[0].totalAmount,
+      });
+
+      const result = arrayTicketTotal.reduce((array, item) => {
+        array[item.date] = array[item.date] || [];
+        array[item.date].push(item);
+        return array;
+      }, Object.create(null));
+
+      const propertyValues = Object.values(result);
+
+      if (propertyValues) {
+        for (const elem of propertyValues) {
+          var totalAmount = 0;
+          var totalAmountRefund = 0;
+          if (elem.length > 1) {
+            for (const item of elem) {
+              totalAmount += item.totalAmount;
+              totalAmountRefund += item.totalAmountRefund;
+            }
+          } else {
+            totalAmount = elem[0].totalAmount;
+            totalAmountRefund = elem[0].totalAmountRefund;
+          }
+          arrayStatistic.push({
+            date: elem[0].date,
+            totalAmount: totalAmount,
+            totalAmountRefund: totalAmountRefund,
+          });
+        }
+      }
+
+      arrayStatistic.sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+      });
+
+      const listTopRoute = await statisticServie.getTopRouteOfMonth(
+        new Date().getMonth(),
+        new Date().getFullYear()
+      );
+      if (listTopRoute) {
+        for (const elem of listTopRoute) {
+          const route = await Route.findOne(
+            {
+              "departure._id": elem._id.departure,
+              "destination._id": elem._id.destination,
+            },
+            {
+              "departure.name": 1,
+              "destination.name": 1,
+              code: 1,
+            }
+          );
+          arrayTopRoute.push({ route, quantityTicket: elem.count });
+        }
+      }
+
+      res.json({
+        revenue: arrayStatistic,
+        quantityTicket,
+        quantityRefunds,
+        listTopRoute: arrayTopRoute,
+      });
     } catch (error) {
       next(error);
     }

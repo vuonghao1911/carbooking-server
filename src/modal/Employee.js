@@ -52,6 +52,10 @@ const employeeSchema = new Schema({
     type: Boolean,
     default: false, // true manage // false employee
   },
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
   code: {
     type: Number,
   },

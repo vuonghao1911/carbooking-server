@@ -36,11 +36,15 @@ class AccountController {
         return res.json({ checkRegister: false });
       } else {
         if (role) {
+          const passDefault = await AccountService.hashPassword(
+            process.env.PASSWORD_DEFAULT,
+            salt
+          );
           var account;
           if (employeeFind) {
             account = new Account({
               phoneNumber: phoneNumber,
-              passWord: passHash,
+              passWord: passDefault,
               role: role,
               idUser: employeeFind._id,
             });
@@ -57,7 +61,7 @@ class AccountController {
 
             account = new Account({
               phoneNumber: phoneNumber,
-              passWord: passHash,
+              passWord: passDefault,
               role: role,
               idUser: employeeFind._id,
             });
@@ -114,7 +118,12 @@ class AccountController {
         if (passCompare) {
           if (userLogin.role) {
             const employee = await Employee.findById(userLogin.idUser);
-            console.log("employee", employee);
+            if (employee.status == false) {
+              return res.json({
+                checklogin: false,
+                message: "Tài khoản không hợp lệ",
+              });
+            }
 
             user = { user: employee, role: userLogin.role, checklogin: true };
           } else {
@@ -123,10 +132,10 @@ class AccountController {
             console.log("employee", customer);
           }
         } else {
-          res.json({ checklogin: false });
+          res.json({ checklogin: false, message: "Sai mật khẩu" });
         }
       } else {
-        res.json({ checklogin: false });
+        res.json({ checklogin: false, message: "Không tìm thấy tài khoản" });
       }
 
       res.json(user);
@@ -142,22 +151,36 @@ class AccountController {
       const account = await AccountService.checkPhoneNumber(phoneNumber);
 
       if (account == null) {
-        res.json({ checkChangePass: false });
+        res.json({ checkChangePass: false, message: "fail" });
       } else {
         const passCompare = await AccountService.comparePassword(
           oldPass,
           account.passWord
         );
         if (passCompare) {
+          if (account.role) {
+            const employee = await Employee.findOne({
+              phoneNumber: phoneNumber,
+            });
+            if (employee?.isActive == false) {
+              return res.json({
+                checkChangePass: false,
+                message: "Tài khoản chưa được active verify otp để active",
+              });
+            }
+          }
           const salt = await AccountService.generateSalt();
           const passHash = await AccountService.hashPassword(newPass, salt);
           await Account.updateOne(
             { phoneNumber: phoneNumber },
             { $set: { passWord: passHash } }
           );
-          res.json({ checkChangePass: true });
+          res.json({ checkChangePass: true, message: "Thành công" });
         } else {
-          res.json({ checkChangePass: false });
+          res.json({
+            checkChangePass: false,
+            message: "Mật khẩu cũ không chính xác",
+          });
         }
       }
     } catch (error) {
@@ -202,6 +225,8 @@ class AccountController {
   async verifyPhoneOTP(req, res, next) {
     const { phoneNumber, otp } = req.query;
     try {
+      const employee = await Employee.findOne({ phoneNumber: phoneNumber });
+
       twilio.verify.v2
         .services(process.env.SERVICE_SID)
         .verificationChecks.create({
@@ -210,8 +235,12 @@ class AccountController {
         })
         .then((verification) => {
           if (verification.valid) {
-            console.log("vao");
-
+            if (employee) {
+              Employee.updateOne(
+                { _id: employee._id },
+                { $set: { isActive: true } }
+              ).then(() => {});
+            }
             res.json({ status: true, message: "verify success" });
           } else {
             res.json({ status: false, message: "verify falis" });
