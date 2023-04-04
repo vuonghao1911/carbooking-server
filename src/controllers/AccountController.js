@@ -11,7 +11,7 @@ const twilio = require("twilio")(
 );
 
 class AccountController {
-  // register
+  // register (employee defaults password 111111)
   async Register(req, res, next) {
     const {
       role,
@@ -122,6 +122,12 @@ class AccountController {
               return res.json({
                 checklogin: false,
                 message: "Tài khoản không hợp lệ",
+              });
+            }
+            if (employee?.isActive == false) {
+              return res.json({
+                checklogin: false,
+                message: "Tài khoản chưa được active verify otp để active",
               });
             }
 

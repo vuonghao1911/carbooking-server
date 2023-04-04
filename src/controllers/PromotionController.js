@@ -328,11 +328,11 @@ class PromotionController {
       next(error);
     }
   }
-
+  // statisticPromotion
   async statisticPromotion(req, res, next) {
     try {
       const promotionLine = await PromotionLine.find();
-      console.log(promotionLine);
+
       const arrayResult = [];
       if (promotionLine?.length > 0) {
         for (const line of promotionLine) {
@@ -340,10 +340,20 @@ class PromotionController {
             await promotionService.getTotalDiscountAmountByIdPromotionLine(
               line._id
             );
+          const routeType = await RouteType.findById(line.routeTypeId);
+
           if (statistic?.length > 0) {
-            arrayResult.push({ Line: line, statistic: statistic[0] });
+            arrayResult.push({
+              Line: line,
+              routeType: routeType ? routeType.type : "Tất cả các tuyến",
+              statistic: statistic[0],
+            });
           } else {
-            arrayResult.push({ Line: line, statistic: [] });
+            arrayResult.push({
+              Line: line,
+              routeType: routeType ? routeType.type : "Tất cả các tuyến",
+              statistic: {},
+            });
           }
         }
 

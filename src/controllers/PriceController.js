@@ -135,13 +135,22 @@ class PriceController {
     }
   }
   async getPriceHeader(req, res, next) {
-    const { code } = req.query;
+    const { date } = req.query;
     const { page, size } = req.query;
     var priceHeader;
     try {
-      if (code) {
-        priceHeader = await PriceHeader.find({ code: code });
-        res.json({ priceHeader: priceHeader });
+      if (date) {
+        const arrayPriceFind = [];
+        priceHeader = await PriceHeader.find();
+        for (const elem of priceHeader) {
+          if (
+            new Date(elem.startDate) <= new Date(date) &&
+            new Date(elem.endDate) >= new Date(date)
+          ) {
+            arrayPriceFind.push(elem);
+          }
+        }
+        res.json({ priceHeader: arrayPriceFind, totalPages: null });
       } else {
         priceHeader = await PriceHeader.find().sort({ _id: -1 });
         const { arrPagination, totalPages } = await utilsService.pagination(

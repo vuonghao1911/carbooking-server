@@ -935,7 +935,13 @@ const TicketService = {
           },
           status: "$status",
           chair: "$chair",
-          createdAt: "$createdAt",
+          date: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "+07:00",
+            },
+          },
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
           prices: "$prices.price",
@@ -952,6 +958,7 @@ const TicketService = {
           status: true,
         },
       },
+
       {
         $lookup: {
           from: "customers",
@@ -962,6 +969,17 @@ const TicketService = {
       },
       {
         $unwind: "$customer",
+      },
+      {
+        $lookup: {
+          from: "customertypes",
+          localField: "customer.customerTypeId",
+          foreignField: "_id",
+          as: "customertypes",
+        },
+      },
+      {
+        $unwind: "$customertypes",
       },
       {
         $lookup: {
@@ -1029,22 +1047,25 @@ const TicketService = {
       {
         $project: {
           _id: "$_id",
-          customer: "$customer",
-          departure: {
-            id: "$departure._id",
-            name: "$departure.name",
-          },
-          destination: {
-            id: "$destination._id",
-            name: "$destination.name",
-          },
           status: "$status",
           chair: "$chair",
-          createdAt: "$createdAt",
+          date: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "+07:00",
+            },
+          },
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
           prices: "$prices.price",
           employee: "$employees",
+        },
+      },
+      {
+        $group: {
+          _id: "$date",
+          ticket: { $push: "$$ROOT" },
         },
       },
     ]);

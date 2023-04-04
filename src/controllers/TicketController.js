@@ -518,7 +518,7 @@ class TicketController {
   }
   // statistic ticket by customer
   async statisticTicketByAllCustomer(req, res, next) {
-    const { startDate, endDate, page, size } = req.query;
+    const { startDate = null, endDate = null, page, size } = req.query;
     const arrayFinal = [];
     try {
       const listTicket = await ticketService.statisticTicketByCustomer();
@@ -538,6 +538,7 @@ class TicketController {
           totalDiscount: totalDiscount,
           totalAfterDiscount: totalAfterDiscount,
           total: total,
+          date: ticket.date,
           route: {
             departure: ticket.departure,
             destination: ticket.destination,
@@ -550,7 +551,25 @@ class TicketController {
           parseInt(size),
           arrayFinal
         );
-        res.json({ data: arrPagination, messages: "success", totalPages });
+        if (startDate && endDate) {
+          const arrayList = [];
+          for (const elem of arrayFinal) {
+            if (
+              new Date(elem.date) >= new Date(startDate) &&
+              new Date(elem.date) <= new Date(endDate)
+            ) {
+              arrayList.push(elem);
+            }
+          }
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            arrayList
+          );
+          res.json({ data: arrPagination, messages: "success", totalPages });
+        } else {
+          res.json({ data: arrPagination, messages: "success", totalPages });
+        }
       }
     } catch (error) {
       next(error);
@@ -558,40 +577,74 @@ class TicketController {
   }
   // statistic ticket by employee
   async statisticTicketByAllEmployee(req, res, next) {
-    const { startDate, endDate, page, size } = req.query;
+    const { startDate = null, endDate = null, page, size } = req.query;
     const arrayFinal = [];
+    const arrayResult = [];
     try {
       const listTicket = await ticketService.statisticTicketByEmployee();
 
       for (const ticket of listTicket) {
-        var totalDiscount = 0;
-        if (ticket.promotionresults?.length > 0) {
-          for (const promotionResult of ticket.promotionresults) {
-            totalDiscount += promotionResult.discountAmount;
-          }
-        }
-        const total = ticket.prices * ticket.chair?.length;
-        const totalAfterDiscount = total - totalDiscount;
+        const result = ticket.ticket.reduce((array, item) => {
+          array[item.employee._id] = array[item.employee._id] || [];
+          array[item.employee._id].push(item);
+          return array;
+        }, Object.create(null));
 
-        arrayFinal.push({
-          customer: ticket.customer,
-          totalDiscount: totalDiscount,
-          totalAfterDiscount: totalAfterDiscount,
-          total: total,
-          route: {
-            departure: ticket.departure,
-            destination: ticket.destination,
-          },
-          employee: ticket.employee,
-        });
+        const propertyValues = Object.values(result);
+        arrayFinal.push(propertyValues);
+      }
+
+      for (const elem of arrayFinal) {
+        for (const emplTicket of elem) {
+          for (const item of emplTicket) {
+            var totalDiscount = 0;
+            var total = 0;
+            var totalAfterDiscount = 0;
+            var date = "";
+            if (item.promotionresults?.length > 0) {
+              for (const promotionResult of item.promotionresults) {
+                totalDiscount += promotionResult.discountAmount;
+              }
+            }
+            total += item.prices * item.chair?.length;
+            totalAfterDiscount += total - totalDiscount;
+            date = item.date;
+          }
+          arrayResult.push({
+            date: date,
+            totalDiscount,
+            total,
+            totalAfterDiscount,
+            employee: emplTicket[0].employee,
+          });
+        }
       }
       if (page != "" && size != "") {
         const { arrPagination, totalPages } = await utilsService.pagination(
           parseInt(page),
           parseInt(size),
-          arrayFinal
+          arrayResult
         );
-        res.json({ data: arrPagination, messages: "success", totalPages });
+
+        if (startDate && endDate) {
+          const arrayList = [];
+          for (const elem of arrayResult) {
+            if (
+              new Date(elem.date) >= new Date(startDate) &&
+              new Date(elem.date) <= new Date(endDate)
+            ) {
+              arrayList.push(elem);
+            }
+          }
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            arrayList
+          );
+          res.json({ data: arrPagination, messages: "success", totalPages });
+        } else {
+          res.json({ data: arrPagination, messages: "success", totalPages });
+        }
       }
     } catch (error) {
       next(error);
@@ -606,11 +659,11 @@ class TicketController {
     var quantityRefunds = 0;
     try {
       const listTicket = await statisticServie.revenueStatistics(
-        new Date().getMonth(),
+        new Date().getMonth() + 1,
         new Date().getFullYear()
       );
       const listTicketRefund = await statisticServie.getTotalRefundAmount(
-        new Date().getMonth(),
+        new Date().getMonth() + 1,
         new Date().getFullYear()
       );
 
@@ -683,7 +736,7 @@ class TicketController {
       });
 
       const listTopRoute = await statisticServie.getTopRouteOfMonth(
-        new Date().getMonth(),
+        new Date().getMonth() + 1,
         new Date().getFullYear()
       );
       if (listTopRoute) {
