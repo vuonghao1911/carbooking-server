@@ -75,7 +75,8 @@ class PlaceController {
       const place = await Place.find().sort({ _id: -1 });
 
       const placeFind = await Place.find({ code: code });
-      if (placeFind) {
+      if (placeFind.length > 0) {
+        console.log("vao");
         return res.json({ data: placeFind, totalPages: null });
       }
 
