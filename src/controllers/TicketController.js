@@ -535,6 +535,7 @@ class TicketController {
 
         arrayFinal.push({
           customer: ticket.customer,
+          customerType: ticket.customerType,
           totalDiscount: totalDiscount,
           totalAfterDiscount: totalAfterDiscount,
           total: total,
@@ -596,25 +597,25 @@ class TicketController {
 
       for (const elem of arrayFinal) {
         for (const emplTicket of elem) {
+          //   console.log(emplTicket[0]);
+          var totalDiscount = 0;
+          var total = 0;
+          var date = "";
           for (const item of emplTicket) {
-            var totalDiscount = 0;
-            var total = 0;
-            var totalAfterDiscount = 0;
-            var date = "";
             if (item.promotionresults?.length > 0) {
               for (const promotionResult of item.promotionresults) {
                 totalDiscount += promotionResult.discountAmount;
               }
             }
             total += item.prices * item.chair?.length;
-            totalAfterDiscount += total - totalDiscount;
+
             date = item.date;
           }
           arrayResult.push({
             date: date,
-            totalDiscount,
+            totalDiscount: totalDiscount,
             total,
-            totalAfterDiscount,
+            totalAfterDiscount: total - totalDiscount,
             employee: emplTicket[0].employee,
           });
         }
@@ -762,6 +763,63 @@ class TicketController {
         quantityRefunds,
         listTopRoute: arrayTopRoute,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async statisticTicketRefunds(req, res, next) {
+    const { startDate = null, endDate = null, page, size } = req.query;
+    const arrayFinal = [];
+    try {
+      const listRefund = await statisticServie.getInfoStatisticTicketRefund();
+      if (listRefund && listRefund.length > 0) {
+        for (const elem of listRefund) {
+          const route = await Route.findOne({
+            "departure._id": elem.vehicleRoute.departure,
+
+            "destination._id": elem.vehicleRoute.destination,
+          });
+          if (route) {
+            arrayFinal.push({
+              _id: elem._id,
+              ticketRefund: elem.ticketRefund,
+              ticket: elem.ticket,
+              route: {
+                name: `${route.departure.name} - ${route.destination.name}`,
+                code: route.code,
+              },
+            });
+          }
+        }
+      }
+      if (page != "" && size != "") {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          arrayFinal
+        );
+        if (startDate && endDate) {
+          const arrayList = [];
+          for (const elem of arrayFinal) {
+            if (
+              new Date(elem.ticketRefund.dateTiketRefund) >=
+                new Date(startDate) &&
+              new Date(elem.ticketRefund.dateTiketRefund) <= new Date(endDate)
+            ) {
+              arrayList.push(elem);
+            }
+          }
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            arrayList
+          );
+          res.json({ data: arrPagination, messages: "success", totalPages });
+        } else {
+          res.json({ data: arrPagination, messages: "success", totalPages });
+        }
+      }
     } catch (error) {
       next(error);
     }

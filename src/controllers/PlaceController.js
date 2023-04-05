@@ -1,4 +1,5 @@
 const placeService = require("../services/PlaceService");
+const utilsService = require("../utils/utils");
 const Place = require("../modal/Place");
 const Route = require("../modal/Route");
 
@@ -12,6 +13,11 @@ class PlaceController {
         busStation: busStation,
         code: code,
       });
+
+      const placeFind = await Place.findOne({ code: code });
+      if (placeFind) {
+        return res.json({ message: "Trùng mã" });
+      }
 
       const saveplace = await placeService.savePlace(place);
       console.log(saveplace);
@@ -64,9 +70,21 @@ class PlaceController {
     }
   }
   async getPlace(req, res, next) {
+    const { page, size, code } = req.query;
     try {
-      const place = await Place.find();
-      res.json(place);
+      const place = await Place.find().sort({ _id: -1 });
+
+      const placeFind = await Place.find({ code: code });
+      if (placeFind) {
+        return res.json({ data: placeFind, totalPages: null });
+      }
+
+      const { arrPagination, totalPages } = await utilsService.pagination(
+        parseInt(page),
+        parseInt(size),
+        place
+      );
+      return res.json({ data: arrPagination, totalPages });
     } catch (error) {
       next(error);
     }

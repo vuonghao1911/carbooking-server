@@ -5,6 +5,7 @@ const Account = require("../modal/Account");
 const Employee = require("../modal/Employee");
 const Customer = require("../modal/Customer");
 const { truncate } = require("fs/promises");
+const ObjectId = require("mongoose").Types.ObjectId;
 const twilio = require("twilio")(
   process.env.ACCOUNT_SID,
   process.env.AUTH_TOKEN
@@ -22,6 +23,8 @@ class AccountController {
       address,
       typeId,
       roleEmloyee,
+      email,
+      dob,
     } = req.body;
 
     var newAccount;
@@ -56,6 +59,8 @@ class AccountController {
               typeId: typeId,
               address: address,
               role: roleEmloyee,
+              email: email,
+              dateOfBirth: dob,
             });
             employeeFind = await EmployeeService.saveEmployee(employee);
 
@@ -90,7 +95,7 @@ class AccountController {
             passWord: passHash,
             role: role,
             idUser: user._id,
-            customerTypeId: "640e9859186ba7d1aee14307",
+            customerTypeId: ObjectId("640e9859186ba7d1aee14307"),
           });
           const saveAccount = await AccountService.saveAccount(account);
           newAccount = { user: user, checkRegister: true };

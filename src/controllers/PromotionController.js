@@ -41,6 +41,11 @@ class PromotionController {
         codeDetails = 0;
       }
 
+      const lineFind = await PromotionLine.findOne({ code: codeLine });
+      if (lineFind) {
+        return res.json({ message: "Trùng mã khuyễn mãi" });
+      }
+
       const checkDate = await promotionService.checDatePromotionsHeader(
         startDate,
         endDate
@@ -79,7 +84,9 @@ class PromotionController {
           "startDate and EndDate promotionLine or PromotionDetails invalid ";
         res.json({ newPromotionLine: null, newPromotion: null, message });
       }
-    } catch (error) {}
+    } catch (error) {
+      next(error);
+    }
   }
   // add promotion header
   async addPromotionHeader(req, res, next) {
@@ -88,6 +95,10 @@ class PromotionController {
 
     try {
       const urlImg = await awsS3Service.uploadFile(file);
+      const promotionFind = await PromotionHeader.findOne({ code: code });
+      if (promotionFind) {
+        return res.json({ message: "Trùng mã khuyến mãi" });
+      }
 
       let data = {
         startDate: startDate,
@@ -98,6 +109,7 @@ class PromotionController {
         imgUrl: urlImg,
       };
       const promotionsHeader = new PromotionHeader(data);
+
       await promotionsHeader.save();
       res.json({ promotionsHeader, message: "Success" });
     } catch (error) {
@@ -228,7 +240,7 @@ class PromotionController {
           }
         );
         res.json({
-          massage: `update status ${status}  promotionHeader success`,
+          massage: `Cập nhật trạng thái khuyễn mãi thành công`,
         });
       } else if (status === null) {
         if (startDate == "") {
@@ -257,7 +269,7 @@ class PromotionController {
             }
           );
           res.json({
-            massage: "update endDate promotionHeader  success",
+            massage: "Cập nhật ngày kết thúc thành công",
           });
         } else {
           await PromotionHeader.updateOne(
@@ -270,7 +282,7 @@ class PromotionController {
             }
           );
           res.json({
-            massage: "update endDate and startDate promotionsHeader success",
+            massage: "Cập nhật ngày bắt đầu và kết thúc thành công",
           });
         }
       }
@@ -294,7 +306,7 @@ class PromotionController {
           }
         );
         res.json({
-          massage: `update status ${status} promotionLine success`,
+          massage: `Cập nhật trạng thái khuyến mãi thành công`,
         });
       } else if (status === null) {
         if (startDate == "") {
@@ -307,7 +319,7 @@ class PromotionController {
             }
           );
           res.json({
-            massage: "update endDate promotionLine success",
+            massage: "Cập nhật ngày kết thúc thành công",
           });
         } else {
           await Promotion.updateOne(
@@ -320,7 +332,7 @@ class PromotionController {
             }
           );
           res.json({
-            massage: "update endDate and startDate promotionsLine success",
+            massage: "Cập nhật ngày bắt đầu và kết thúc thành công",
           });
         }
       }

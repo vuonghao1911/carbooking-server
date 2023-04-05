@@ -912,6 +912,17 @@ const TicketService = {
       },
       {
         $lookup: {
+          from: "customertypes",
+          localField: "customer.customerTypeId",
+          foreignField: "_id",
+          as: "customertypes",
+        },
+      },
+      {
+        $unwind: "$customertypes",
+      },
+      {
+        $lookup: {
           from: "prices",
           localField: "priceId",
           foreignField: "_id",
@@ -925,6 +936,7 @@ const TicketService = {
         $project: {
           _id: "$_id",
           customer: "$customer",
+          customerType: "$customertypes.type",
           departure: {
             id: "$departure._id",
             name: "$departure.name",

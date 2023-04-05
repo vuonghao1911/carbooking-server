@@ -24,7 +24,7 @@ router.get("/all/getPromotionHeader", promotionController.getPromotionHeader);
 router.patch("/updateHeader", promotionController.updatePromotionHeader);
 // update status and endDate promotionLine
 router.patch("/updateLine", promotionController.updatePromotionLine);
-
+// statistic all  promotion
 router.get("/statistic", promotionController.statisticPromotion);
 
 module.exports = router;

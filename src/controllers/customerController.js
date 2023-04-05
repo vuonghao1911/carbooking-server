@@ -1,8 +1,10 @@
 const customerService = require("../services/customerService");
+const utilsService = require("../utils/utils");
 const AwsS3Service = require("../services/AwsS3Service");
 const Customer = require("../modal/Customer");
 const CustomerType = require("../modal/CustomerType");
 class CustomerController {
+  // add customer
   async addCustomer(req, res, next) {
     const { firstName, lastName, phoneNumber, address, email, dateOfBirth } =
       req.body;
@@ -34,6 +36,7 @@ class CustomerController {
       next(error);
     }
   }
+  // get customer by id
   async getCustomerById(req, res, next) {
     const { userId } = req.params;
     console.log(userId);
@@ -46,6 +49,7 @@ class CustomerController {
       next(error);
     }
   }
+  // add customer type
   async addCustomerType(req, res, next) {
     const { code, type, description } = req.body;
 
@@ -62,7 +66,19 @@ class CustomerController {
       next(error);
     }
   }
+  // get customer type
+  async getCustomerType(req, res, next) {
+    try {
+      const type = await CustomerType.find();
+
+      res.json(type);
+    } catch (error) {
+      next(error);
+    }
+  }
+  // get customer by query parameters
   async getCustomer(req, res, next) {
+    const { page, size, name = "", phone = "" } = req.query;
     try {
       const customer = await Customer.aggregate([
         {
@@ -74,23 +90,52 @@ class CustomerController {
           },
         },
         {
+          $lookup: {
+            from: "customertypes",
+            localField: "customerTypeId",
+            foreignField: "_id",
+            as: "customertypes",
+          },
+        },
+        {
+          $unwind: "$customertypes",
+        },
+        {
           $project: {
             _id: "$_id",
             firstName: "$firstName",
             lastName: "$lastName",
             phoneNumber: "$phoneNumber",
             address: "$address",
+            email: "$email",
+            dob: "$dateOfBirth",
+            customerType: "$customertypes.type",
             quantityTicket: { $size: "$tickets" },
           },
         },
         { $sort: { _id: -1 } },
       ]);
-      res.json(customer);
+      if (name != "" && phone == "") {
+        const customer = await Customer.find({ $text: { $search: name } });
+        return res.json({ data: customer, totalPages: null });
+      } else if (phone != "" && name == "") {
+        const customer = await Customer.find({ phoneNumber: phone });
+        return res.json({ data: customer, totalPages: null });
+      }
+
+      if (page && size) {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          customer
+        );
+        return res.json({ data: arrPagination, totalPages });
+      }
     } catch (error) {
       next(error);
     }
   }
-
+  // update info customer
   async updateInfo(req, res, next) {
     const { firstName, lastName, id, address, dateOfBirth, email } = req.body;
     //console.log(number);
@@ -114,6 +159,7 @@ class CustomerController {
       next(error);
     }
   }
+  // get customer by phone
   async getCustomerByPhoneNumber(req, res, next) {
     const { phone = "" } = req.query;
     //console.log(number);

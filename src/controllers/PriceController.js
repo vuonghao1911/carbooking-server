@@ -183,7 +183,7 @@ class PriceController {
           }
         );
         res.json({
-          massage: "update status false priceHeader success",
+          massage: "Cập nhật trạng thái thành công",
         });
       } else if (status === null) {
         if (startDate == "") {
@@ -196,7 +196,7 @@ class PriceController {
             }
           );
           res.json({
-            massage: "update endDate priceHeader  success",
+            massage: "Cập nhật ngày kết thúc thành công",
           });
         } else {
           await PriceHeader.updateOne(
@@ -209,7 +209,7 @@ class PriceController {
             }
           );
           res.json({
-            massage: "update endDate and startDate priceHeader success",
+            massage: "Cập nhật ngày bắt đầu và ngày kết thúc thành công",
           });
         }
       } else if (status == "true") {
@@ -238,7 +238,7 @@ class PriceController {
         }
         if (priceUnique) {
           res.json({
-            massage: `price is exist in priceHeader id: ${idPriceHeader}`,
+            massage: `Giá đã tồn tại trong bảng giá với id : ${idPriceHeader}`,
           });
         } else {
           await PriceHeader.updateOne(
@@ -250,7 +250,7 @@ class PriceController {
             }
           );
           res.json({
-            massage: "update status true priceHeader success",
+            massage: "Cập nhật trạng thái thành công",
           });
         }
       }

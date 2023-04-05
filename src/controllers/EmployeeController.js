@@ -1,4 +1,5 @@
 const employeeService = require("../services/EmployeeService");
+const utilsService = require("../utils/utils");
 const Employee = require("../modal/Employee");
 const EmployeeType = require("../modal/EmployeeType");
 class EmployeeController {
@@ -28,9 +29,25 @@ class EmployeeController {
     }
   }
   async getEmployee(req, res, next) {
+    const { page, size, name = "", phone = "" } = req.query;
     try {
       const getEmps = await Employee.find().sort({ _id: -1 });
-      return res.json(getEmps);
+      if (name != "" && phone == "") {
+        const customer = await Employee.find({ $text: { $search: name } });
+        return res.json({ data: customer, totalPages: null });
+      } else if (phone != "" && name == "") {
+        const customer = await Employee.find({ phoneNumber: phone });
+        return res.json({ data: customer, totalPages: null });
+      }
+
+      if (page && size) {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          getEmps
+        );
+        return res.json({ data: arrPagination, totalPages });
+      }
     } catch (error) {
       console.log(error);
       next(error);

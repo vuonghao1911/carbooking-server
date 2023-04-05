@@ -1,18 +1,8 @@
-const Car = require("../modal/Car");
-const CarType = require("../modal/CarType");
 var mongoose = require("mongoose");
 const Ticket = require("../modal/Ticket");
-const PromotionService = require("../services/PromotionService");
-const Promotion = require("../modal/Promotion");
-const Customer = require("../modal/Customer");
-const Price = require("../modal/Price");
-const VehicleRoute = require("../modal/VehicleRoute");
 const TicketRefund = require("../modal/TicketRefund");
-const PromotionHeader = require("../modal/PromotionHeader");
-const PromotionResult = require("../modal/PromotionResult");
-const Order = require("../modal/Order");
+
 const ObjectId = require("mongoose").Types.ObjectId;
-// car and car type services
 
 const StatisticService = {
   // get total amount of ticket refunds
@@ -242,6 +232,64 @@ const StatisticService = {
         },
       },
       { $limit: 5 },
+    ]);
+    return list;
+  },
+  // statistic ticket refund
+  getInfoStatisticTicketRefund: async () => {
+    const list = await TicketRefund.aggregate([
+      {
+        $lookup: {
+          from: "tickets",
+          localField: "ticketId",
+          foreignField: "_id",
+          as: "tickets",
+        },
+      },
+      {
+        $unwind: "$tickets",
+      },
+      {
+        $lookup: {
+          from: "vehicleroutes",
+          localField: "tickets.vehicleRouteId",
+          foreignField: "_id",
+          as: "vehicleroutes",
+        },
+      },
+      {
+        $unwind: "$vehicleroutes",
+      },
+      {
+        $project: {
+          ticketRefund: {
+            updatedAt: "$updatedAt",
+            returnAmount: "$returnAmount",
+            dateTiketRefund: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+                timezone: "+07:00",
+              },
+            },
+            codeRefund: "$code",
+          },
+          ticket: {
+            dateTiket: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$tickets.createdAt",
+                timezone: "+07:00",
+              },
+            },
+            codeTiket: "$tickets.code",
+          },
+          vehicleRoute: {
+            departure: "$vehicleroutes.departure",
+            destination: "$vehicleroutes.destination",
+          },
+        },
+      },
     ]);
     return list;
   },

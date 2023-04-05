@@ -8,6 +8,7 @@ router.get("/:userId", customerController.getCustomerById);
 router.get("/all/getCustomer", customerController.getCustomer);
 router.post("/update", customerController.updateInfo);
 router.get("", customerController.getCustomerByPhoneNumber);
+router.get("/getType", customerController.getCustomerType);
 router.post(
   "/file",
   uploadFile.uploadFileMiddleware,

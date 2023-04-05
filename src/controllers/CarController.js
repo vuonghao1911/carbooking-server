@@ -1,4 +1,5 @@
 const carService = require("../services/CarService");
+const utilsService = require("../utils/utils");
 const Car = require("../modal/Car");
 const CarType = require("../modal/CarType");
 class CarController {
@@ -53,7 +54,9 @@ class CarController {
       next(error);
     }
   }
+  // get all car by query params page, size, typeId
   async getCar(req, res, next) {
+    const { page, size, typeId } = req.query;
     try {
       const cars = await Car.aggregate([
         {
@@ -83,7 +86,24 @@ class CarController {
         },
         { $sort: { _id: -1 } },
       ]);
-      res.json(cars);
+
+      if (typeId) {
+        const arrayCarFind = [];
+        for (const elem of cars) {
+          if (elem.carType._id == typeId) {
+            arrayCarFind.push(elem);
+          }
+        }
+        res.json({ data: arrayCarFind, totalPages: null });
+      } else {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          cars
+        );
+
+        res.json({ data: arrPagination, totalPages });
+      }
     } catch (error) {
       next(error);
     }
@@ -108,15 +128,22 @@ class CarController {
       next(error);
     }
   }
-
+  // get vehicle by id car query params page size
   async getVehicleByCarId(req, res, next) {
     const { id } = req.params;
+    const { page, size } = req.query;
     try {
       const listVehcle = await carService.findVehicleRouteByIdCar(id);
       if (listVehcle?.length > 0) {
-        res.json({ listVehcle, message: "success" });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          listVehcle
+        );
+
+        res.json({ data: arrPagination, totalPages, message: "success" });
       } else {
-        res.json({ listVehcle: null, message: "This car has no trips" });
+        res.json({ listVehcle: [], message: "This car has no trips" });
       }
     } catch (error) {
       next(error);
