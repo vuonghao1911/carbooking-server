@@ -128,20 +128,32 @@ class AccountController {
             if (employee.status == false) {
               return res.json({
                 checklogin: false,
+                isActive: false,
                 message: "Tài khoản không hợp lệ",
               });
             }
             if (employee?.isActive == false) {
               return res.json({
                 checklogin: false,
+                isActive: false,
                 message: "Tài khoản chưa được active verify otp để active",
               });
             }
 
-            user = { user: employee, role: userLogin.role, checklogin: true };
+            user = {
+              user: employee,
+              role: userLogin.role,
+              checklogin: true,
+              isActive: true,
+            };
           } else {
             const customer = await Customer.findById(userLogin.idUser);
-            user = { user: customer, role: userLogin.role, checklogin: true };
+            user = {
+              user: customer,
+              role: userLogin.role,
+              checklogin: true,
+              isActive: true,
+            };
             console.log("employee", customer);
           }
         } else {

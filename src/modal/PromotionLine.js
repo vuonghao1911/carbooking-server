@@ -19,7 +19,7 @@ const promotionLineSchema = new Schema(
     },
     status: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     code: {
       type: String,

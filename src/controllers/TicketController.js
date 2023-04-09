@@ -148,6 +148,7 @@ class TicketController {
   // get all ticket with query parameters
   async getTicket(req, res, next) {
     const { page = "", size = "", name = "", phone = "" } = req.query;
+    const { depId = "", desId = "", date = "" } = req.query;
     try {
       var tickets = [];
       if (name != "" && phone == "") {
@@ -330,6 +331,63 @@ class TicketController {
           });
         }
       }
+
+      if (desId !== "" && depId !== "") {
+        const tickets = [];
+        if (date !== "") {
+          listTicketResult.forEach((element) => {
+            if (
+              element.destination._id.toString() == desId &&
+              element.departure._id.toString() == depId &&
+              new Date(element.startDate).toLocaleDateString() ===
+                new Date(date).toLocaleDateString()
+            ) {
+              tickets.push(element);
+            }
+          });
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            tickets
+          );
+
+          return res.json({ listTicketResult: arrPagination, totalPages });
+        } else {
+          listTicketResult.forEach((element) => {
+            if (
+              element.destination._id.toString() == desId &&
+              element.departure._id.toString() == depId
+            ) {
+              tickets.push(element);
+            }
+          });
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            tickets
+          );
+
+          return res.json({ listTicketResult: arrPagination, totalPages });
+        }
+      } else if (date !== "") {
+        const tickets = [];
+        listTicketResult.forEach((element) => {
+          if (
+            new Date(element.startDate).toLocaleDateString() ===
+            new Date(date).toLocaleDateString()
+          ) {
+            tickets.push(element);
+          }
+        });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          tickets
+        );
+
+        return res.json({ listTicketResult: arrPagination, totalPages });
+      }
+
       if (page != "" && size != "") {
         const { arrPagination, totalPages } = await utilsService.pagination(
           parseInt(page),
@@ -436,6 +494,7 @@ class TicketController {
   // get all ticket refund  with query parameters
   async getAllTicketRefund(req, res, next) {
     const { page = "", size = "", name = "", phone = "" } = req.query;
+    const { depId = "", desId = "", date = "" } = req.query;
     try {
       var tickets = [];
       if (name != "" && phone == "") {
@@ -454,6 +513,63 @@ class TicketController {
       } else {
         tickets = await TicketService.getAllTicketRefund();
       }
+      const listTicket = await TicketService.getAllTicketRefund();
+
+      if (desId !== "" && depId !== "") {
+        tickets = [];
+        if (date !== "") {
+          listTicket.forEach((element) => {
+            if (
+              element.destination._id.toString() == desId &&
+              element.departure._id.toString() == depId &&
+              new Date(element.startDate).toLocaleDateString() ===
+                new Date(date).toLocaleDateString()
+            ) {
+              tickets.push(element);
+            }
+          });
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            tickets
+          );
+
+          return res.json({ listTicketResult: arrPagination, totalPages });
+        } else {
+          listTicket.forEach((element) => {
+            if (
+              element.destination._id.toString() == desId &&
+              element.departure._id.toString() == depId
+            ) {
+              tickets.push(element);
+            }
+          });
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            tickets
+          );
+
+          return res.json({ listTicketResult: arrPagination, totalPages });
+        }
+      } else if (date !== "") {
+        tickets = [];
+        listTicket.forEach((element) => {
+          if (
+            new Date(element.startDate).toLocaleDateString() ===
+            new Date(date).toLocaleDateString()
+          ) {
+            tickets.push(element);
+          }
+        });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          tickets
+        );
+
+        return res.json({ listTicketResult: arrPagination, totalPages });
+      }
 
       if (page != "" && size != "") {
         const { arrPagination, totalPages } = await utilsService.pagination(
@@ -461,6 +577,7 @@ class TicketController {
           parseInt(size),
           tickets
         );
+
         res.json({ listTicketResult: arrPagination, totalPages });
       } else {
         res.json({ listTicketResult: tickets, totalPages: null });
@@ -767,7 +884,7 @@ class TicketController {
       next(error);
     }
   }
-
+  // statistic ticket refunds
   async statisticTicketRefunds(req, res, next) {
     const { startDate = null, endDate = null, page, size } = req.query;
     const arrayFinal = [];
