@@ -76,16 +76,18 @@ class PlaceController {
 
       const placeFind = await Place.find({ code: code });
       if (placeFind.length > 0) {
-        console.log("vao");
         return res.json({ data: placeFind, totalPages: null });
       }
-
-      const { arrPagination, totalPages } = await utilsService.pagination(
-        parseInt(page),
-        parseInt(size),
-        place
-      );
-      return res.json({ data: arrPagination, totalPages });
+      if (page && size) {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          place
+        );
+        return res.json({ data: arrPagination, totalPages });
+      } else {
+        return res.json({ data: place, totalPages: null });
+      }
     } catch (error) {
       next(error);
     }
@@ -163,7 +165,7 @@ class PlaceController {
   }
   // update route
   async updateRoute(req, res, next) {
-    const { idroute, intendTime, routeTypeId } = req.body;
+    const { idroute, intendTime, routeTypeId, status } = req.body;
 
     try {
       await Route.updateOne(
@@ -175,6 +177,7 @@ class PlaceController {
             intendTime: intendTime,
 
             routeType: routeTypeId,
+            status: status,
           },
         }
       );

@@ -25,6 +25,7 @@ class AccountController {
       roleEmloyee,
       email,
       dob,
+      gender,
     } = req.body;
 
     var newAccount;
@@ -61,6 +62,7 @@ class AccountController {
               role: roleEmloyee,
               email: email,
               dateOfBirth: dob,
+              gender: gender,
             });
             employeeFind = await EmployeeService.saveEmployee(employee);
 
