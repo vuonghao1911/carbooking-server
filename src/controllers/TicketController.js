@@ -405,6 +405,7 @@ class TicketController {
   // get all ticket by user Id
   async getAllTicketByUserId(req, res, next) {
     const { userId } = req.params;
+    const { page, size } = req.query;
     console.log(userId);
     var listTicketResult = [];
     try {
@@ -440,7 +441,16 @@ class TicketController {
           });
         }
       }
-      res.json(listTicketResult);
+      if (page && size) {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          listTicketResult
+        );
+        return res.json({ data: arrPagination, totalPages });
+      } else {
+        return res.json({ data: listTicketResult, totalPages: null });
+      }
     } catch (error) {
       next(error);
     }
@@ -482,11 +492,21 @@ class TicketController {
   // get all ticket refund by user id
   async getAllTicketRefundByUserId(req, res, next) {
     const { userId } = req.params;
+    const { page, size } = req.query;
     console.log(userId);
     try {
       const listTicket = await ticketService.getTicketRefundByUserId(userId);
 
-      res.json(listTicket);
+      if (page && size) {
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          listTicket
+        );
+        return res.json({ data: arrPagination, totalPages });
+      } else {
+        return res.json({ data: listTicket, totalPages: null });
+      }
     } catch (error) {
       next(error);
     }

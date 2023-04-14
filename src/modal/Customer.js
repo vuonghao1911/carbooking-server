@@ -16,10 +16,12 @@ const customerSchema = new Schema({
   },
   email: {
     type: String,
+    default: null,
   },
 
   dateOfBirth: {
     type: Date,
+    default: null,
   },
 
   address: {
@@ -40,6 +42,7 @@ const customerSchema = new Schema({
   },
   customerTypeId: {
     type: ObjectId,
+    default: null,
   },
 });
 

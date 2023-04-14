@@ -18,13 +18,16 @@ const employeeSchema = new Schema({
   typeId: {
     type: ObjectId,
     required: true,
+    default: null,
   },
   email: {
     type: String,
+    default: null,
   },
 
   dateOfBirth: {
     type: Date,
+    default: null,
   },
 
   address: {

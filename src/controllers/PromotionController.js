@@ -297,7 +297,7 @@ class PromotionController {
 
     try {
       if (status == "false" || status == "true") {
-        await Promotion.updateOne(
+        await PromotionLine.updateOne(
           { _id: idLine },
           {
             $set: {
@@ -310,7 +310,7 @@ class PromotionController {
         });
       } else if (status === null) {
         if (startDate == "") {
-          await Promotion.updateOne(
+          await PromotionLine.updateOne(
             { _id: idLine },
             {
               $set: {
@@ -322,7 +322,7 @@ class PromotionController {
             massage: "Cập nhật ngày kết thúc thành công",
           });
         } else {
-          await Promotion.updateOne(
+          await PromotionLine.updateOne(
             { _id: idLine },
             {
               $set: {

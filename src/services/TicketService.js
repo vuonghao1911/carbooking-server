@@ -29,7 +29,7 @@ const TicketService = {
       { _id: customerId },
       {
         $set: {
-          customerTypeId: new ObjectId("640e987e186ba7d1aee14309"),
+          customerTypeId: ObjectId("640e987e186ba7d1aee14309"),
         },
       }
     );
