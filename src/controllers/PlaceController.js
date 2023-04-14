@@ -175,7 +175,6 @@ class PlaceController {
         {
           $set: {
             intendTime: intendTime,
-
             routeType: routeTypeId,
             status: status,
           },

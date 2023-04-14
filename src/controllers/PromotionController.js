@@ -364,7 +364,10 @@ class PromotionController {
             arrayResult.push({
               Line: line,
               routeType: routeType ? routeType.type : "Tất cả các tuyến",
-              statistic: {},
+              statistic: {
+                totalDiscountAmount: 0,
+                count: 0,
+              },
             });
           }
         }

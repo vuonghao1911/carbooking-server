@@ -965,11 +965,11 @@ const TicketService = {
   // statistic ticket with all employees
   statisticTicketByEmployee: async () => {
     const ticket = await Ticket.aggregate([
-      {
-        $match: {
-          status: true,
-        },
-      },
+      // {
+      //   $match: {
+      //     status: true,
+      //   },
+      // },
 
       {
         $lookup: {

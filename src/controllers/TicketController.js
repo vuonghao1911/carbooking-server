@@ -757,6 +757,9 @@ class TicketController {
           });
         }
       }
+      arrayResult.sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+      });
       if (page != "" && size != "") {
         const { arrPagination, totalPages } = await utilsService.pagination(
           parseInt(page),

@@ -255,6 +255,23 @@ const PromotionService = {
         },
       },
       {
+        $lookup: {
+          from: "tickets",
+          localField: "ticketId",
+          foreignField: "_id",
+          as: "tickets",
+        },
+      },
+      {
+        $unwind: "$tickets",
+      },
+      {
+        $match: {
+          "tickets.status": true,
+        },
+      },
+
+      {
         $group: {
           _id: "$promotionLineId",
           totalDiscountAmount: { $sum: "$discountAmount" },
