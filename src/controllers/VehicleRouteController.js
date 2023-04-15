@@ -44,55 +44,58 @@ class VehicleRouteController {
         departure,
         destination
       );
-      const { _id, intendTime, routeType } = await Route.findOne({
-        "departure._id": ObjectId(departure),
-        "destination._id": ObjectId(destination),
-      });
-      const promotion = await vehicleRouteService.checkPromotionsRoute(
-        startDate
-      );
+      if (vehicleRoute && vehicleRoute.length > 0) {
+        const { _id, intendTime, routeType } = await Route.findOne({
+          "departure._id": ObjectId(departure),
+          "destination._id": ObjectId(destination),
+        });
+        const promotion = await vehicleRouteService.checkPromotionsRoute(
+          startDate
+        );
 
-      for (const route of vehicleRoute) {
-        if (
-          new Date(route.startDate).toLocaleDateString() ===
-          new Date(req.body.startDate).toLocaleDateString()
-        ) {
-          const price = await vehicleRouteService.checkPriceRoute(
-            route.startDate,
-            _id,
-            route.carTypeId
-          );
-          console.log(promotion);
-          const arrayPromotions = [];
-          if (promotion?.promotion?.length > 0) {
-            for (const elem of promotion.promotion) {
-              if (
-                elem.promotionLine.routeTypeId === routeType ||
-                elem?.promotionLine.routeTypeId == null
-              ) {
-                arrayPromotions.push({ ...elem });
+        for (const route of vehicleRoute) {
+          if (
+            new Date(route.startDate).toLocaleDateString() ===
+            new Date(req.body.startDate).toLocaleDateString()
+          ) {
+            const price = await vehicleRouteService.checkPriceRoute(
+              route.startDate,
+              _id,
+              route.carTypeId
+            );
+            console.log(promotion);
+            const arrayPromotions = [];
+            if (promotion?.promotion?.length > 0) {
+              for (const elem of promotion.promotion) {
+                if (
+                  elem.promotionLine.routeTypeId === routeType ||
+                  elem?.promotionLine.routeTypeId == null
+                ) {
+                  arrayPromotions.push({ ...elem });
+                }
               }
+              vehicleRouteSearch.push({
+                ...route,
+                intendTime,
+                priceId: price?._id ? price._id : null,
+                price: price?.price ? price?.price : null,
+                promotion: arrayPromotions,
+              });
+            } else {
+              vehicleRouteSearch.push({
+                ...route,
+                intendTime,
+                priceId: price?._id ? price._id : null,
+                price: price?.price ? price?.price : null,
+                promotion: arrayPromotions,
+              });
             }
-            vehicleRouteSearch.push({
-              ...route,
-              intendTime,
-              priceId: price?._id ? price._id : null,
-              price: price?.price ? price?.price : null,
-              promotion: arrayPromotions,
-            });
-          } else {
-            vehicleRouteSearch.push({
-              ...route,
-              intendTime,
-              priceId: price?._id ? price._id : null,
-              price: price?.price ? price?.price : null,
-              promotion: arrayPromotions,
-            });
           }
         }
+        return res.json(vehicleRouteSearch);
+      } else {
+        return res.json(vehicleRouteSearch);
       }
-
-      res.json(vehicleRouteSearch);
     } catch (error) {
       next(error);
     }
