@@ -5,6 +5,8 @@ router.post("/booking", ticketController.bookingTicket);
 // get all ticket  query page, size, name = (name customer)
 router.get("/all/getTicket", ticketController.getTicket);
 router.get("/:userId", ticketController.getAllTicketByUserId);
+// get ticket by code
+router.get("/", ticketController.getTicketByCode);
 // cancle ticket
 router.delete("/delete", ticketController.CanceledTicket);
 // create ticket refund Ticket by seat

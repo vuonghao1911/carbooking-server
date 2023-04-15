@@ -455,6 +455,50 @@ class TicketController {
       next(error);
     }
   }
+  // get ticket by id
+  async getTicketByCode(req, res, next) {
+    const code = +req.query.code;
+
+    var listTicketResult = [];
+    try {
+      const listTicket = await ticketService.getTicketByCode(code);
+
+      for (const ticket of listTicket) {
+        // get routeId
+        const { _id, intendTime } = await Route.findOne({
+          "departure._id": ObjectId(ticket.departure._id),
+          "destination._id": ObjectId(ticket.destination._id),
+        });
+        var pomrotionLine;
+        const listPromotions = [];
+        if (ticket.promotionresults?.length > 0) {
+          for (const elem of ticket.promotionresults) {
+            pomrotionLine = await PromotionLine.findById(elem.promotionLineId);
+            listPromotions.push({
+              PromotionResults: elem,
+              PromotionLine: pomrotionLine,
+            });
+          }
+
+          listTicketResult.push({
+            ...ticket,
+            listPromotions,
+            intendTime: intendTime,
+          });
+        } else {
+          listTicketResult.push({
+            ...ticket,
+            listPromotions: null,
+            intendTime: intendTime,
+          });
+        }
+      }
+
+      return res.json({ data: listTicketResult, totalPages: null });
+    } catch (error) {
+      next(error);
+    }
+  }
   // cancle ticket and create new Refund ticket
   async CanceledTicket(req, res, next) {
     const { ticketId, note, returnAmount } = req.body;

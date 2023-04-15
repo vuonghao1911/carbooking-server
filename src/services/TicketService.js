@@ -225,6 +225,143 @@ const TicketService = {
 
     return ticket;
   },
+  // get ticket by id ticket
+  getTicketByCode: async (code) => {
+    const ticket = await Ticket.aggregate([
+      {
+        $match: {
+          code: code,
+        },
+      },
+      {
+        $lookup: {
+          from: "customers",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customer",
+        },
+      },
+      {
+        $unwind: "$customer",
+      },
+
+      {
+        $lookup: {
+          from: "vehicleroutes",
+          localField: "vehicleRouteId",
+          foreignField: "_id",
+          as: "vehicleroute",
+        },
+      },
+      {
+        $unwind: "$vehicleroute",
+      },
+      {
+        $lookup: {
+          from: "departuretimes",
+          localField: "vehicleroute.startTime",
+          foreignField: "_id",
+          as: "departuretimes",
+        },
+      },
+      {
+        $unwind: "$departuretimes",
+      },
+      {
+        $lookup: {
+          from: "promotionresults",
+          localField: "_id",
+          foreignField: "ticketId",
+          as: "promotionresults",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "promotionlines",
+          localField: "promotionresults.promotionLineId",
+          foreignField: "_id",
+          as: "promotions",
+        },
+      },
+      {
+        $lookup: {
+          from: "places",
+          localField: "vehicleroute.departure",
+          foreignField: "_id",
+          as: "departure",
+        },
+      },
+      {
+        $unwind: "$departure",
+      },
+      {
+        $lookup: {
+          from: "places",
+          localField: "vehicleroute.destination",
+          foreignField: "_id",
+          as: "destination",
+        },
+      },
+      {
+        $unwind: "$destination",
+      },
+      {
+        $lookup: {
+          from: "cars",
+          localField: "vehicleroute.carId",
+          foreignField: "_id",
+          as: "car",
+        },
+      },
+      {
+        $unwind: "$car",
+      },
+      {
+        $lookup: {
+          from: "prices",
+          localField: "priceId",
+          foreignField: "_id",
+          as: "prices",
+        },
+      },
+      {
+        $unwind: "$prices",
+      },
+
+      {
+        $project: {
+          _id: "$_id",
+          firstName: "$customer.firstName",
+          lastName: "$customer.lastName",
+          phoneNumber: "$customer.phoneNumber",
+          address: "$customer.address",
+          departure: {
+            _id: 1,
+            name: 1,
+          },
+          destination: {
+            _id: 1,
+            name: 1,
+          },
+          code: "$code",
+          licensePlates: "$car.licensePlates",
+          startDate: "$vehicleroute.startDate",
+          endTime: "$vehicleroute.endTime",
+          startTime: "$departuretimes.time",
+          status: "$status",
+          locaDeparture: "$locationBus",
+          chair: "$chair",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          promotionresults: "$promotionresults",
+          price: "$prices.price",
+        },
+      },
+    ]);
+
+    return ticket;
+  },
   // get ticket by user id for Admin page
   getTicketByUserIdForAdmin: async (userId) => {
     const ticket = await Ticket.aggregate([
