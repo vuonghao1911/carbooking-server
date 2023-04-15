@@ -79,6 +79,7 @@ class CarController {
               _id: "$cartype._id",
               type: "$cartype.type",
             },
+            status: "$status",
             description: "$description",
             purchaseDate: "$purchaseDate",
             chair: { $size: "$chair" },
