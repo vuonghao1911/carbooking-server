@@ -93,7 +93,7 @@ class VehicleRouteController {
           }
         }
         const currenTime = new Date().getHours();
-        console.log(currenTime);
+        console.log(new Date().toString());
         const arrayResult = [];
         for (const elem of vehicleRouteSearch) {
           const routeTime = Number(elem.startTime.substring(0, 2));
