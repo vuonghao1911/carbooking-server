@@ -342,6 +342,7 @@ class PromotionController {
   }
   // statisticPromotion
   async statisticPromotion(req, res, next) {
+    const { page, size, code = "", startDate = "", endDate = "" } = req.query;
     try {
       const promotionLine = await PromotionLine.find();
 
@@ -353,12 +354,18 @@ class PromotionController {
               line._id
             );
           const routeType = await RouteType.findById(line.routeTypeId);
+          const promoDetails = await Promotion.findOne({
+            promotionLineId: line._id,
+          });
 
           if (statistic?.length > 0) {
             arrayResult.push({
               Line: line,
               routeType: routeType ? routeType.type : "Tất cả các tuyến",
               statistic: statistic[0],
+              budget: promoDetails.budget,
+              remainingBudget:
+                promoDetails.budget - statistic[0].totalDiscountAmount,
             });
           } else {
             arrayResult.push({
@@ -368,11 +375,54 @@ class PromotionController {
                 totalDiscountAmount: 0,
                 count: 0,
               },
+              budget: promoDetails?.budget,
+              remainingBudget: promoDetails?.budget - 0,
             });
           }
         }
+        if (page && size) {
+          const array = [];
+          if (startDate != "" && endDate != "") {
+            for (const elem of arrayResult) {
+              if (
+                new Date(elem.Line.startDate) >= new Date(startDate) &&
+                new Date(elem.Line.endDate) <= new Date(endDate)
+              ) {
+                array.push(elem);
+              }
+            }
 
-        res.json({ data: arrayResult, message: "success" });
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              array
+            );
+            return res.json({ data: arrPagination, totalPages });
+          }
+
+          if (code != "") {
+            for (const elem of arrayResult) {
+              if (elem.Line.code === code) {
+                array.push(elem);
+                break;
+              }
+            }
+
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              array
+            );
+            return res.json({ data: arrPagination, totalPages });
+          }
+        }
+
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          arrayResult
+        );
+        return res.json({ data: arrPagination, totalPages });
       }
     } catch (error) {
       next(error);

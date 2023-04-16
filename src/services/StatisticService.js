@@ -44,7 +44,7 @@ const StatisticService = {
         $group: {
           _id: "$date",
           ticketRefunds: { $push: "$$ROOT" },
-          count: { $count: {} },
+          count: { $sum: { $size: "$chair" } },
           returnAmount: { $sum: "$returnAmount" },
         },
       },
@@ -54,6 +54,11 @@ const StatisticService = {
   //  get total amount all ticket
   revenueStatistics: async (month, year) => {
     const list = await Ticket.aggregate([
+      {
+        $match: {
+          status: true,
+        },
+      },
       {
         $lookup: {
           from: "customers",
@@ -159,6 +164,11 @@ const StatisticService = {
   getTopRouteOfMonth: async (month, year) => {
     const list = await Ticket.aggregate([
       {
+        $match: {
+          status: true,
+        },
+      },
+      {
         $lookup: {
           from: "vehicleroutes",
           localField: "vehicleRouteId",
@@ -198,6 +208,7 @@ const StatisticService = {
           year: { $year: "$createdAt" },
           departure: "$departure._id",
           destination: "$destination._id",
+          quantity: "$quantity",
           date: {
             $dateToString: {
               format: "%Y-%m-%d",
@@ -223,7 +234,7 @@ const StatisticService = {
         $group: {
           _id: { destination: "$destination", departure: "$departure" },
 
-          count: { $count: {} },
+          count: { $sum: "$quantity" },
         },
       },
       {

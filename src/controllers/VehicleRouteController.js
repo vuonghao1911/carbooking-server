@@ -63,7 +63,7 @@ class VehicleRouteController {
               _id,
               route.carTypeId
             );
-            console.log(promotion);
+
             const arrayPromotions = [];
             if (promotion?.promotion?.length > 0) {
               for (const elem of promotion.promotion) {
@@ -92,7 +92,22 @@ class VehicleRouteController {
             }
           }
         }
-        return res.json(vehicleRouteSearch);
+        const currenTime = new Date().getHours();
+        const arrayResult = [];
+        for (const elem of vehicleRouteSearch) {
+          const routeTime = Number(elem.startTime.substring(0, 2));
+          if (
+            new Date(elem.startDate).toLocaleDateString() ==
+            new Date().toLocaleDateString()
+          ) {
+            if (routeTime + 2 > currenTime) {
+              arrayResult.push(elem);
+            }
+          } else {
+            arrayResult.push(elem);
+          }
+        }
+        return res.json(arrayResult);
       } else {
         return res.json(vehicleRouteSearch);
       }

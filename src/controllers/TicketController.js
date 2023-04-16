@@ -3,6 +3,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const utilsService = require("../utils/utils");
 const Ticket = require("../modal/Ticket");
 const Customer = require("../modal/Customer");
+const Employee = require("../modal/Employee");
 const VehicleRoute = require("../modal/VehicleRoute");
 const Order = require("../modal/Order");
 
@@ -578,7 +579,6 @@ class TicketController {
         tickets = await TicketService.getAllTicketRefund();
       }
       const listTicket = await TicketService.getAllTicketRefund();
-
       if (desId !== "" && depId !== "") {
         tickets = [];
         if (date !== "") {
@@ -699,7 +699,13 @@ class TicketController {
   }
   // statistic ticket by customer
   async statisticTicketByAllCustomer(req, res, next) {
-    const { startDate = null, endDate = null, page, size } = req.query;
+    const {
+      startDate = null,
+      endDate = null,
+      page,
+      size,
+      name = "",
+    } = req.query;
     const arrayFinal = [];
     try {
       const listTicket = await ticketService.statisticTicketByCustomer();
@@ -727,12 +733,40 @@ class TicketController {
           },
         });
       }
+      arrayFinal.sort((a, b) => {
+        return a.customer.code - b.customer.code;
+      });
       if (page != "" && size != "") {
         const { arrPagination, totalPages } = await utilsService.pagination(
           parseInt(page),
           parseInt(size),
           arrayFinal
         );
+
+        if (name != "") {
+          const employee = await Customer.find({ $text: { $search: name } });
+          const arrayList = [];
+          if (employee && employee.length > 0) {
+            for (const empl of employee) {
+              for (const elem of arrayFinal) {
+                if (elem.customer._id.toString() === empl._id.toString()) {
+                  arrayList.push(elem);
+                }
+              }
+            }
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayList
+            );
+            return res.json({
+              data: arrPagination,
+              messages: "success",
+              totalPages,
+            });
+          }
+        }
+
         if (startDate && endDate) {
           const arrayList = [];
           for (const elem of arrayFinal) {
@@ -759,7 +793,13 @@ class TicketController {
   }
   // statistic ticket by employee
   async statisticTicketByAllEmployee(req, res, next) {
-    const { startDate = null, endDate = null, page, size } = req.query;
+    const {
+      startDate = null,
+      endDate = null,
+      page,
+      size,
+      name = "",
+    } = req.query;
     const arrayFinal = [];
     const arrayResult = [];
     try {
@@ -810,6 +850,29 @@ class TicketController {
           parseInt(size),
           arrayResult
         );
+        if (name != "") {
+          const employee = await Employee.find({ $text: { $search: name } });
+          const arrayList = [];
+          if (employee && employee.length > 0) {
+            for (const empl of employee) {
+              for (const elem of arrayResult) {
+                if (elem.employee._id.toString() === empl._id.toString()) {
+                  arrayList.push(elem);
+                }
+              }
+            }
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayList
+            );
+            return res.json({
+              data: arrPagination,
+              messages: "success",
+              totalPages,
+            });
+          }
+        }
 
         if (startDate && endDate) {
           const arrayList = [];
@@ -872,7 +935,7 @@ class TicketController {
               elemTicket.prices,
               elemTicket.promotionresults
             );
-            quantityTicket++;
+            quantityTicket += elemTicket.chair.length;
           }
           arrayTicketTotal.push({
             date: elem.ticket[0].date,

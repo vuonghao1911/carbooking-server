@@ -161,7 +161,6 @@ class CarController {
         {
           $set: {
             licensePlates: licensePlates,
-            typeCarId: idTypeCar,
             description: description,
             purchaseDate: purchaseDate,
             status: status,
