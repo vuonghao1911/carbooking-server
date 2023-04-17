@@ -12,6 +12,10 @@ router.post("/addBusStation", placeController.addBusStation);
 router.patch("/updateRoute", placeController.updateRoute);
 
 router.delete("/deleteBusStation", placeController.deleteBusStation);
+// statictis route
+router.get("/route/statictis", placeController.statictisRouteByDate);
+// statictis cartype
+router.get("/carType/statictis", placeController.statisticCartypeByDate);
 
 //router.get("/:id", carController.getCarById);
 

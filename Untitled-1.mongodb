@@ -27,46 +27,79 @@
 //           },
 //         }
 //       );
-db.ticketrefunds.aggregate([
-  {
-    $project: {
-      _id: "$_id",
-
-      status: "$status",
-      chair: "$chair",
-      createdAt: "$createdAt",
-      updatedAt: "$updatedAt",
-      returnAmount: "$returnAmount",
-      month: { $month: "$createdAt" },
-      year: { $year: "$createdAt" },
-
-      date: {
-        $dateToString: {
-          format: "%d-%m-%Y",
-          date: "$createdAt",
-          timezone: "+07:00",
-        },
-      },
-    },
-  },
+db.vehicleroutes.aggregate([
   {
     $match: {
       $and: [
         {
-          month: 3,
+          startDate: { $gte: new Date("2023/03/26") },
         },
         {
-          year: 2023,
+          startDate: { $lte: new Date("2023/04/16") },
         },
       ],
     },
   },
+
+            {
+              $lookup:
+              {
+                from: "tickets",
+                localField: "_id",
+                foreignField: "vehicleRouteId",
+                as: "tickets"
+              },
+            },
+            {
+              $unwind: "$tickets"
+            },
+            {
+              $lookup:
+              {
+                from: "cars",
+                localField: "carId",
+                foreignField: "_id",
+                as: "cars"
+              },
+            },
+           
+            {
+              $unwind: "$cars"
+            },
+            {
+              $lookup:
+              {
+                from: "cartypes",
+                localField: "cars.typeCarId",
+                foreignField: "_id",
+                as: "cartypes"
+              },
+            },
+            {
+              $unwind: "$cartypes"
+            },
+            {
+                $match: {
+                  "tickets.status":true
+                }
+            },
+            {
+              $project: {
+                            _id: "$_id",
+                          //  startDate: "$startDate",
+                           
+                            quantityTicket:"$tickets.quantity",
+                            carTypeId:"$cartypes._id",
+                            carType:"$cartypes.type",
+                            
+                          },
+            },
   {
     $group: {
-      _id: "$date",
-      ticketRefunds: { $push: "$$ROOT" },
-      returnAmount: { $sum: "$returnAmount" },
-      count: { $count: {} },
+      _id: "$carTypeId",
+      
+    tickets:{$push:"$$ROOT"},
+    countTicket:{$sum: "$quantityTicket"},
     },
   },
 ]);
@@ -98,7 +131,6 @@ db.ticketrefunds.aggregate([
 //             "endDate": "$endDate",
 //            "budget":"$budget",
 //             "title": "$title",
-
 //             route: "$route.place",
 //           },
 //         },

@@ -1,7 +1,9 @@
 const placeService = require("../services/PlaceService");
 const utilsService = require("../utils/utils");
+const statictisService = require("../services/StatisticService");
 const Place = require("../modal/Place");
 const Route = require("../modal/Route");
+const CarType = require("../modal/CarType");
 
 class PlaceController {
   async addPlace(req, res, next) {
@@ -203,6 +205,167 @@ class PlaceController {
         }
       );
       res.json({ message: "Update Success" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // statictis route by date
+  async statictisRouteByDate(req, res, next) {
+    const { startDate, endDate, code = "" } = req.query;
+    try {
+      const qntRoute = await statictisService.countStatictisVehicleRoute(
+        startDate,
+        endDate
+      );
+      const qntTicketRoute =
+        await statictisService.countStatictisTicketVehicleRoute(
+          startDate,
+          endDate
+        );
+      const array = [];
+      if (qntRoute && qntRoute.length > 0) {
+        for (const elem of qntRoute) {
+          const route = await Route.findOne(
+            {
+              "departure._id": elem._id.departure,
+              "destination._id": elem._id.destination,
+            },
+            { "departure.busStation": 0, "destination.busStation": 0 }
+          );
+          array.push({
+            ...elem,
+            route: route,
+            routeName: `${route.departure.name} - ${route.destination.name}`,
+          });
+        }
+      }
+      if (qntTicketRoute && qntTicketRoute.length > 0) {
+        for (const elem of qntTicketRoute) {
+          const route = await Route.findOne(
+            {
+              "departure._id": elem._id.departure,
+              "destination._id": elem._id.destination,
+            },
+            { "departure.busStation": 0, "destination.busStation": 0 }
+          );
+          var totalAmount = 0;
+          if (elem.ticket && elem.ticket.length > 0) {
+            for (const ticket of elem.ticket) {
+              totalAmount += await utilsService.totalAmountTicket(
+                ticket.chair,
+                ticket.price,
+                ticket.promotionResult
+              );
+            }
+          }
+          array.push({
+            statictisTicket: {
+              totalAmount,
+              countTicket: elem.countTicket,
+            },
+            route: route,
+            routeName: `${route.departure.name} - ${route.destination.name}`,
+          });
+        }
+      }
+      const result = array.reduce((array, item) => {
+        array[item.route._id] = array[item.route._id] || [];
+        array[item.route._id].push(item);
+        return array;
+      }, Object.create(null));
+
+      const propertyValues = Object.values(result);
+      const arrayGroup = [];
+      if (propertyValues.length > 0 && propertyValues) {
+        for (const elem of propertyValues) {
+          if (elem.length == 1) {
+            arrayGroup.push({
+              ...elem[0],
+              statictisTicket: {
+                totalAmount: 0,
+                countTicket: 0,
+              },
+            });
+          } else {
+            const array = [];
+            array.push({ ...elem[0], ...elem[1] });
+            arrayGroup.push(...array);
+          }
+        }
+      }
+      const arrayStatistic = [];
+
+      if (arrayGroup.length > 0 && arrayGroup) {
+        for (const elem of arrayGroup) {
+          const ticketRefund =
+            await statictisService.countStatictisTicketRefundsVehicleRoute(
+              startDate,
+              endDate,
+              elem._id.departure,
+              elem._id.destination
+            );
+          if (ticketRefund.length > 0 && ticketRefund) {
+            arrayStatistic.push({
+              ...elem,
+              quantityTicketRefunds: ticketRefund[0].countTicket,
+              totalAmountRefund: ticketRefund[0].totalAmountRefund,
+            });
+          } else {
+            arrayStatistic.push({
+              ...elem,
+              quantityTicketRefunds: 0,
+              totalAmountRefund: 0,
+            });
+          }
+          // console.log(ticketRefund);
+        }
+      }
+      arrayStatistic.sort((a, b) => {
+        return a.count - b.count;
+      });
+
+      if (code != "") {
+        const arrayFilter = [];
+        for (const elem of arrayStatistic) {
+          if (elem.route.code === code) arrayFilter.push(elem);
+          break;
+        }
+        return res.json({ data: arrayFilter, message: "success" });
+      }
+
+      res.json({ data: arrayStatistic, message: "success" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async statisticCartypeByDate(req, res, next) {
+    const { startDate, endDate, code } = req.query;
+    try {
+      const listRefundsByCarType =
+        await statictisService.countTicketRefundTypeChairByDate(
+          startDate,
+          endDate
+        );
+      const listResult = [];
+      if (listRefundsByCarType.length > 0 && listRefundsByCarType) {
+        for (const elem of listRefundsByCarType) {
+          const qntTicket = await statictisService.countTicketTypeChairByDate(
+            startDate,
+            endDate,
+            elem._id
+          );
+          const carType = await CarType.findById(elem._id);
+
+          listResult.push({
+            quantityTicketRefund: elem.countTicketRefund,
+            quantityTicket: qntTicket[0].countTicket,
+            carType: carType.type,
+          });
+        }
+      }
+      res.json(listResult);
     } catch (error) {
       next(error);
     }

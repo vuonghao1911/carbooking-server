@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
 const Ticket = require("../modal/Ticket");
 const TicketRefund = require("../modal/TicketRefund");
+const VehicleRoute = require("../modal/VehicleRoute");
 
 const ObjectId = require("mongoose").Types.ObjectId;
 
@@ -302,6 +303,334 @@ const StatisticService = {
         },
       },
     ]);
+    return list;
+  },
+
+  // statictis vehicle route by startDate and endDate
+  countStatictisVehicleRoute: async (startDate, endDate) => {
+    const list = await VehicleRoute.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              startDate: { $gte: new Date(startDate) },
+            },
+            {
+              startDate: { $lte: new Date(endDate) },
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: { departure: "$departure", destination: "$destination" },
+          count: { $count: {} },
+        },
+      },
+    ]);
+
+    return list;
+  },
+  // statictis ticket of vehicleRoute by startDate and endDate
+  countStatictisTicketVehicleRoute: async (startDate, endDate) => {
+    const list = await VehicleRoute.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              startDate: { $gte: new Date(startDate) },
+            },
+            {
+              startDate: { $lte: new Date(endDate) },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tickets",
+          localField: "_id",
+          foreignField: "vehicleRouteId",
+          as: "tickets",
+        },
+      },
+      {
+        $unwind: "$tickets",
+      },
+      {
+        $lookup: {
+          from: "prices",
+          localField: "tickets.priceId",
+          foreignField: "_id",
+          as: "prices",
+        },
+      },
+      {
+        $unwind: "$prices",
+      },
+      {
+        $lookup: {
+          from: "promotionresults",
+          localField: "tickets._id",
+          foreignField: "ticketId",
+          as: "promotionresults",
+        },
+      },
+      {
+        $match: {
+          "tickets.status": true,
+        },
+      },
+      {
+        $project: {
+          _id: "$_id",
+          startDate: "$startDate",
+          quantity: "$tickets.quantity",
+          departure: "$departure",
+          destination: "$destination",
+          price: "$prices.price",
+          promotionResult: "$promotionresults",
+          chair: "$tickets.chair",
+        },
+      },
+      {
+        $group: {
+          _id: { departure: "$departure", destination: "$destination" },
+          ticket: { $push: "$$ROOT" },
+          countTicket: { $sum: "$quantity" },
+        },
+      },
+    ]);
+
+    return list;
+  },
+
+  // statictis ticket refunds of vehicleRoute by departure_id and destination_id
+  countStatictisTicketRefundsVehicleRoute: async (
+    startDate,
+    endDate,
+    depId,
+    desId
+  ) => {
+    const list = await TicketRefund.aggregate([
+      {
+        $lookup: {
+          from: "tickets",
+          localField: "ticketId",
+          foreignField: "_id",
+          as: "tickets",
+        },
+      },
+      {
+        $unwind: "$tickets",
+      },
+      {
+        $lookup: {
+          from: "vehicleroutes",
+          localField: "tickets.vehicleRouteId",
+          foreignField: "_id",
+          as: "vehicleroutes",
+        },
+      },
+
+      {
+        $unwind: "$vehicleroutes",
+      },
+
+      {
+        $match: {
+          "vehicleroutes.departure": ObjectId(depId),
+          "vehicleroutes.destination": ObjectId(desId),
+        },
+      },
+      {
+        $match: {
+          $and: [
+            {
+              "vehicleroutes.startDate": { $gte: new Date(startDate) },
+            },
+            {
+              "vehicleroutes.startDate": { $lte: new Date(endDate) },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: "$_id",
+
+          chair: "$chair",
+          departure: "$vehicleroutes.departure",
+          destination: "$vehicleroutes.destination",
+          returnAmount: "$returnAmount",
+        },
+      },
+      {
+        $group: {
+          _id: { departure: "$departure", destination: "$destination" },
+
+          countTicket: { $sum: { $size: "$chair" } },
+          totalAmountRefund: { $sum: "$returnAmount" },
+        },
+      },
+    ]);
+    return list;
+  },
+  // count ticket refund of type char by date
+  countTicketRefundTypeChairByDate: async (startDate, endDate) => {
+    const list = await VehicleRoute.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              startDate: { $gte: new Date(startDate) },
+            },
+            {
+              startDate: { $lte: new Date(endDate) },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tickets",
+          localField: "_id",
+          foreignField: "vehicleRouteId",
+          as: "tickets",
+        },
+      },
+      {
+        $unwind: "$tickets",
+      },
+      {
+        $lookup: {
+          from: "cars",
+          localField: "carId",
+          foreignField: "_id",
+          as: "cars",
+        },
+      },
+
+      {
+        $unwind: "$cars",
+      },
+      {
+        $lookup: {
+          from: "cartypes",
+          localField: "cars.typeCarId",
+          foreignField: "_id",
+          as: "cartypes",
+        },
+      },
+      {
+        $unwind: "$cartypes",
+      },
+      {
+        $lookup: {
+          from: "ticketrefunds",
+          localField: "tickets._id",
+          foreignField: "ticketId",
+          as: "ticketrefunds",
+        },
+      },
+      {
+        $unwind: "$ticketrefunds",
+      },
+
+      {
+        $project: {
+          _id: "$_id",
+
+          chairTicketReufund: "$ticketrefunds.chair",
+          carTypeId: "$cartypes._id",
+        },
+      },
+      {
+        $group: {
+          _id: "$carTypeId",
+          countTicketRefund: { $sum: { $size: "$chairTicketReufund" } },
+        },
+      },
+    ]);
+
+    return list;
+  },
+
+  countTicketTypeChairByDate: async (startDate, endDate, carTypeId) => {
+    const list = await VehicleRoute.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              startDate: { $gte: new Date(startDate) },
+            },
+            {
+              startDate: { $lte: new Date(endDate) },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "tickets",
+          localField: "_id",
+          foreignField: "vehicleRouteId",
+          as: "tickets",
+        },
+      },
+      {
+        $unwind: "$tickets",
+      },
+      {
+        $lookup: {
+          from: "cars",
+          localField: "carId",
+          foreignField: "_id",
+          as: "cars",
+        },
+      },
+
+      {
+        $unwind: "$cars",
+      },
+      {
+        $lookup: {
+          from: "cartypes",
+          localField: "cars.typeCarId",
+          foreignField: "_id",
+          as: "cartypes",
+        },
+      },
+      {
+        $unwind: "$cartypes",
+      },
+      {
+        $match: {
+          "tickets.status": true,
+        },
+      },
+      {
+        $match: {
+          "cartypes._id": ObjectId(carTypeId),
+        },
+      },
+      {
+        $project: {
+          _id: "$_id",
+          quantityTicket: "$tickets.quantity",
+          carTypeId: "$cartypes._id",
+          carType: "$cartypes.type",
+        },
+      },
+      {
+        $group: {
+          _id: "$carTypeId",
+          countTicket: { $sum: "$quantityTicket" },
+        },
+      },
+    ]);
+
     return list;
   },
 };
