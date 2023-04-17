@@ -8,6 +8,7 @@ const RouteType = require("../modal/RouteType");
 const VehicleRoute = require("../modal/VehicleRoute");
 const DepartureTime = require("../modal/DepartureTime");
 const Car = require("../modal/Car");
+const moment = require("moment");
 class VehicleRouteController {
   // save vehicle route
   async addVehicleRoute(req, res, next) {
@@ -92,7 +93,8 @@ class VehicleRouteController {
             }
           }
         }
-        const currenTime = new Date().getHours() + 7;
+        console.log(moment().utcOffset(420).toDate().getHours());
+        const currenTime = moment().utcOffset(420).toDate().getHours();
 
         const arrayResult = [];
         for (const elem of vehicleRouteSearch) {
