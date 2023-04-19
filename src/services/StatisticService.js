@@ -555,7 +555,7 @@ const StatisticService = {
 
     return list;
   },
-
+  // count ticket type car
   countTicketTypeChairByDate: async (startDate, endDate, carTypeId) => {
     const list = await VehicleRoute.aggregate([
       {
@@ -627,6 +627,145 @@ const StatisticService = {
         $group: {
           _id: "$carTypeId",
           countTicket: { $sum: "$quantityTicket" },
+        },
+      },
+    ]);
+
+    return list;
+  },
+  // count ticket current date
+  countTicketByCurrenDate: async (startDate) => {
+    const list = await Ticket.aggregate([
+      {
+        $lookup: {
+          from: "promotionresults",
+          localField: "_id",
+          foreignField: "ticketId",
+          as: "promotionresults",
+        },
+      },
+      {
+        $lookup: {
+          from: "prices",
+          localField: "priceId",
+          foreignField: "_id",
+          as: "prices",
+        },
+      },
+      {
+        $unwind: "$prices",
+      },
+      {
+        $match: {
+          status: true,
+        },
+      },
+      {
+        $project: {
+          _id: "$_id",
+          quantityTicket: "$quantity",
+          chair: "$chair",
+          promotionResults: "$promotionresults",
+          prices: "$prices.price",
+          date: {
+            $dateToString: {
+              format: "%Y/%m/%d",
+              date: "$createdAt",
+              timezone: "+07:00",
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          date: startDate,
+        },
+      },
+      {
+        $group: {
+          _id: "$date",
+          ticket: { $push: "$$ROOT" },
+          countTicket: { $sum: "$quantityTicket" },
+        },
+      },
+    ]);
+
+    return list;
+  },
+  // count ticket refund current date
+  countTicketRefundByCurrenDate: async (startDate) => {
+    const list = await TicketRefund.aggregate([
+      {
+        $project: {
+          _id: "$_id",
+          chair: "$chair",
+          date: {
+            $dateToString: {
+              format: "%Y/%m/%d",
+              date: "$createdAt",
+              timezone: "+07:00",
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          date: startDate,
+        },
+      },
+      {
+        $group: {
+          _id: "$date",
+          count: { $sum: { $size: "$chair" } },
+        },
+      },
+    ]);
+
+    return list;
+  },
+
+  // statictis customer by current date
+  countCustomerCurrenDate: async (startDate) => {
+    const list = await Ticket.aggregate([
+      {
+        $lookup: {
+          from: "customers",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customers",
+        },
+      },
+      {
+        $unwind: "$customers",
+      },
+      {
+        $project: {
+          _id: "$_id",
+          chair: "$chair",
+          customerId: "$customers._id",
+          date: {
+            $dateToString: {
+              format: "%Y/%m/%d",
+              date: "$createdAt",
+              timezone: "+07:00",
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          date: startDate,
+        },
+      },
+      {
+        $match: {
+          status: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$customerId",
+          count: { $count: {} },
         },
       },
     ]);

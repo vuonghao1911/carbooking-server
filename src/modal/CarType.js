@@ -20,6 +20,9 @@ const carTypeSchema = new Schema({
       },
     },
   ],
+  code: {
+    type: String,
+  },
 });
 
 const CarType = mongoose.model("CarType", carTypeSchema);

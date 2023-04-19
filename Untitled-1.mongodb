@@ -27,79 +27,45 @@
 //           },
 //         }
 //       );
-db.vehicleroutes.aggregate([
+db.tickets.aggregate([
   {
     $match: {
       $and: [
         {
-          startDate: { $gte: new Date("2023/03/26") },
+          createdAt: { $gte: new Date("2023-04-12") },
         },
         {
-          startDate: { $lte: new Date("2023/04/16") },
+          createdAt: { $lte: new Date("2023-04-12") },
         },
       ],
     },
   },
-
-            {
-              $lookup:
-              {
-                from: "tickets",
-                localField: "_id",
-                foreignField: "vehicleRouteId",
-                as: "tickets"
-              },
-            },
-            {
-              $unwind: "$tickets"
-            },
-            {
-              $lookup:
-              {
-                from: "cars",
-                localField: "carId",
-                foreignField: "_id",
-                as: "cars"
-              },
-            },
-           
-            {
-              $unwind: "$cars"
-            },
-            {
-              $lookup:
-              {
-                from: "cartypes",
-                localField: "cars.typeCarId",
-                foreignField: "_id",
-                as: "cartypes"
-              },
-            },
-            {
-              $unwind: "$cartypes"
-            },
-            {
-                $match: {
-                  "tickets.status":true
-                }
-            },
-            {
-              $project: {
-                            _id: "$_id",
-                          //  startDate: "$startDate",
-                           
-                            quantityTicket:"$tickets.quantity",
-                            carTypeId:"$cartypes._id",
-                            carType:"$cartypes.type",
-                            
-                          },
-            },
   {
-    $group: {
-      _id: "$carTypeId",
-      
-    tickets:{$push:"$$ROOT"},
-    countTicket:{$sum: "$quantityTicket"},
+    $lookup: {
+      from: "promotionresults",
+      localField: "_id",
+      foreignField: "ticketId",
+      as: "promotionresults",
+    },
+  },
+  // {
+  //   $lookup: {
+  //     from: "prices",
+  //     localField: "priceId",
+  //     foreignField: "_id",
+  //     as: "prices",
+  //   },
+  // },
+  // {
+  //   $unwind: "$prices",
+  // },
+  {
+    $project: {
+      _id: "$_id",
+      quantityTicket: "$quantity",
+      chair: "$chair",
+      promotionResults: "$promotionresults",
+      // prices: "$price",
     },
   },
 ]);

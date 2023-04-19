@@ -6,12 +6,13 @@ const Customer = require("../modal/Customer");
 const Employee = require("../modal/Employee");
 const VehicleRoute = require("../modal/VehicleRoute");
 const Order = require("../modal/Order");
-
 const Route = require("../modal/Route");
 const PromotionResults = require("../modal/PromotionResult");
 const PromotionLine = require("../modal/PromotionLine");
 const TicketService = require("../services/TicketService");
 const statisticServie = require("../services/StatisticService");
+const moment = require("moment");
+const TicketRefund = require("../modal/TicketRefund");
 
 class TicketController {
   // body save tickets
@@ -1067,6 +1068,44 @@ class TicketController {
           res.json({ data: arrPagination, messages: "success", totalPages });
         }
       }
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async statictisCurrentDate(req, res, next) {
+    try {
+      var totalAmount = 0;
+      const listTicketCurrent = await statisticServie.countTicketByCurrenDate(
+        moment(new Date()).utcOffset(420).format("yyyy/MM/DD")
+      );
+
+      if (listTicketCurrent && listTicketCurrent[0]?.ticket.length > 0) {
+        for (const elem of listTicketCurrent[0].ticket) {
+          totalAmount += await utilsService.totalAmountTicket(
+            elem.chair,
+            elem.prices,
+            elem.promotionResults
+          );
+        }
+      }
+
+      const listRefunds = await statisticServie.countTicketRefundByCurrenDate(
+        moment(new Date()).utcOffset(420).format("yyyy/MM/DD")
+      );
+
+      const listCustomer = await statisticServie.countCustomerCurrenDate(
+        moment(new Date()).utcOffset(420).format("yyyy/MM/DD")
+      );
+      const statictis = {
+        quantityTicket: listTicketCurrent[0]?.countTicket
+          ? listTicketCurrent[0].ticket
+          : 0,
+        totalAmount: totalAmount,
+        quantityRefunds: listRefunds[0]?.count,
+        quantityCustomer: listCustomer.length,
+      };
+      res.json({ data: statictis, message: "success" });
     } catch (error) {
       next(error);
     }

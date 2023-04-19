@@ -135,31 +135,57 @@ class PriceController {
     }
   }
   async getPriceHeader(req, res, next) {
-    const { date } = req.query;
+    const { code, startDate = "", endDate = "", status = "" } = req.query;
     const { page, size } = req.query;
     var priceHeader;
     try {
-      if (date) {
+      if (code) {
         const arrayPriceFind = [];
-        priceHeader = await PriceHeader.find();
-        for (const elem of priceHeader) {
-          if (
-            new Date(elem.startDate) <= new Date(date) &&
-            new Date(elem.endDate) >= new Date(date)
-          ) {
-            arrayPriceFind.push(elem);
-          }
-        }
-        res.json({ priceHeader: arrayPriceFind, totalPages: null });
-      } else {
-        priceHeader = await PriceHeader.find().sort({ _id: -1 });
-        const { arrPagination, totalPages } = await utilsService.pagination(
-          parseInt(page),
-          parseInt(size),
-          priceHeader
-        );
+        priceHeader = await PriceHeader.find({ code: code });
 
-        res.json({ priceHeader: arrPagination, totalPages });
+        return res.json({ priceHeader: priceHeader, totalPages: null });
+      } else {
+        if (page && size) {
+          priceHeader = await PriceHeader.find().sort({ _id: -1 });
+          const arrayResult = [];
+          if (startDate != "" && endDate != "") {
+            for (const elem of priceHeader) {
+              if (
+                new Date(elem.startDate) >= new Date(startDate) &&
+                new Date(elem.startDate) <= new Date(endDate)
+              ) {
+                arrayResult.push(elem);
+              }
+            }
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayResult
+            );
+            return res.json({ priceHeader: arrPagination, totalPages });
+          }
+
+          if (status != "") {
+            for (const elem of priceHeader) {
+              if (elem.status.toString() == status) {
+                arrayResult.push(elem);
+              }
+            }
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayResult
+            );
+            return res.json({ priceHeader: arrPagination, totalPages });
+          }
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            priceHeader
+          );
+
+          return res.json({ priceHeader: arrPagination, totalPages });
+        }
       }
     } catch (error) {
       next(error);

@@ -341,7 +341,7 @@ class PlaceController {
   }
 
   async statisticCartypeByDate(req, res, next) {
-    const { startDate, endDate, code } = req.query;
+    const { startDate, endDate, code = "" } = req.query;
     try {
       const listRefundsByCarType =
         await statictisService.countTicketRefundTypeChairByDate(
@@ -362,10 +362,21 @@ class PlaceController {
             quantityTicketRefund: elem.countTicketRefund,
             quantityTicket: qntTicket[0].countTicket,
             carType: carType.type,
+            code: carType.code,
           });
         }
       }
-      res.json(listResult);
+      if (code != "") {
+        const listFilter = [];
+        for (const elem of listResult) {
+          if (elem.code === code) {
+            listFilter.push(elem);
+            break;
+          }
+        }
+        return res.json({ data: listFilter, message: "success" });
+      }
+      res.json({ data: listResult, message: "success" });
     } catch (error) {
       next(error);
     }

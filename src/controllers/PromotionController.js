@@ -204,21 +204,62 @@ class PromotionController {
   // get all promotion header
   async getPromotionHeader(req, res, next) {
     try {
-      const { page, size, code } = req.query;
+      const {
+        page,
+        size,
+        code,
+        startDate = "",
+        endDate = "",
+        status = "",
+      } = req.query;
 
       var promotionResult;
 
       if (code) {
         promotionResult = await PromotionHeader.find({ code: code });
-        res.json({ promotionsHeader: promotionResult });
+        return res.json({ promotionsHeader: promotionResult });
       } else {
-        promotionResult = await PromotionHeader.find().sort({ _id: -1 });
-        const { arrPagination, totalPages } = await utilsService.pagination(
-          parseInt(page),
-          parseInt(size),
-          promotionResult
-        );
-        res.json({ promotionsHeader: arrPagination, totalPages });
+        if (page && size) {
+          promotionResult = await PromotionHeader.find().sort({ _id: -1 });
+          const arrayResult = [];
+          if (startDate != "" && endDate != "") {
+            for (const elem of promotionResult) {
+              if (
+                new Date(elem.startDate) >= new Date(startDate) &&
+                new Date(elem.startDate) <= new Date(endDate)
+              ) {
+                arrayResult.push(elem);
+              }
+            }
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayResult
+            );
+            return res.json({ arrayResult: arrPagination, totalPages });
+          }
+
+          if (status != "") {
+            for (const elem of promotionResult) {
+              if (elem.status.toString() == status) {
+                arrayResult.push(elem);
+              }
+            }
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayResult
+            );
+            return res.json({ arrayResult: arrPagination, totalPages });
+          }
+
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            promotionResult
+          );
+          return res.json({ promotionsHeader: arrPagination, totalPages });
+        }
       }
     } catch (error) {
       next(error);
