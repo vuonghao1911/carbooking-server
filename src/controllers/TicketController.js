@@ -899,7 +899,7 @@ class TicketController {
       next(error);
     }
   }
-  // statistic revenue month
+  // statistic revenue month (dastboard)
   async revenueStatisticsMonth(req, res, next) {
     const arrayTicketTotal = [];
     const arrayFinal = [];
@@ -1072,7 +1072,7 @@ class TicketController {
       next(error);
     }
   }
-
+  // statistic current date (dastboard)
   async statictisCurrentDate(req, res, next) {
     try {
       var totalAmount = 0;

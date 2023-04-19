@@ -26,11 +26,11 @@ router.get(
   "/statistic/ticket-empl",
   ticketController.statisticTicketByAllEmployee
 );
-// statistic revenue month
+// statistic revenue month (dashboard)
 router.get("/statistic/revenue", ticketController.revenueStatisticsMonth);
 // statistic ticet refunds
 router.get("/statistic/ticket-refund", ticketController.statisticTicketRefunds);
-
+// statictis current date (dashboard)
 router.get("/statistic/current", ticketController.statictisCurrentDate);
 
 module.exports = router;
