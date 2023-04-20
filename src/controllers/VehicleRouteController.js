@@ -101,7 +101,7 @@ class VehicleRouteController {
             new Date(elem.startDate).toLocaleDateString() ==
             new Date().toLocaleDateString()
           ) {
-            if (routeTime + 2 > currenTime) {
+            if (routeTime - 1 > currenTime) {
               arrayResult.push(elem);
             }
           } else {
