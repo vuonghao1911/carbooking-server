@@ -236,7 +236,7 @@ class PromotionController {
               parseInt(size),
               arrayResult
             );
-            return res.json({ arrayResult: arrPagination, totalPages });
+            return res.json({ promotionsHeader: arrPagination, totalPages });
           }
 
           if (status != "") {
@@ -250,7 +250,7 @@ class PromotionController {
               parseInt(size),
               arrayResult
             );
-            return res.json({ arrayResult: arrPagination, totalPages });
+            return res.json({ promotionsHeader: arrPagination, totalPages });
           }
 
           const { arrPagination, totalPages } = await utilsService.pagination(
