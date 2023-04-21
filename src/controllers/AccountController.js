@@ -4,7 +4,6 @@ const CustomerService = require("../services/customerService");
 const Account = require("../modal/Account");
 const Employee = require("../modal/Employee");
 const Customer = require("../modal/Customer");
-const { truncate } = require("fs/promises");
 const ObjectId = require("mongoose").Types.ObjectId;
 const twilio = require("twilio")(
   process.env.ACCOUNT_SID,
@@ -36,6 +35,23 @@ class AccountController {
       const passHash = await AccountService.hashPassword(passWord, salt);
       const customerFind = await Customer.findOne({ phoneNumber: phoneNumber });
       var employeeFind = await Employee.findOne({ phoneNumber: phoneNumber });
+      // find code customer
+      const codeFind = await Customer.find().sort({ _id: -1 }).limit(1);
+      var code;
+      if (codeFind[0]) {
+        code = codeFind[0].code;
+      } else {
+        code = 0;
+      }
+      // find code employee
+      const codeFindEmpl = await Employee.find().sort({ _id: -1 }).limit(1);
+      var codeEml;
+      if (codeFind[0]) {
+        codeEml = codeFindEmpl[0].code;
+      } else {
+        codeEml = 0;
+      }
+
       if (checkRegister != null) {
         return res.json({ checkRegister: false });
       } else {
@@ -63,6 +79,7 @@ class AccountController {
               email: email,
               dateOfBirth: dob,
               gender: gender,
+              code: codeEml + 1,
             });
             employeeFind = await EmployeeService.saveEmployee(employee);
 
@@ -90,6 +107,8 @@ class AccountController {
             lastName: lastName,
             phoneNumber: phoneNumber,
             address: address,
+            customerTypeId: ObjectId("640e9859186ba7d1aee14307"),
+            code: code + 1,
           });
           const user = await CustomerService.addCustomer(customer);
           const account = new Account({
@@ -97,7 +116,6 @@ class AccountController {
             passWord: passHash,
             role: role,
             idUser: user._id,
-            customerTypeId: ObjectId("640e9859186ba7d1aee14307"),
           });
           const saveAccount = await AccountService.saveAccount(account);
           newAccount = { user: user, checkRegister: true };
