@@ -110,6 +110,7 @@ class CustomerController {
             email: "$email",
             dob: "$dateOfBirth",
             customerType: "$customertypes.type",
+            code: "$code",
             quantityTicket: { $size: "$tickets" },
           },
         },

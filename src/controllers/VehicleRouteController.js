@@ -108,8 +108,21 @@ class VehicleRouteController {
             arrayResult.push(elem);
           }
         }
+        arrayResult.sort((a, b) => {
+          return (
+            Number(a.startTime.substring(0, 2)) -
+            Number(b.startTime.substring(0, 2))
+          );
+        });
+
         return res.json(arrayResult);
       } else {
+        vehicleRouteSearch.sort((a, b) => {
+          return (
+            Number(b.startTime.substring(0, 2)) -
+            Number(a.startTime.substring(0, 2))
+          );
+        });
         return res.json(vehicleRouteSearch);
       }
     } catch (error) {

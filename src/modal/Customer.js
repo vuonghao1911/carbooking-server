@@ -28,15 +28,20 @@ const customerSchema = new Schema({
     type: {
       ward: {
         type: String,
+        default: null,
       },
       district: {
         type: String,
+        default: null,
       },
       province: {
         type: String,
+        default: null,
       },
     },
+    default: null,
   },
+
   code: {
     type: Number,
   },
