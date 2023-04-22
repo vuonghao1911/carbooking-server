@@ -135,7 +135,7 @@ class PriceController {
     }
   }
   async getPriceHeader(req, res, next) {
-    const { code, startDate = "", endDate = "", status = "" } = req.query;
+    const { code, startDate = "", endDate = "", status = "", date } = req.query;
     const { page, size } = req.query;
     var priceHeader;
     try {
@@ -177,6 +177,27 @@ class PriceController {
               arrayResult
             );
             return res.json({ priceHeader: arrPagination, totalPages });
+          }
+
+          if (date) {
+            for (const elem of priceHeader) {
+              if (
+                new Date(elem.startDate) <= new Date(date) &&
+                new Date(elem.endDate) >= new Date(date)
+              ) {
+                arrayResult.push(elem);
+              }
+            }
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayResult
+            );
+
+            return res.json({
+              priceHeader: arrPagination,
+              totalPages: totalPages,
+            });
           }
           const { arrPagination, totalPages } = await utilsService.pagination(
             parseInt(page),
