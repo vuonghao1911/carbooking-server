@@ -212,7 +212,7 @@ class PlaceController {
 
   // statictis route by date
   async statictisRouteByDate(req, res, next) {
-    const { startDate, endDate, code = "" } = req.query;
+    const { startDate, endDate, code = "", page, size } = req.query;
     try {
       const qntRoute = await statictisService.countStatictisVehicleRoute(
         startDate,
@@ -322,7 +322,7 @@ class PlaceController {
         }
       }
       arrayStatistic.sort((a, b) => {
-        return a.count - b.count;
+        return b.count - a.count;
       });
 
       if (code != "") {
@@ -331,15 +331,30 @@ class PlaceController {
           if (elem.route.code === code) arrayFilter.push(elem);
           break;
         }
-        return res.json({ data: arrayFilter, message: "success" });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          arrayFilter
+        );
+        return res.json({
+          data: arrPagination,
+          message: "success",
+          totalPages,
+        });
       }
+      const { arrPagination, totalPages } = await utilsService.pagination(
+        parseInt(page),
+        parseInt(size),
+        arrayStatistic
+      );
 
-      res.json({ data: arrayStatistic, message: "success" });
+      res.json({ data: arrPagination, message: "success", totalPages });
     } catch (error) {
       next(error);
     }
   }
 
+  // statictis cartype by date
   async statisticCartypeByDate(req, res, next) {
     const { startDate, endDate, code = "" } = req.query;
     try {
@@ -374,9 +389,23 @@ class PlaceController {
             break;
           }
         }
-        return res.json({ data: listFilter, message: "success" });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          listFilter
+        );
+        return res.json({
+          data: arrPagination,
+          message: "success",
+          totalPages,
+        });
       }
-      res.json({ data: listResult, message: "success" });
+      const { arrPagination, totalPages } = await utilsService.pagination(
+        parseInt(page),
+        parseInt(size),
+        listResult
+      );
+      res.json({ data: arrPagination, message: "success", totalPages });
     } catch (error) {
       next(error);
     }
