@@ -807,6 +807,17 @@ class TicketController {
     try {
       const listTicket = await ticketService.statisticTicketByEmployee();
 
+      for (const empl of listTicket) {
+        for (const e of empl.ticket) {
+          if (e.employee.length > 0) {
+            e.employee = e.employee[0];
+          } else {
+            e.employee = {
+              _id: null,
+            };
+          }
+        }
+      }
       for (const ticket of listTicket) {
         const result = ticket.ticket.reduce((array, item) => {
           array[item.employee._id] = array[item.employee._id] || [];
@@ -1024,11 +1035,16 @@ class TicketController {
       const listRefund = await statisticServie.getInfoStatisticTicketRefund();
       if (listRefund && listRefund.length > 0) {
         for (const elem of listRefund) {
+          var totalDiscount = 0;
           const route = await Route.findOne({
             "departure._id": elem.vehicleRoute.departure,
 
             "destination._id": elem.vehicleRoute.destination,
           });
+          totalDiscount = await utilsService.totalDiscount(
+            elem.promotionResult
+          );
+
           if (route) {
             arrayFinal.push({
               _id: elem._id,
@@ -1038,6 +1054,9 @@ class TicketController {
                 name: `${route.departure.name} - ${route.destination.name}`,
                 code: route.code,
               },
+              totalDiscount,
+              totalBeforDiscount:
+                totalDiscount + elem.ticketRefund.returnAmount,
             });
           }
         }

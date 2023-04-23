@@ -218,6 +218,7 @@ class PlaceController {
         startDate,
         endDate
       );
+      console.log(new Date(new Date(endDate).getTime() + 24 * 60 * 60 * 1000));
       const qntTicketRoute =
         await statictisService.countStatictisTicketVehicleRoute(
           startDate,
@@ -250,6 +251,8 @@ class PlaceController {
             { "departure.busStation": 0, "destination.busStation": 0 }
           );
           var totalAmount = 0;
+          var totalDiscount = 0;
+          var total = 0;
           if (elem.ticket && elem.ticket.length > 0) {
             for (const ticket of elem.ticket) {
               totalAmount += await utilsService.totalAmountTicket(
@@ -257,12 +260,19 @@ class PlaceController {
                 ticket.price,
                 ticket.promotionResult
               );
+
+              totalDiscount += await utilsService.totalDiscount(
+                ticket.promotionResult
+              );
+              total += ticket.price * ticket.chair?.length;
             }
           }
           array.push({
             statictisTicket: {
               totalAmount,
               countTicket: elem.countTicket,
+              totalDiscount,
+              totalBeforDiscout: total,
             },
             route: route,
             routeName: `${route.departure.name} - ${route.destination.name}`,
@@ -285,6 +295,8 @@ class PlaceController {
               statictisTicket: {
                 totalAmount: 0,
                 countTicket: 0,
+                totalDiscount: 0,
+                totalBeforDiscout: 0,
               },
             });
           } else {

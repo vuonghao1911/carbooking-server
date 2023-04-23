@@ -247,7 +247,11 @@ const PromotionService = {
     );
   },
   // get total discount amount by id promotion line
-  getTotalDiscountAmountByIdPromotionLine: async (idLine) => {
+  getTotalDiscountAmountByIdPromotionLine: async (
+    idLine,
+    startDate,
+    endDate
+  ) => {
     return await PromotionResult.aggregate([
       {
         $match: {
@@ -264,6 +268,24 @@ const PromotionService = {
       },
       {
         $unwind: "$tickets",
+      },
+      {
+        $match: {
+          $and: [
+            {
+              "tickets.createdAt": {
+                $gte: new Date(startDate),
+              },
+            },
+            {
+              "tickets.createdAt": {
+                $lte: new Date(
+                  new Date(endDate).getTime() + 24 * 60 * 60 * 1000
+                ),
+              },
+            },
+          ],
+        },
       },
       {
         $match: {

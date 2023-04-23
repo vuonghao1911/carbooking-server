@@ -1158,9 +1158,6 @@ const TicketService = {
         },
       },
       {
-        $unwind: "$employees",
-      },
-      {
         $lookup: {
           from: "promotionresults",
           localField: "_id",

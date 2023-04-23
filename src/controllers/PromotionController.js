@@ -385,14 +385,30 @@ class PromotionController {
   async statisticPromotion(req, res, next) {
     const { page, size, code = "", startDate = "", endDate = "" } = req.query;
     try {
+      const arrayPromotions = [];
       const promotionLine = await PromotionLine.find();
+      for (const elem of promotionLine) {
+        if (
+          (new Date(elem.startDate) <= new Date(startDate) &&
+            new Date(elem.endDate) >= new Date(startDate)) ||
+          (new Date(elem.startDate) <= new Date(endDate) &&
+            new Date(elem.endDate) >= new Date(endDate)) ||
+          (new Date(startDate) <= new Date(elem.startDate) &&
+            new Date(endDate) >= new Date(elem.startDate))
+        ) {
+          arrayPromotions.push(elem);
+        }
+      }
+      // return res.json(promotionLine);
 
       const arrayResult = [];
-      if (promotionLine?.length > 0) {
-        for (const line of promotionLine) {
+      if (arrayPromotions?.length > 0) {
+        for (const line of arrayPromotions) {
           const statistic =
             await promotionService.getTotalDiscountAmountByIdPromotionLine(
-              line._id
+              line._id,
+              startDate,
+              endDate
             );
           const routeType = await RouteType.findById(line.routeTypeId);
           const promoDetails = await Promotion.findOne({
@@ -407,6 +423,9 @@ class PromotionController {
               budget: promoDetails.budget,
               remainingBudget:
                 promoDetails.budget - statistic[0].totalDiscountAmount,
+              discount: promoDetails.percentDiscount
+                ? promoDetails.percentDiscount
+                : promoDetails.moneyReduced,
             });
           } else {
             arrayResult.push({
@@ -418,25 +437,19 @@ class PromotionController {
               },
               budget: promoDetails?.budget,
               remainingBudget: promoDetails?.budget - 0,
+              discount: promoDetails.percentDiscount
+                ? promoDetails.percentDiscount
+                : promoDetails.moneyReduced,
             });
           }
         }
         if (page && size) {
           const array = [];
           if (startDate != "" && endDate != "") {
-            for (const elem of arrayResult) {
-              if (
-                new Date(elem.Line.startDate) >= new Date(startDate) &&
-                new Date(elem.Line.endDate) <= new Date(endDate)
-              ) {
-                array.push(elem);
-              }
-            }
-
             const { arrPagination, totalPages } = await utilsService.pagination(
               parseInt(page),
               parseInt(size),
-              array
+              arrayResult
             );
             return res.json({ data: arrPagination, totalPages });
           }

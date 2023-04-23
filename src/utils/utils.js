@@ -31,6 +31,16 @@ const commonUtils = {
     }
     return totalAmount - totalAmountDiscount;
   },
+  totalDiscount: async (promotion) => {
+    var totalAmountDiscount = 0;
+
+    if (promotion.length > 0 && promotion) {
+      for (const elm of promotion) {
+        totalAmountDiscount += elm.discountAmount;
+      }
+    }
+    return totalAmountDiscount;
+  },
 };
 
 module.exports = commonUtils;

@@ -273,6 +273,14 @@ const StatisticService = {
         $unwind: "$vehicleroutes",
       },
       {
+        $lookup: {
+          from: "promotionresults",
+          localField: "tickets._id",
+          foreignField: "ticketId",
+          as: "promotionresults",
+        },
+      },
+      {
         $project: {
           ticketRefund: {
             updatedAt: "$updatedAt",
@@ -286,6 +294,7 @@ const StatisticService = {
             },
             codeRefund: "$code",
           },
+          promotionResult: "$promotionresults",
           ticket: {
             dateTiket: {
               $dateToString: {
@@ -310,17 +319,51 @@ const StatisticService = {
   countStatictisVehicleRoute: async (startDate, endDate) => {
     const list = await VehicleRoute.aggregate([
       {
+        $lookup: {
+          from: "tickets",
+          localField: "_id",
+          foreignField: "vehicleRouteId",
+          as: "tickets",
+        },
+      },
+      {
+        $unwind: "$tickets",
+      },
+      {
         $match: {
           $and: [
             {
-              startDate: { $gte: new Date(startDate) },
+              "tickets.createdAt": {
+                $gte: new Date(startDate),
+              },
             },
             {
-              startDate: { $lte: new Date(endDate) },
+              "tickets.createdAt": {
+                $lte: new Date(
+                  new Date(endDate).getTime() + 24 * 60 * 60 * 1000
+                ),
+              },
             },
           ],
         },
       },
+
+      {
+        $project: {
+          _id: "$_id",
+
+          departure: "$departure",
+          destination: "$destination",
+          dateString: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$tickets.createdAt",
+              timezone: "+07:00",
+            },
+          },
+        },
+      },
+
       {
         $group: {
           _id: { departure: "$departure", destination: "$destination" },
@@ -334,18 +377,6 @@ const StatisticService = {
   // statictis ticket of vehicleRoute by startDate and endDate
   countStatictisTicketVehicleRoute: async (startDate, endDate) => {
     const list = await VehicleRoute.aggregate([
-      {
-        $match: {
-          $and: [
-            {
-              startDate: { $gte: new Date(startDate) },
-            },
-            {
-              startDate: { $lte: new Date(endDate) },
-            },
-          ],
-        },
-      },
       {
         $lookup: {
           from: "tickets",
@@ -374,6 +405,24 @@ const StatisticService = {
           localField: "tickets._id",
           foreignField: "ticketId",
           as: "promotionresults",
+        },
+      },
+      {
+        $match: {
+          $and: [
+            {
+              "tickets.createdAt": {
+                $gte: new Date(startDate),
+              },
+            },
+            {
+              "tickets.createdAt": {
+                $lte: new Date(
+                  new Date(endDate).getTime() + 24 * 60 * 60 * 1000
+                ),
+              },
+            },
+          ],
         },
       },
       {
@@ -447,10 +496,16 @@ const StatisticService = {
         $match: {
           $and: [
             {
-              "vehicleroutes.startDate": { $gte: new Date(startDate) },
+              "tickets.createdAt": {
+                $gte: new Date(startDate),
+              },
             },
             {
-              "vehicleroutes.startDate": { $lte: new Date(endDate) },
+              "tickets.createdAt": {
+                $lte: new Date(
+                  new Date(endDate).getTime() + 24 * 60 * 60 * 1000
+                ),
+              },
             },
           ],
         },
