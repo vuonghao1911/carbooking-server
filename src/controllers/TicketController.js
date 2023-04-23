@@ -93,6 +93,7 @@ class TicketController {
           firstName: customer.firstNameCustomer,
           lastName: customer.lastNameCustomer,
           phoneNumber: phoneNumber,
+          customerTypeId: ObjectId("640e9859186ba7d1aee14307"),
         });
         const newCustomer = await customerAdd.save();
 

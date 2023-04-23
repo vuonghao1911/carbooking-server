@@ -22,13 +22,11 @@ class CarController {
       array.push({ seats: seats, status: false });
     }
 
-    console.log(array);
-
     try {
       const carType = new CarType({ type: type, chair: array });
 
       const saveCar = await carService.addCarType(carType);
-      console.log(saveCar);
+
       return res.json(saveCar);
     } catch (error) {
       console.log(error);
@@ -37,7 +35,6 @@ class CarController {
   }
   async getCarById(req, res, next) {
     const { id } = req.params;
-    console.log(id);
 
     try {
       const customer = await carService.getCarById(id);
@@ -113,7 +110,7 @@ class CarController {
     const { idTypeCar, licensePlates, description, purchaseDate } = req.body;
 
     const { chair } = await CarType.findById(idTypeCar);
-    console.log(chair);
+
     const car = new Car({
       licensePlates: licensePlates,
       typeCarId: idTypeCar,

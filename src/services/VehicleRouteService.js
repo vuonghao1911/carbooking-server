@@ -23,7 +23,7 @@ const VehicleRouteService = {
   ) => {
     var code;
     let startDateNew = new Date(startDate);
-    console.log("fsf", startDateNew);
+
     let endDateNew = new Date(endDate);
 
     var arrayResults = [];
@@ -98,7 +98,7 @@ const VehicleRouteService = {
     });
     function removeObjectWithId(arr, id) {
       const objWithIdIndex = arr.findIndex((obj) => obj._id == id);
-      console.log(objWithIdIndex);
+
       if (objWithIdIndex > -1) {
         arr.splice(objWithIdIndex, 1);
       }

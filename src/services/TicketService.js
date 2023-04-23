@@ -25,14 +25,19 @@ const TicketService = {
   ) => {
     var ticketSave;
     console.log(phoneNumber);
-    await Customer.updateOne(
-      { _id: customerId },
-      {
-        $set: {
-          customerTypeId: ObjectId("640e987e186ba7d1aee14309"),
-        },
-      }
-    );
+
+    const countTicket = await Ticket.count({ customerId: customerId });
+    if (countTicket >= 1) {
+      await Customer.updateOne(
+        { _id: customerId },
+        {
+          $set: {
+            customerTypeId: ObjectId("640e987e186ba7d1aee14309"),
+          },
+        }
+      );
+    }
+
     if (promotion?.length > 0) {
       const ticket = new Ticket({
         vehicleRouteId: vehicleRouteId,
