@@ -319,30 +319,13 @@ const StatisticService = {
   countStatictisVehicleRoute: async (startDate, endDate) => {
     const list = await VehicleRoute.aggregate([
       {
-        $lookup: {
-          from: "tickets",
-          localField: "_id",
-          foreignField: "vehicleRouteId",
-          as: "tickets",
-        },
-      },
-      {
-        $unwind: "$tickets",
-      },
-      {
         $match: {
           $and: [
             {
-              "tickets.createdAt": {
-                $gte: new Date(startDate),
-              },
+              startDate: { $gte: new Date(startDate) },
             },
             {
-              "tickets.createdAt": {
-                $lte: new Date(
-                  new Date(endDate).getTime() + 24 * 60 * 60 * 1000
-                ),
-              },
+              startDate: { $lte: new Date(endDate) },
             },
           ],
         },
@@ -354,13 +337,6 @@ const StatisticService = {
 
           departure: "$departure",
           destination: "$destination",
-          dateString: {
-            $dateToString: {
-              format: "%Y-%m-%d",
-              date: "$tickets.createdAt",
-              timezone: "+07:00",
-            },
-          },
         },
       },
 
