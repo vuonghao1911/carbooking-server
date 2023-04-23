@@ -183,7 +183,8 @@ class PriceController {
             for (const elem of priceHeader) {
               if (
                 new Date(elem.startDate) <= new Date(date) &&
-                new Date(elem.endDate) >= new Date(date)
+                new Date(elem.endDate) >= new Date(date) &&
+                elem.status == true
               ) {
                 arrayResult.push(elem);
               }

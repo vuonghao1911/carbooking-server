@@ -758,11 +758,6 @@ const StatisticService = {
         },
       },
       {
-        $match: {
-          status: true,
-        },
-      },
-      {
         $group: {
           _id: "$customerId",
           count: { $count: {} },

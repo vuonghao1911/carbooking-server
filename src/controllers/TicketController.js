@@ -1098,12 +1098,13 @@ class TicketController {
       const listCustomer = await statisticServie.countCustomerCurrenDate(
         moment(new Date()).utcOffset(420).format("yyyy/MM/DD")
       );
+
       const statictis = {
         quantityTicket: listTicketCurrent[0]?.countTicket
-          ? listTicketCurrent[0].ticket
+          ? listTicketCurrent[0].countTicket
           : 0,
         totalAmount: totalAmount,
-        quantityRefunds: listRefunds[0]?.count,
+        quantityRefunds: listRefunds[0]?.count ? listRefunds[0]?.count : 0,
         quantityCustomer: listCustomer.length,
       };
       res.json({ data: statictis, message: "success" });
