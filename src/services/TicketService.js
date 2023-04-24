@@ -959,6 +959,13 @@ const TicketService = {
           chairRefund: "$chair",
           chairTicket: "$tickets.chair",
           createdAt: "$createdAt",
+          date: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "+07:00",
+            },
+          },
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
           price: "$prices.price",

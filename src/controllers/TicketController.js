@@ -151,7 +151,7 @@ class TicketController {
   // get all ticket with query parameters
   async getTicket(req, res, next) {
     const { page = "", size = "", name = "", phone = "" } = req.query;
-    const { depId = "", desId = "", date = "" } = req.query;
+    const { depId = "", desId = "", date = "", dateCreate = "" } = req.query;
     try {
       var tickets = [];
       if (name != "" && phone == "") {
@@ -295,6 +295,13 @@ class TicketController {
               locaDeparture: "$locationBus",
               chair: "$chair",
               createdAt: "$createdAt",
+              date: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: "$createdAt",
+                  timezone: "+07:00",
+                },
+              },
               updatedAt: "$updatedAt",
               promotionresults: "$promotionresults",
               price: "$prices.price",
@@ -333,6 +340,24 @@ class TicketController {
             intendTime: intendTime,
           });
         }
+      }
+      if (dateCreate != "") {
+        const tickets = [];
+        listTicketResult.forEach((element) => {
+          if (
+            new Date(element.date).toLocaleDateString() ===
+            new Date(dateCreate).toLocaleDateString()
+          ) {
+            tickets.push(element);
+          }
+        });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          tickets
+        );
+
+        return res.json({ listTicketResult: arrPagination, totalPages });
       }
 
       if (desId !== "" && depId !== "") {
@@ -561,7 +586,7 @@ class TicketController {
   // get all ticket refund  with query parameters
   async getAllTicketRefund(req, res, next) {
     const { page = "", size = "", name = "", phone = "" } = req.query;
-    const { depId = "", desId = "", date = "" } = req.query;
+    const { depId = "", desId = "", date = "", dateCreate = "" } = req.query;
     try {
       var tickets = [];
       if (name != "" && phone == "") {
@@ -581,6 +606,26 @@ class TicketController {
         tickets = await TicketService.getAllTicketRefund();
       }
       const listTicket = await TicketService.getAllTicketRefund();
+
+      if (dateCreate != "") {
+        tickets = [];
+        listTicket.forEach((element) => {
+          if (
+            new Date(element.date).toLocaleDateString() ===
+            new Date(dateCreate).toLocaleDateString()
+          ) {
+            tickets.push(element);
+          }
+        });
+        const { arrPagination, totalPages } = await utilsService.pagination(
+          parseInt(page),
+          parseInt(size),
+          tickets
+        );
+
+        return res.json({ listTicketResult: arrPagination, totalPages });
+      }
+
       if (desId !== "" && depId !== "") {
         tickets = [];
         if (date !== "") {
