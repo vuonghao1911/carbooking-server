@@ -322,12 +322,19 @@ class PlaceController {
               ...elem,
               quantityTicketRefunds: ticketRefund[0].countTicket,
               totalAmountRefund: ticketRefund[0].totalAmountRefund,
+              quantityTicket:
+                elem.statictisTicket.countTicket - ticketRefund[0].countTicket,
+              totalAmountTicket:
+                elem.statictisTicket.totalAmount -
+                ticketRefund[0].totalAmountRefund,
             });
           } else {
             arrayStatistic.push({
               ...elem,
               quantityTicketRefunds: 0,
               totalAmountRefund: 0,
+              quantityTicket: elem.statictisTicket.countTicket,
+              totalAmountTicket: elem.statictisTicket.totalAmount,
             });
           }
           // console.log(ticketRefund);

@@ -401,11 +401,11 @@ const StatisticService = {
           ],
         },
       },
-      {
-        $match: {
-          "tickets.status": true,
-        },
-      },
+      // {
+      //   $match: {
+      //     "tickets.status": true,
+      //   },
+      // },
       {
         $project: {
           _id: "$_id",
