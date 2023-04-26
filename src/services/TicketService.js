@@ -495,6 +495,13 @@ const TicketService = {
           locaDeparture: "$locationBus",
           chair: "$chair",
           createdAt: "$createdAt",
+          date: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "+07:00",
+            },
+          },
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
           price: "$prices.price",
@@ -937,6 +944,7 @@ const TicketService = {
       {
         $project: {
           _id: "$_id",
+          idCustomer:"$customer._id",
           firstName: "$customer.firstName",
           lastName: "$customer.lastName",
           phoneNumber: "$customer.phoneNumber",

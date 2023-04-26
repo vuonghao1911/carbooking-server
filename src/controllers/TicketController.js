@@ -276,6 +276,7 @@ class TicketController {
             $project: {
               _id: "$_id",
               firstName: "$customer.firstName",
+              idCustomer:"$customer._id",
               lastName: "$customer.lastName",
               phoneNumber: "$customer.phoneNumber",
               address: "$customer.address",
@@ -589,6 +590,7 @@ class TicketController {
     const { depId = "", desId = "", date = "", dateCreate = "" } = req.query;
     try {
       var tickets = [];
+      const listTicket = await TicketService.getAllTicketRefund();
       if (name != "" && phone == "") {
         const customer = await Customer.find({ $text: { $search: name } });
         for (const elem of customer) {
@@ -601,11 +603,49 @@ class TicketController {
         }
       } else if (phone != "" && name == "") {
         const customer = await Customer.findOne({ phoneNumber: phone });
-        tickets = await ticketService.getTicketRefundByUserId(customer._id);
+        if(!customer){
+          return res.json({ listTicketResult: [], totalPages:null });
+        }else
+        if (dateCreate != "") {
+          tickets = [];
+          listTicket.forEach((element) => {
+            if (
+              new Date(element.date).toLocaleDateString() ===
+              new Date(dateCreate).toLocaleDateString()
+            ) {
+              tickets.push(element);
+            }
+          });
+          const listResult=[]
+          if(tickets && tickets.length>0){
+            for (const elem of tickets) {
+              if(elem.idCustomer.toString() == customer._id.toString()){
+                listResult.push(elem);
+              }
+            }
+          }
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            listResult
+          );
+  
+          return res.json({ listTicketResult: arrPagination, totalPages });
+        }else{
+          tickets = await ticketService.getTicketRefundByUserId(customer._id);
+          const { arrPagination, totalPages } = await utilsService.pagination(
+            parseInt(page),
+            parseInt(size),
+            tickets
+          );
+  
+          return res.json({ listTicketResult: arrPagination, totalPages });
+          
+        }
       } else {
         tickets = await TicketService.getAllTicketRefund();
       }
-      const listTicket = await TicketService.getAllTicketRefund();
+     
 
       if (dateCreate != "") {
         tickets = [];
@@ -789,33 +829,9 @@ class TicketController {
           parseInt(size),
           arrayFinal
         );
-
-        if (name != "") {
-          const employee = await Customer.find({ $text: { $search: name } });
-          const arrayList = [];
-          if (employee && employee.length > 0) {
-            for (const empl of employee) {
-              for (const elem of arrayFinal) {
-                if (elem.customer._id.toString() === empl._id.toString()) {
-                  arrayList.push(elem);
-                }
-              }
-            }
-            const { arrPagination, totalPages } = await utilsService.pagination(
-              parseInt(page),
-              parseInt(size),
-              arrayList
-            );
-            return res.json({
-              data: arrPagination,
-              messages: "success",
-              totalPages,
-            });
-          }
-        }
-
         if (startDate && endDate) {
           const arrayList = [];
+
           for (const elem of arrayFinal) {
             if (
               new Date(elem.date) >= new Date(startDate) &&
@@ -824,12 +840,64 @@ class TicketController {
               arrayList.push(elem);
             }
           }
-          const { arrPagination, totalPages } = await utilsService.pagination(
-            parseInt(page),
-            parseInt(size),
-            arrayList
-          );
-          res.json({ data: arrPagination, messages: "success", totalPages });
+          if (name != "") {
+            const employee1 = await Customer.findOne({
+              $text: { $search:name },
+            });
+              console.log(employee1)
+            const employee = await Customer.find({
+              $text: { $search:name },
+            });
+            var namefind = employee[0]
+            if(employee && employee.length>1){
+              for (const elm of employee) {
+                const nameCus = `${elm.firstName} ${elm.lastName}`
+               
+                if(nameCus == name){
+                  namefind = elm;
+                  break;
+                }
+              }
+            }
+            const arrayListCus = [];
+            if (employee) {
+              for (const elem of arrayList) {
+                if (elem.customer._id.toString() === namefind._id.toString()) {
+                  arrayListCus.push(elem);
+                }
+              }
+              const { arrPagination, totalPages } =
+                await utilsService.pagination(
+                  parseInt(page),
+                  parseInt(size),
+                  arrayListCus
+                );
+              return res.json({
+                data: arrPagination,
+                messages: "success",
+                totalPages,
+              });
+            } else {
+              const { arrPagination, totalPages } =
+                await utilsService.pagination(
+                  parseInt(page),
+                  parseInt(size),
+                  arrayListCus
+                );
+              return res.json({
+                data: arrPagination,
+                messages: "success",
+                totalPages,
+              });
+            }
+          } else {
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayList
+            );
+            res.json({ data: arrPagination, messages: "success", totalPages });
+          }
         } else {
           res.json({ data: arrPagination, messages: "success", totalPages });
         }
@@ -908,29 +976,7 @@ class TicketController {
           parseInt(size),
           arrayResult
         );
-        if (name != "") {
-          const employee = await Employee.find({ $text: { $search: name } });
-          const arrayList = [];
-          if (employee && employee.length > 0) {
-            for (const empl of employee) {
-              for (const elem of arrayResult) {
-                if (elem.employee._id.toString() === empl._id.toString()) {
-                  arrayList.push(elem);
-                }
-              }
-            }
-            const { arrPagination, totalPages } = await utilsService.pagination(
-              parseInt(page),
-              parseInt(size),
-              arrayList
-            );
-            return res.json({
-              data: arrPagination,
-              messages: "success",
-              totalPages,
-            });
-          }
-        }
+        
 
         if (startDate && endDate) {
           const arrayList = [];
@@ -942,12 +988,50 @@ class TicketController {
               arrayList.push(elem);
             }
           }
-          const { arrPagination, totalPages } = await utilsService.pagination(
-            parseInt(page),
-            parseInt(size),
-            arrayList
-          );
-          res.json({ data: arrPagination, messages: "success", totalPages });
+
+
+          if (name != "") {
+            const employee = await Employee.findOne({ $text: { $search: name } });
+            console.log(employee);
+            const arrayListEml = [];
+            if (employee) {
+              for (const elem of arrayList) {
+                if (elem.employee?._id?.toString() === employee._id.toString()) {
+                  arrayListEml.push(elem);
+                }
+              }
+  
+              const { arrPagination, totalPages } = await utilsService.pagination(
+                parseInt(page),
+                parseInt(size),
+                arrayListEml
+              );
+              return res.json({
+                data: arrPagination,
+                messages: "success",
+                totalPages,
+              });
+            }else{
+              const { arrPagination, totalPages } = await utilsService.pagination(
+                parseInt(page),
+                parseInt(size),
+                arrayListEml
+              );
+              return res.json({
+                data: arrPagination,
+                messages: "success",
+                totalPages,
+              });
+            }
+          } else{
+            const { arrPagination, totalPages } = await utilsService.pagination(
+              parseInt(page),
+              parseInt(size),
+              arrayList
+            );
+            res.json({ data: arrPagination, messages: "success", totalPages });
+          }
+          
         } else {
           res.json({ data: arrPagination, messages: "success", totalPages });
         }
