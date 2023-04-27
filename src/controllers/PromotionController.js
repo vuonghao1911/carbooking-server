@@ -451,23 +451,23 @@ class PromotionController {
               parseInt(size),
               arrayResult
             );
-            return res.json({ data: arrPagination, totalPages });
-          }
-
-          if (code != "") {
-            for (const elem of arrayResult) {
-              if (elem.Line.code === code) {
-                array.push(elem);
-                break;
+            if(code!=""){
+              for (const elem of arrayResult) {
+                if (elem.Line.code === code) {
+                  array.push(elem);
+                  break;
+                }
               }
+              const { arrPagination, totalPages } = await utilsService.pagination(
+                parseInt(page),
+                parseInt(size),
+                array
+              );
+              return res.json({ data: arrPagination, totalPages });
+            }else{
+              return res.json({ data: arrPagination, totalPages });
             }
-
-            const { arrPagination, totalPages } = await utilsService.pagination(
-              parseInt(page),
-              parseInt(size),
-              array
-            );
-            return res.json({ data: arrPagination, totalPages });
+           
           }
         }
 
