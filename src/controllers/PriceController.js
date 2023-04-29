@@ -47,6 +47,7 @@ class PriceController {
     } else {
       code = 0;
     }
+  
     let data = {
       routeId: routeId,
       price: price,
@@ -56,8 +57,15 @@ class PriceController {
     };
     try {
       const price = new Price(data);
+     const priceCheck = Price.findOne({priceHeaderId:priceHeaderId,routeId:routeId,carTypeId:carTypeId})
+     if(priceCheck){
+      return  res.json({ price:null, message: "Giá này đã tồn tại trong bảng giá hiện tại" });
+     }else{
       await price.save();
-      res.json({ price, message: "Success" });
+      return res.json({ price, message: "Success" });
+     }
+      
+      
     } catch (error) {
       next(error);
     }
