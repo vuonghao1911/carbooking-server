@@ -72,14 +72,20 @@ class PlaceController {
     }
   }
   async getPlace(req, res, next) {
-    const { page, size, code } = req.query;
+    const { page, size, code="" } = req.query;
     try {
       const place = await Place.find().sort({ _id: -1 });
 
-      const placeFind = await Place.find({ code: code });
-      if (placeFind.length > 0) {
-        return res.json({ data: placeFind, totalPages: null });
+    
+      if(code!=""){
+        const placeFind = await Place.find({ code: code });
+        if (placeFind.length > 0) {
+          return res.json({ data: placeFind, totalPages: null });
+        }else{
+          return res.json({ data: [], totalPages: null });
+        }
       }
+     
       if (page && size) {
         const { arrPagination, totalPages } = await utilsService.pagination(
           parseInt(page),
