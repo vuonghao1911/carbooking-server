@@ -525,14 +525,7 @@ const TicketService = {
   cancleTicket: async (idTicket, returnAmount, note) => {
     const ticket = await Ticket.findById(idTicket);
     const promotion = await PromotionResult.find({ ticketId: idTicket });
-    const codeFind = await TicketRefund.find().sort({ _id: -1 }).limit(1);
-    var code;
 
-    if (codeFind[0]) {
-      code = codeFind[0].code;
-    } else {
-      code = 0;
-    }
     if (promotion?.length > 0) {
       for (const elem of promotion) {
         const { remainingBudget, _id } = await Promotion.findOne({
@@ -568,7 +561,7 @@ const TicketService = {
     const ticketRefund = new TicketRefund({
       ticketId: idTicket,
       chair: ticket.chair,
-      code: code + 1,
+      code: new Date().getTime(),
       note: note,
       returnAmount: returnAmount,
     });
@@ -944,7 +937,7 @@ const TicketService = {
       {
         $project: {
           _id: "$_id",
-          idCustomer:"$customer._id",
+          idCustomer: "$customer._id",
           firstName: "$customer.firstName",
           lastName: "$customer.lastName",
           phoneNumber: "$customer.phoneNumber",

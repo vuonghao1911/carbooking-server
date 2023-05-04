@@ -59,7 +59,7 @@ class PriceController {
       const price = new Price(data);
      
       const priceCheck = await Price.findOne({priceHeaderId:priceHeaderId,routeId:routeId,carTypeId:carTypeId})
-     console.log(priceCheck)
+     
       if(priceCheck){
       return  res.json({ price:null, message: "Giá này đã tồn tại trong bảng giá hiện tại" });
      }else{
