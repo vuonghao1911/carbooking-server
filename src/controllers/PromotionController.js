@@ -119,6 +119,7 @@ class PromotionController {
   // get all  promotion by header id
   async getPromotion(req, res, next) {
     const { idProHeader } = req.params;
+    const { startDate = "", endDate = "" } = req.query;
     const result = [];
     try {
       // console.log(promotion[1].promotionLine.startDate);
@@ -136,7 +137,25 @@ class PromotionController {
         result.push({ ...elem, routeType: routeType });
       }
 
-      res.json(result);
+      if (startDate != "" && endDate != "") {
+        const arrayResult = [];
+        for (const elem of result) {
+          if (
+            (new Date(elem.promotionLine.startDate) <= new Date(startDate) &&
+              new Date(elem.promotionLine.endDate) >= new Date(startDate)) ||
+            (new Date(elem.promotionLine.startDate) <= new Date(endDate) &&
+              new Date(elem.promotionLine.endDate) >= new Date(endDate)) ||
+            (new Date(startDate) <= new Date(elem.promotionLine.startDate) &&
+              new Date(endDate) >= new Date(elem.promotionLine.startDate))
+          ) {
+            arrayResult.push(elem);
+          }
+        }
+
+        return res.json(arrayResult);
+      } else {
+        return res.json(result);
+      }
     } catch (error) {
       next(error);
     }
@@ -225,8 +244,12 @@ class PromotionController {
           if (startDate != "" && endDate != "") {
             for (const elem of promotionResult) {
               if (
-                new Date(elem.startDate) >= new Date(startDate) &&
-                new Date(elem.startDate) <= new Date(endDate)
+                (new Date(elem.startDate) <= new Date(startDate) &&
+                  new Date(elem.endDate) >= new Date(startDate)) ||
+                (new Date(elem.startDate) <= new Date(endDate) &&
+                  new Date(elem.endDate) >= new Date(endDate)) ||
+                (new Date(startDate) <= new Date(elem.startDate) &&
+                  new Date(endDate) >= new Date(elem.startDate))
               ) {
                 arrayResult.push(elem);
               }
@@ -451,23 +474,23 @@ class PromotionController {
               parseInt(size),
               arrayResult
             );
-            if(code!=""){
+            if (code != "") {
               for (const elem of arrayResult) {
                 if (elem.Line.code === code) {
                   array.push(elem);
                   break;
                 }
               }
-              const { arrPagination, totalPages } = await utilsService.pagination(
-                parseInt(page),
-                parseInt(size),
-                array
-              );
+              const { arrPagination, totalPages } =
+                await utilsService.pagination(
+                  parseInt(page),
+                  parseInt(size),
+                  array
+                );
               return res.json({ data: arrPagination, totalPages });
-            }else{
+            } else {
               return res.json({ data: arrPagination, totalPages });
             }
-           
           }
         }
 

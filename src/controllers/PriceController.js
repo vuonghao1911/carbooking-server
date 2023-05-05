@@ -47,7 +47,7 @@ class PriceController {
     } else {
       code = 0;
     }
-  
+
     let data = {
       routeId: routeId,
       price: price,
@@ -57,17 +57,22 @@ class PriceController {
     };
     try {
       const price = new Price(data);
-     
-      const priceCheck = await Price.findOne({priceHeaderId:priceHeaderId,routeId:routeId,carTypeId:carTypeId})
-     
-      if(priceCheck){
-      return  res.json({ price:null, message: "Giá này đã tồn tại trong bảng giá hiện tại" });
-     }else{
-      await price.save();
-      return res.json({ price, message: "Success" });
-     }
-      
-      
+
+      const priceCheck = await Price.findOne({
+        priceHeaderId: priceHeaderId,
+        routeId: routeId,
+        carTypeId: carTypeId,
+      });
+
+      if (priceCheck) {
+        return res.json({
+          price: null,
+          message: "Giá này đã tồn tại trong bảng giá hiện tại",
+        });
+      } else {
+        await price.save();
+        return res.json({ price, message: "Success" });
+      }
     } catch (error) {
       next(error);
     }
@@ -161,8 +166,12 @@ class PriceController {
           if (startDate != "" && endDate != "") {
             for (const elem of priceHeader) {
               if (
-                new Date(elem.startDate) >= new Date(startDate) &&
-                new Date(elem.startDate) <= new Date(endDate)
+                (new Date(elem.startDate) <= new Date(startDate) &&
+                  new Date(elem.endDate) >= new Date(startDate)) ||
+                (new Date(elem.startDate) <= new Date(endDate) &&
+                  new Date(elem.endDate) >= new Date(endDate)) ||
+                (new Date(startDate) <= new Date(elem.startDate) &&
+                  new Date(endDate) >= new Date(elem.startDate))
               ) {
                 arrayResult.push(elem);
               }
