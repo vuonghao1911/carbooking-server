@@ -276,7 +276,7 @@ class TicketController {
             $project: {
               _id: "$_id",
               firstName: "$customer.firstName",
-              idCustomer:"$customer._id",
+              idCustomer: "$customer._id",
               lastName: "$customer.lastName",
               phoneNumber: "$customer.phoneNumber",
               address: "$customer.address",
@@ -603,10 +603,9 @@ class TicketController {
         }
       } else if (phone != "" && name == "") {
         const customer = await Customer.findOne({ phoneNumber: phone });
-        if(!customer){
-          return res.json({ listTicketResult: [], totalPages:null });
-        }else
-        if (dateCreate != "") {
+        if (!customer) {
+          return res.json({ listTicketResult: [], totalPages: null });
+        } else if (dateCreate != "") {
           tickets = [];
           listTicket.forEach((element) => {
             if (
@@ -616,10 +615,10 @@ class TicketController {
               tickets.push(element);
             }
           });
-          const listResult=[]
-          if(tickets && tickets.length>0){
+          const listResult = [];
+          if (tickets && tickets.length > 0) {
             for (const elem of tickets) {
-              if(elem.idCustomer.toString() == customer._id.toString()){
+              if (elem.idCustomer.toString() == customer._id.toString()) {
                 listResult.push(elem);
               }
             }
@@ -629,23 +628,21 @@ class TicketController {
             parseInt(size),
             listResult
           );
-  
+
           return res.json({ listTicketResult: arrPagination, totalPages });
-        }else{
+        } else {
           tickets = await ticketService.getTicketRefundByUserId(customer._id);
           const { arrPagination, totalPages } = await utilsService.pagination(
             parseInt(page),
             parseInt(size),
             tickets
           );
-  
+
           return res.json({ listTicketResult: arrPagination, totalPages });
-          
         }
       } else {
         tickets = await TicketService.getAllTicketRefund();
       }
-     
 
       if (dateCreate != "") {
         tickets = [];
@@ -841,19 +838,15 @@ class TicketController {
             }
           }
           if (name != "") {
-            const employee1 = await Customer.findOne({
-              $text: { $search:name },
-            });
-              console.log(employee1)
             const employee = await Customer.find({
-              $text: { $search:name },
+              $text: { $search: name },
             });
-            var namefind = employee[0]
-            if(employee && employee.length>1){
+            var namefind = employee[0];
+            if (employee && employee.length > 1) {
               for (const elm of employee) {
-                const nameCus = `${elm.firstName} ${elm.lastName}`
-               
-                if(nameCus == name){
+                const nameCus = `${elm.firstName} ${elm.lastName}`;
+
+                if (nameCus.toLowerCase() == name.toLowerCase()) {
                   namefind = elm;
                   break;
                 }
@@ -976,7 +969,6 @@ class TicketController {
           parseInt(size),
           arrayResult
         );
-        
 
         if (startDate && endDate) {
           const arrayList = [];
@@ -989,41 +981,46 @@ class TicketController {
             }
           }
 
-
           if (name != "") {
-            const employee = await Employee.findOne({ $text: { $search: name } });
+            const employee = await Employee.findOne({
+              $text: { $search: name },
+            });
             console.log(employee);
             const arrayListEml = [];
             if (employee) {
               for (const elem of arrayList) {
-                if (elem.employee?._id?.toString() === employee._id.toString()) {
+                if (
+                  elem.employee?._id?.toString() === employee._id.toString()
+                ) {
                   arrayListEml.push(elem);
                 }
               }
-  
-              const { arrPagination, totalPages } = await utilsService.pagination(
-                parseInt(page),
-                parseInt(size),
-                arrayListEml
-              );
+
+              const { arrPagination, totalPages } =
+                await utilsService.pagination(
+                  parseInt(page),
+                  parseInt(size),
+                  arrayListEml
+                );
               return res.json({
                 data: arrPagination,
                 messages: "success",
                 totalPages,
               });
-            }else{
-              const { arrPagination, totalPages } = await utilsService.pagination(
-                parseInt(page),
-                parseInt(size),
-                arrayListEml
-              );
+            } else {
+              const { arrPagination, totalPages } =
+                await utilsService.pagination(
+                  parseInt(page),
+                  parseInt(size),
+                  arrayListEml
+                );
               return res.json({
                 data: arrPagination,
                 messages: "success",
                 totalPages,
               });
             }
-          } else{
+          } else {
             const { arrPagination, totalPages } = await utilsService.pagination(
               parseInt(page),
               parseInt(size),
@@ -1031,7 +1028,6 @@ class TicketController {
             );
             res.json({ data: arrPagination, messages: "success", totalPages });
           }
-          
         } else {
           res.json({ data: arrPagination, messages: "success", totalPages });
         }
@@ -1052,6 +1048,7 @@ class TicketController {
         new Date().getMonth() + 1,
         new Date().getFullYear()
       );
+
       const listTicketRefund = await statisticServie.getTotalRefundAmount(
         new Date().getMonth() + 1,
         new Date().getFullYear()
@@ -1080,16 +1077,16 @@ class TicketController {
             quantityTicket += elemTicket.chair.length;
           }
           arrayTicketTotal.push({
-            date: elem.ticket[0].date,
+            date: elem.ticket[0]?.date,
             totalAmount: total,
             totalAmountRefund: 0,
           });
         }
       }
       arrayFinal.push({
-        date: arrayTicketTotal[0].date,
-        totalAmountRefund: arrayTicketTotal[0].totalAmountRefund,
-        totalAmount: arrayTicketTotal[0].totalAmount,
+        date: arrayTicketTotal[0]?.date,
+        totalAmountRefund: arrayTicketTotal[0]?.totalAmountRefund,
+        totalAmount: arrayTicketTotal[0]?.totalAmount,
       });
 
       const result = arrayTicketTotal.reduce((array, item) => {
