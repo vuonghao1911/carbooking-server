@@ -325,6 +325,38 @@ class PriceController {
       next(error);
     }
   }
+  // delete priceHeader
+
+  async deletePriceHeader(req, res, next) {
+    var { idHeader } = req.body;
+
+    try {
+      const priceHeader = await PriceHeader.findById(idHeader);
+      if (priceHeader) {
+        await PriceHeader.deleteOne({ _id: idHeader });
+        return res.json({ message: "success" });
+      } else {
+        return res.json({ message: "failed " });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+  // delete price
+  async deletePrice(req, res, next) {
+    var { idPrice } = req.body;
+    try {
+      const price = await Price.findById(idPrice);
+      if (price) {
+        await Price.deleteOne({ _id: idPrice });
+        return res.json({ message: "success" });
+      } else {
+        return res.json({ message: "failed " });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new PriceController();

@@ -41,15 +41,36 @@ class AccountController {
       if (codeFind[0]) {
         code = codeFind[0].code;
       } else {
-        code = 0;
+        code = "KH00";
+      }
+      var code1 = "";
+      var codeString = code.substring(2);
+
+      var codeCus = Number(codeString) + Number(1);
+
+      if (Number(codeString) < 9) {
+        code1 = `KH0${codeCus}`;
+      } else {
+        code1 = `KH${codeCus}`;
       }
       // find code employee
       const codeFindEmpl = await Employee.find().sort({ _id: -1 }).limit(1);
       var codeEml;
-      if (codeFind[0]) {
+
+      if (codeFindEmpl[0]) {
         codeEml = codeFindEmpl[0].code;
       } else {
-        codeEml = 0;
+        codeEml = "NV00";
+      }
+      var code2 = "";
+      var codeStringEml = codeEml.substring(2);
+
+      var codeEmpl = Number(codeStringEml) + Number(1);
+
+      if (Number(codeStringEml) < 9) {
+        code2 = `NV0${codeEmpl}`;
+      } else {
+        code2 = `NV${codeEmpl}`;
       }
 
       if (checkRegister != null) {
@@ -79,7 +100,7 @@ class AccountController {
               email: email,
               dateOfBirth: dob,
               gender: gender,
-              code: codeEml + 1,
+              code: code2,
             });
             employeeFind = await EmployeeService.saveEmployee(employee);
 
@@ -108,7 +129,7 @@ class AccountController {
             phoneNumber: phoneNumber,
             address: address,
             customerTypeId: ObjectId("640e9859186ba7d1aee14307"),
-            code: code + 1,
+            code: code1,
           });
           const user = await CustomerService.addCustomer(customer);
           const account = new Account({

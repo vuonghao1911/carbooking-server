@@ -293,6 +293,7 @@ const StatisticService = {
               },
             },
             codeRefund: "$code",
+            countTicketRefund: { $size: "$chair" },
           },
           promotionResult: "$promotionresults",
           ticket: {
@@ -305,6 +306,7 @@ const StatisticService = {
             },
             codeTiket: "$tickets.code",
           },
+
           vehicleRoute: {
             departure: "$vehicleroutes.departure",
             destination: "$vehicleroutes.destination",

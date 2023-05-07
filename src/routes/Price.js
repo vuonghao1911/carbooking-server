@@ -13,4 +13,12 @@ router.get("/all/getPriceHeader", PriceController.getPriceHeader);
 // body idHeader
 router.patch("/updateHeader", PriceController.updatePriceHeader);
 
+// delete priceHeader
+// price header status is active and start date < current date --- not deleted
+router.delete("/delete/priceHeader", PriceController.deletePriceHeader);
+
+// delete price
+// price header status is active and start date < current date --- not deleted
+router.delete("delete/price", PriceController.deletePrice);
+
 module.exports = router;

@@ -60,7 +60,7 @@ const employeeSchema = new Schema({
     default: false,
   },
   code: {
-    type: Number,
+    type: String,
   },
 });
 

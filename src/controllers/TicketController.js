@@ -73,6 +73,24 @@ class TicketController {
 
     var code = new Date().getTime();
 
+    const codeFind = await Customer.find().sort({ _id: -1 }).limit(1);
+    var code2;
+    if (codeFind[0]) {
+      code2 = codeFind[0].code;
+    } else {
+      code2 = "KH00";
+    }
+    var code1 = "";
+    var codeString = code2.substring(2);
+
+    var codeEmpl = Number(codeString) + Number(1);
+
+    if (Number(codeString) < 9) {
+      code1 = `KH0${codeEmpl}`;
+    } else {
+      code1 = `KH${codeEmpl}`;
+    }
+
     try {
       const Arrayplace = await Promise.all(
         chair.map((e) => {
@@ -94,6 +112,7 @@ class TicketController {
           lastName: customer.lastNameCustomer,
           phoneNumber: phoneNumber,
           customerTypeId: ObjectId("640e9859186ba7d1aee14307"),
+          code: code1,
         });
         const newCustomer = await customerAdd.save();
 
@@ -809,8 +828,10 @@ class TicketController {
           customerType: ticket.customerType,
           totalDiscount: totalDiscount,
           totalAfterDiscount: totalAfterDiscount,
+
           total: total,
           date: ticket.date,
+          quantity: ticket.quantity,
           route: {
             departure: ticket.departure,
             destination: ticket.destination,

@@ -13,10 +13,20 @@ class CustomerController {
     if (codeFind[0]) {
       code = codeFind[0].code;
     } else {
-      code = 0;
+      code = "KH00";
+    }
+    var code1 = "";
+    var codeString = code.substring(2);
+
+    var codeEmpl = Number(codeString) + Number(1);
+
+    if (Number(codeString) < 9) {
+      code1 = `KH0${codeEmpl}`;
+    } else {
+      code1 = `KH${codeEmpl}`;
     }
 
-    //console.log(number);
+    console.log(code1);
     try {
       const customer = new Customer({
         firstName: firstName,
@@ -25,7 +35,7 @@ class CustomerController {
         address: address,
         email: email,
         dateOfBirth: dateOfBirth,
-        code: code + 1,
+        code: code1,
       });
 
       const savecustomer = await customerService.addCustomer(customer);
@@ -138,7 +148,15 @@ class CustomerController {
   }
   // update info customer
   async updateInfo(req, res, next) {
-    const { firstName, lastName, id, address, dateOfBirth, email } = req.body;
+    const {
+      firstName,
+      lastName,
+      id,
+      address,
+      dateOfBirth,
+      email,
+      status = true,
+    } = req.body;
     //console.log(number);
     try {
       await Customer.updateOne(
@@ -150,6 +168,7 @@ class CustomerController {
             address: address,
             email: email,
             dateOfBirth: dateOfBirth,
+            status: status,
           },
         }
       );

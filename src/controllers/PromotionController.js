@@ -505,6 +505,48 @@ class PromotionController {
       next(error);
     }
   }
+
+  async deletePromotionHeader(req, res, next) {
+    var { idPromoHeader } = req.body;
+    try {
+      const promotion = await PromotionHeader.findById(idPromoHeader);
+      const promotionLine = await PromotionLine.find({
+        promotionHeaderId: idPromoHeader,
+      });
+
+      if (promotion) {
+        await PromotionHeader.deleteOne({ _id: idPromoHeader });
+        if (promotionLine.length > 0 && promotionLine) {
+          for (const elem of promotionLine) {
+            await PromotionLine.deleteOne({ _id: elem._id });
+            await Promotion.deleteOne({ promotionLineId: elem._id });
+          }
+        }
+
+        return res.json({ message: "success" });
+      } else {
+        return res.json({ message: "failed " });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+  async deletePromotionLine(req, res, next) {
+    var { idLine } = req.body;
+    try {
+      const promotion = await PromotionLine.findById(idLine);
+
+      if (promotion) {
+        await PromotionLine.deleteOne({ _id: idLine });
+        await Promotion.deleteOne({ promotionLineId: idLine });
+        return res.json({ message: "success" });
+      } else {
+        return res.json({ message: "failed " });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new PromotionController();

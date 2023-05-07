@@ -43,11 +43,15 @@ const customerSchema = new Schema({
   },
 
   code: {
-    type: Number,
+    type: String,
   },
   customerTypeId: {
     type: ObjectId,
     default: null,
+  },
+  status: {
+    type: Boolean,
+    default: true,
   },
 });
 

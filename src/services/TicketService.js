@@ -1099,6 +1099,7 @@ const TicketService = {
           },
           status: "$status",
           chair: "$chair",
+          quantity: "$quantity",
           date: {
             $dateToString: {
               format: "%Y-%m-%d",

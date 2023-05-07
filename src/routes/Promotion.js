@@ -27,4 +27,15 @@ router.patch("/updateLine", promotionController.updatePromotionLine);
 // statistic all  promotion
 router.get("/statistic", promotionController.statisticPromotion);
 
+// delete promotion Header
+//Promotion header status is active and start date < current date --- not deleted
+router.delete(
+  "/detele/promotionHeader",
+  promotionController.deletePromotionHeader
+);
+
+// delete promotion Line
+//Promotion header status is active and start date < current date --- not deleted
+router.delete("/detele/promotionLine", promotionController.deletePromotionLine);
+
 module.exports = router;
