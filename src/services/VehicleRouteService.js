@@ -89,7 +89,7 @@ const VehicleRouteService = {
         arryListCarDate.push(elem);
       }
     }
-    console.log("listcar", arryListCarDate);
+
     // find vehicleRoute by startTime, route
     const listVehcle = await VehicleRoute.find({
       startTime: startTimeId,
@@ -105,6 +105,7 @@ const VehicleRouteService = {
 
       return arr;
     }
+    console.log("listcar", listVehcle);
 
     // check listVehcle ==0? find vehicleRoute of ListCar
     if (listVehcle?.length == 0) {
@@ -149,9 +150,10 @@ const VehicleRouteService = {
       }
     } else {
       // find car of route
+
       for (const vehcle of listVehcle) {
         if (
-          vehcle.startDate.toLocaleDateString() ===
+          new Date(vehcle.startDate).toLocaleDateString() ===
           new Date(startDate).toLocaleDateString()
         ) {
           arrayResults.push(vehcle);
@@ -160,17 +162,22 @@ const VehicleRouteService = {
 
       const arrayList1 = new Set(arrayResults);
       const arrayList = [...arrayList1];
+      console.log(arrayResults);
       //  console.log("listcdss", arrayList);
-      // get list car unique
-      for (const e of arrayList) {
-        removeObjectWithId(listCar, e.carId.toString());
+      if (arrayList.length > 0 && arrayList) {
+        // get list car unique
+        for (const e of arrayList) {
+          removeObjectWithId(listCar, e.carId.toString());
 
+          arrayFinal.push(...listCar);
+
+          let cachedObject = {};
+          arrayFinal.map((item) => (cachedObject[item.id] = item));
+          arrayFinal = Object.values(cachedObject);
+          //  console.log("fsfs", listCar);
+        }
+      } else {
         arrayFinal.push(...listCar);
-
-        let cachedObject = {};
-        arrayFinal.map((item) => (cachedObject[item.id] = item));
-        arrayFinal = Object.values(cachedObject);
-        //  console.log("fsfs", listCar);
       }
     }
     for (const car of arrayFinal) {
