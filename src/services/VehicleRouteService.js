@@ -267,6 +267,93 @@ const VehicleRouteService = {
     ]);
     return vehicleRoute;
   },
+
+  // get vehicleRoute by current date
+  getVehicleRouteCurrentDate: async (date) => {
+    const vehicleRoute = await VehicleRoute.aggregate([
+      {
+        $match: {
+          $and: [
+            { startDate: { $lte: new Date(date) } },
+            { startDate: { $gte: new Date(date) } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "cars",
+          localField: "carId",
+          foreignField: "_id",
+          as: "car",
+        },
+      },
+      {
+        $unwind: "$car",
+      },
+      {
+        $lookup: {
+          from: "places",
+          localField: "departure",
+          foreignField: "_id",
+          as: "departure",
+        },
+      },
+      {
+        $unwind: "$departure",
+      },
+      {
+        $lookup: {
+          from: "departuretimes",
+          localField: "startTime",
+          foreignField: "_id",
+          as: "departuretimes",
+        },
+      },
+      {
+        $unwind: "$departuretimes",
+      },
+      {
+        $lookup: {
+          from: "places",
+          localField: "destination",
+          foreignField: "_id",
+          as: "destination",
+        },
+      },
+      {
+        $unwind: "$destination",
+      },
+      {
+        $lookup: {
+          from: "cartypes",
+          localField: "car.typeCarId",
+          foreignField: "_id",
+          as: "cartype",
+        },
+      },
+      {
+        $unwind: "$cartype",
+      },
+
+      {
+        $project: {
+          _id: "$_id",
+          startDate: "$startDate",
+          startTime: "$departuretimes.time",
+          endTime: "$endTime",
+          departure: "$departure",
+          destination: "$destination",
+          licensePlates: "$car.licensePlates",
+          carType: "$cartype.type",
+          carTypeId: "$cartype._id",
+          chair: "$chair",
+        },
+      },
+      { $sort: { startDate: -1 } },
+    ]);
+    return vehicleRoute;
+  },
   // check price route
   checkPriceRoute: async (currenDate, routeId, carTypeId) => {
     const priceHeader = await PriceHeader.find({

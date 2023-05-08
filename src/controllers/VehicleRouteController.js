@@ -8,6 +8,7 @@ const RouteType = require("../modal/RouteType");
 const VehicleRoute = require("../modal/VehicleRoute");
 const DepartureTime = require("../modal/DepartureTime");
 const Car = require("../modal/Car");
+const moment = require("moment");
 class VehicleRouteController {
   // save vehicle route
   async addVehicleRoute(req, res, next) {
@@ -393,6 +394,96 @@ class VehicleRouteController {
       );
 
       res.json({ message: "success" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // get vehicle route by current date
+  async getVehicleRouteByDate(req, res, next) {
+    let vehicleRouteSearch = [];
+    try {
+      const date = moment().utcOffset(420).format("YYYY-MM-DD");
+      const vehicleRoute = await vehicleRouteService.getVehicleRouteCurrentDate(
+        date
+      );
+
+      if (vehicleRoute && vehicleRoute.length > 0) {
+        for (const route of vehicleRoute) {
+          const { _id, intendTime, routeType } = await Route.findOne({
+            "departure._id": ObjectId(route.departure._id),
+            "destination._id": ObjectId(route.destination._id),
+          });
+          const promotion = await vehicleRouteService.checkPromotionsRoute(
+            route.startDate
+          );
+
+          const price = await vehicleRouteService.checkPriceRoute(
+            route.startDate,
+            _id,
+            route.carTypeId
+          );
+
+          const arrayPromotions = [];
+          if (promotion?.promotion?.length > 0) {
+            for (const elem of promotion.promotion) {
+              if (
+                elem.promotionLine.routeTypeId === routeType ||
+                elem?.promotionLine.routeTypeId == null
+              ) {
+                arrayPromotions.push({ ...elem });
+              }
+            }
+            vehicleRouteSearch.push({
+              ...route,
+              intendTime,
+              priceId: price?._id ? price._id : null,
+              price: price?.price ? price?.price : null,
+              promotion: arrayPromotions,
+            });
+          } else {
+            vehicleRouteSearch.push({
+              ...route,
+              intendTime,
+              priceId: price?._id ? price._id : null,
+              price: price?.price ? price?.price : null,
+              promotion: arrayPromotions,
+            });
+          }
+        }
+        const currenTime = new Date().getHours() + 7;
+
+        const arrayResult = [];
+        for (const elem of vehicleRouteSearch) {
+          const routeTime = Number(elem.startTime.substring(0, 2));
+          if (
+            new Date(elem.startDate).toLocaleDateString() ==
+            new Date().toLocaleDateString()
+          ) {
+            if (routeTime - 1 > currenTime) {
+              arrayResult.push(elem);
+            }
+          } else {
+            arrayResult.push(elem);
+          }
+        }
+        arrayResult.sort((a, b) => {
+          return (
+            Number(a.startTime.substring(0, 2)) -
+            Number(b.startTime.substring(0, 2))
+          );
+        });
+
+        return res.json(arrayResult);
+      } else {
+        vehicleRouteSearch.sort((a, b) => {
+          return (
+            Number(b.startTime.substring(0, 2)) -
+            Number(a.startTime.substring(0, 2))
+          );
+        });
+        return res.json(vehicleRoute);
+      }
     } catch (error) {
       next(error);
     }

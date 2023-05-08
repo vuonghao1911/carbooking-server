@@ -21,4 +21,6 @@ router.get(
   "/getVehiceCurrenDate",
   vehicleRouteController.getListVehicleRouteCurrenDate
 );
+// get list vehicleRoute current date
+router.get("/listVehicleCurrent", vehicleRouteController.getVehicleRouteByDate);
 module.exports = router;
