@@ -68,8 +68,6 @@ class TicketController {
       priceId,
       employeeId,
     } = req.body;
-    console.log(chair);
-    console.log(customer);
 
     var code = new Date().getTime();
 
@@ -157,7 +155,6 @@ class TicketController {
   // get customer by id
   async getCustomerById(req, res, next) {
     const { userId } = req.params;
-    console.log(userId);
 
     try {
       const customer = await Customer.findById(userId);
@@ -454,7 +451,7 @@ class TicketController {
   async getAllTicketByUserId(req, res, next) {
     const { userId } = req.params;
     const { page, size } = req.query;
-    console.log(userId);
+
     var listTicketResult = [];
     try {
       const listTicket = await ticketService.getTicketByUserId(userId);
@@ -585,7 +582,7 @@ class TicketController {
   async getAllTicketRefundByUserId(req, res, next) {
     const { userId } = req.params;
     const { page, size } = req.query;
-    console.log(userId);
+
     try {
       const listTicket = await ticketService.getTicketRefundByUserId(userId);
 
@@ -1009,7 +1006,7 @@ class TicketController {
             const employee = await Employee.findOne({
               $text: { $search: name },
             });
-            console.log(employee);
+
             const arrayListEml = [];
             if (employee) {
               for (const elem of arrayList) {

@@ -193,7 +193,6 @@ class AccountController {
               checklogin: true,
               isActive: true,
             };
-            console.log("employee", customer);
           }
         } else {
           res.json({ checklogin: false, message: "Sai mật khẩu" });

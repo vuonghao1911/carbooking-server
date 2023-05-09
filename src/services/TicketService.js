@@ -24,7 +24,6 @@ const TicketService = {
     employeeId
   ) => {
     var ticketSave;
-    console.log(phoneNumber);
 
     const countTicket = await Ticket.count({ customerId: customerId });
     if (countTicket >= 1) {
@@ -532,8 +531,7 @@ const TicketService = {
           promotionLineId: elem.promotionLineId,
         });
         var newRemainingBuget = remainingBudget + elem.discountAmount;
-        console.log("old", remainingBudget);
-        console.log("new", newRemainingBuget);
+
         await Promotion.updateOne(
           { _id: ObjectId(_id) },
           {
@@ -601,8 +599,7 @@ const TicketService = {
           promotionLineId: elem.promotionLineId,
         });
         var newRemainingBuget = remainingBudget + elem.discountAmount;
-        console.log("old", remainingBudget);
-        console.log("new", newRemainingBuget);
+
         await Promotion.updateOne(
           { _id: ObjectId(_id) },
           {

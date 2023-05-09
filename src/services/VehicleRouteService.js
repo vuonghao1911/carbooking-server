@@ -105,7 +105,6 @@ const VehicleRouteService = {
 
       return arr;
     }
-    console.log("listcar", listVehcle);
 
     // check listVehcle ==0? find vehicleRoute of ListCar
     if (listVehcle?.length == 0) {
@@ -122,7 +121,6 @@ const VehicleRouteService = {
             carTrip.endTime.substring(0, 2) * 1 + intendTime + 1 >
             time.time.substring(0, 2) * 1
           ) {
-            console.log("cartrip", carTrip.endTime.substring(0, 2));
             arrayFinal.push(e);
           }
         } else {
@@ -162,7 +160,7 @@ const VehicleRouteService = {
 
       const arrayList1 = new Set(arrayResults);
       const arrayList = [...arrayList1];
-      console.log(arrayResults);
+
       //  console.log("listcdss", arrayList);
       if (arrayList.length > 0 && arrayList) {
         // get list car unique

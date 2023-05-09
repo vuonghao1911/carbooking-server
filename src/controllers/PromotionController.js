@@ -292,7 +292,7 @@ class PromotionController {
   async updatePromotionHeader(req, res, next) {
     const { idHeader } = req.body;
     const { startDate = "", endDate = "", status = null } = req.query;
-    console.log(endDate);
+
     try {
       if (status == "false" || status == "true") {
         await PromotionHeader.updateOne(

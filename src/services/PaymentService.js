@@ -19,9 +19,6 @@ const PaymentService = {
     promotion,
     priceId,
   }) {
-    console.log(chair);
-    console.log(customer);
-
     var code = new Date().getTime();
 
     try {

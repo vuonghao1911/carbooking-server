@@ -50,7 +50,6 @@ class PaymentController {
       axios
         .post(config.endpoint, null, { params: order })
         .then((result) => {
-          console.log(result.data);
           // axios
           //   .post(process.env.URL_GET_STATUS, {
           //     appTransId: order.app_trans_id,
@@ -76,7 +75,6 @@ class PaymentController {
     const { appTransId, appTime, ticket } = req.body;
 
     try {
-      console.log(ticket);
       const config = {
         app_id: process.env.ZALO_PAY_APP_ID,
         key1: process.env.ZALO_PAY_KEY_1,
@@ -122,7 +120,6 @@ class PaymentController {
 
               res.json({ data: null, status: false });
             }
-            console.log(response.data);
           })
           .catch(function (error) {
             console.log(error);

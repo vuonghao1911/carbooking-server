@@ -26,7 +26,6 @@ class CustomerController {
       code1 = `KH${codeEmpl}`;
     }
 
-    console.log(code1);
     try {
       const customer = new Customer({
         firstName: firstName,
@@ -39,7 +38,7 @@ class CustomerController {
       });
 
       const savecustomer = await customerService.addCustomer(customer);
-      console.log(savecustomer);
+
       return res.json(savecustomer);
     } catch (error) {
       console.log(error);

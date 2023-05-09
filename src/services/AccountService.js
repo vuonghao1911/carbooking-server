@@ -35,7 +35,6 @@ const AccountService = {
     return await bcrypt.compare(passWord, passWordHash);
   },
   async sendOTP(phone) {
-    console.log("phone::" + phone);
     twilio.verify.v2
       .services(process.env.SERVICE_SID)
       .verifications.create({
@@ -58,7 +57,7 @@ const AccountService = {
         if (verification.valid) {
           console.log("vao");
           verificationPhone = true;
-          console.log("vetify", verificationPhone);
+
           return { status: true, message: "verify success" };
         }
       })

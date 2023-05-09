@@ -23,7 +23,7 @@ class PlaceController {
       }
 
       const saveplace = await placeService.savePlace(place);
-      console.log(saveplace);
+
       return res.json(saveplace);
     } catch (error) {
       console.log(error);
@@ -62,7 +62,6 @@ class PlaceController {
   }
   async getCustomerById(req, res, next) {
     const { userId } = req.params;
-    console.log(userId);
 
     try {
       const customer = await Customer.findById(userId);
@@ -233,7 +232,7 @@ class PlaceController {
         startDate,
         endDate
       );
-      console.log(new Date(new Date(endDate).getTime() + 24 * 60 * 60 * 1000));
+
       const qntTicketRoute =
         await statictisService.countStatictisTicketVehicleRoute(
           startDate,

@@ -34,7 +34,7 @@ const AwsS3Service = {
       mimetype === "image/jpg"
     )
       uploadParams.ContentType = mimetype;
-    console.log("file path", file.path);
+
     try {
       const result = await s3.upload(uploadParams).promise();
       return result.Location;

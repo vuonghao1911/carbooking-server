@@ -13,7 +13,7 @@ class VehicleRouteController {
   // save vehicle route
   async addVehicleRoute(req, res, next) {
     const { startDate, startTimeId, routeId, carId, endDate } = req.body;
-    console.log(routeId);
+
     var message = "success";
     try {
       const routeChoose = await Route.findById(routeId);
@@ -255,7 +255,7 @@ class VehicleRouteController {
         vehicleId
       );
       const vehicle = vehicleRoute[0];
-      console.log(vehicle.departure);
+
       const { _id, intendTime, routeType } = await Route.findOne({
         "departure._id": ObjectId(vehicle.departure._id),
         "destination._id": ObjectId(vehicle.destination._id),
@@ -316,7 +316,7 @@ class VehicleRouteController {
 
     let arrrayFinal = [];
     const a = new Date().toLocaleDateString();
-    console.log(a);
+
     try {
       var vehicleRoute = await VehicleRoute.find().sort({ startDate: -1 });
 

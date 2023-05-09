@@ -12,7 +12,7 @@ class EmployeeController {
       });
 
       const saveEmp = await employeeService.saveEmployeeType(employeeType);
-      console.log(saveEmp);
+
       return res.json(saveEmp);
     } catch (error) {
       console.log(error);
@@ -55,7 +55,6 @@ class EmployeeController {
   }
   async getEmployeeById(req, res, next) {
     const { userId } = req.params;
-    console.log(userId);
 
     try {
       const customer = await Employee.findById(userId);
