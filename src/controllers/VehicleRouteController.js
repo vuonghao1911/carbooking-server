@@ -39,6 +39,7 @@ class VehicleRouteController {
   // search vehicle route
   async searchVehicleRoute(req, res, next) {
     const { departure, destination, startDate } = req.body;
+    const { admin = false } = req.query;
     let vehicleRouteSearch = [];
     try {
       const vehicleRoute = await vehicleRouteService.findVehicleRoute(
@@ -96,6 +97,7 @@ class VehicleRouteController {
         const currenTime = new Date().getHours() + 7;
 
         const arrayResult = [];
+
         for (const elem of vehicleRouteSearch) {
           const routeTime = Number(elem.startTime.substring(0, 2));
           if (
@@ -109,14 +111,24 @@ class VehicleRouteController {
             arrayResult.push(elem);
           }
         }
-        arrayResult.sort((a, b) => {
-          return (
-            Number(a.startTime.substring(0, 2)) -
-            Number(b.startTime.substring(0, 2))
-          );
-        });
+        if (admin) {
+          vehicleRouteSearch.sort((a, b) => {
+            return (
+              Number(a.startTime.substring(0, 2)) -
+              Number(b.startTime.substring(0, 2))
+            );
+          });
+          return res.json(vehicleRouteSearch);
+        } else {
+          arrayResult.sort((a, b) => {
+            return (
+              Number(a.startTime.substring(0, 2)) -
+              Number(b.startTime.substring(0, 2))
+            );
+          });
 
-        return res.json(arrayResult);
+          return res.json(arrayResult);
+        }
       } else {
         vehicleRouteSearch.sort((a, b) => {
           return (

@@ -4,6 +4,7 @@ const statictisService = require("../services/StatisticService");
 const Place = require("../modal/Place");
 const Route = require("../modal/Route");
 const CarType = require("../modal/CarType");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 class PlaceController {
   async addPlace(req, res, next) {
@@ -72,9 +73,14 @@ class PlaceController {
     }
   }
   async getPlace(req, res, next) {
-    const { page, size, code = "" } = req.query;
+    const { page, size, code = "", admin = false } = req.query;
     try {
-      const place = await Place.find().sort({ _id: -1 });
+      var place = [];
+      if (admin) {
+        place = await Place.find();
+      } else {
+        place = await Place.find({ status: true });
+      }
 
       place.sort((a, b) => {
         return a.name.localeCompare(b.name);
@@ -434,6 +440,52 @@ class PlaceController {
         listResult
       );
       res.json({ data: arrPagination, message: "success", totalPages });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // update status place
+  async updateStatusPlace(req, res, next) {
+    const { idPlace, status } = req.body;
+
+    try {
+      const route = await Route.find({
+        $or: [
+          { "departure._id": ObjectId(idPlace) },
+          { "destination._id": ObjectId(idPlace) },
+        ],
+      });
+
+      var checkUpdate = true;
+
+      if (route && route.length > 0) {
+        for (const elem of route) {
+          if (elem.status) {
+            checkUpdate = false;
+            break;
+          }
+        }
+      }
+      if (checkUpdate) {
+        await Place.updateOne(
+          {
+            _id: idPlace,
+          },
+          {
+            $set: {
+              status: status,
+            },
+          }
+        );
+        return res.json({ statusUpdate: true, message: "Update Success" });
+      } else {
+        return res.json({
+          statusUpdate: false,
+          message:
+            " Hủy địa điểm không thành công do địa điểm này có tuyến đang hoạt động",
+        });
+      }
     } catch (error) {
       next(error);
     }

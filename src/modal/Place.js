@@ -30,6 +30,10 @@ const placeSchema = new Schema({
   code: {
     type: String,
   },
+  status: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const Place = mongoose.model("Place", placeSchema);

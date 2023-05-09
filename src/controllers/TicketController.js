@@ -839,7 +839,10 @@ class TicketController {
         });
       }
       arrayFinal.sort((a, b) => {
-        return a.customer.code - b.customer.code;
+        return (
+          Number(a.customer.code.substring(2)) -
+          Number(b.customer.code.substring(2))
+        );
       });
       if (page != "" && size != "") {
         const { arrPagination, totalPages } = await utilsService.pagination(
