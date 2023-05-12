@@ -65,6 +65,11 @@ const PromotionService = {
       {
         $unwind: "$promotiontypes",
       },
+      {
+        $match: {
+          "promotionlines.endDate": { $gte: new Date() },
+        },
+      },
 
       {
         $project: {

@@ -35,6 +35,7 @@ class CustomerController {
         email: email,
         dateOfBirth: dateOfBirth,
         code: code1,
+        customerTypeId: ObjectId("640e9859186ba7d1aee14307"),
       });
 
       const savecustomer = await customerService.addCustomer(customer);
@@ -204,6 +205,27 @@ class CustomerController {
       console.log(file);
       const location = await AwsS3Service.uploadFile(file);
       return res.json({ locationFile: location });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  // update customer type
+  async updateCustomerType(req, res, next) {
+    const { id, type, description } = req.body;
+    //console.log(number);
+    try {
+      await CustomerType.updateOne(
+        { _id: id },
+        {
+          $set: {
+            type: type,
+            description: description,
+          },
+        }
+      );
+      const customer = await CustomerType.findById(id);
+      return res.json(customer);
     } catch (error) {
       console.log(error);
       next(error);

@@ -9,6 +9,8 @@ router.get("/all/getCustomer", customerController.getCustomer);
 router.post("/update", customerController.updateInfo);
 router.get("", customerController.getCustomerByPhoneNumber);
 router.get("/getType", customerController.getCustomerType);
+// update customer type
+router.patch("/updateType", customerController.updateCustomerType);
 router.post(
   "/file",
   uploadFile.uploadFileMiddleware,
