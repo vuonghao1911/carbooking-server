@@ -274,7 +274,7 @@ class VehicleRouteController {
       );
 
       const arrayPromotions = [];
-      if (promotion.promotion?.length > 0) {
+      if (promotion?.promotion?.length > 0) {
         for (const elem of promotion.promotion) {
           if (
             elem.promotionLine.routeTypeId === routeType ||

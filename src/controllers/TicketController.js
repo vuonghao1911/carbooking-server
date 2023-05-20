@@ -324,7 +324,7 @@ class TicketController {
               price: "$prices.price",
             },
           },
-          { $sort: { startDate: -1 } },
+          { $sort: { createdAt: -1 } },
         ]);
       }
 
@@ -1143,6 +1143,14 @@ class TicketController {
         return new Date(a.date) - new Date(b.date);
       });
 
+      var totalAmountMonth = 0;
+      var totalAmountRefundMonth = 0;
+      if (arrayStatistic && arrayStatistic.length > 0) {
+        for (const elem of arrayStatistic) {
+          totalAmountMonth += elem.totalAmount;
+          totalAmountRefundMonth += elem.totalAmountRefund;
+        }
+      }
       const listTopRoute = await statisticServie.getTopRouteOfMonth(
         new Date().getMonth() + 1,
         new Date().getFullYear()
@@ -1168,6 +1176,9 @@ class TicketController {
         revenue: arrayStatistic,
         quantityTicket,
         quantityRefunds,
+        totalAmountMonth,
+        totalAmountRefundMonth,
+        month: new Date().getMonth() + 1,
         listTopRoute: arrayTopRoute,
       });
     } catch (error) {

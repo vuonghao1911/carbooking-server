@@ -506,7 +506,7 @@ const TicketService = {
           price: "$prices.price",
         },
       },
-      { $sort: { startDate: -1 } },
+      { $sort: { createdAt: -1 } },
     ]);
 
     return ticket;
