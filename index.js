@@ -55,6 +55,10 @@ app.get("/", (req, res) => {
 //   res.json(response);
 // });
 
-server.listen(5005, () => {
-  console.log("Example app listening on http://localhost:" + 5005);
+// server.listen(5005, () => {
+//   console.log("Example app listening on http://localhost:" + 5005);
+// });
+
+httpsServer.listen(4004, () => {
+  console.log("Example app listening on http://localhost:" + 4004);
 });
