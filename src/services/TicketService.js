@@ -827,7 +827,7 @@ const TicketService = {
           code: "$code",
         },
       },
-      { $sort: { _id: -1 } },
+      { $sort: { createdAt: -1 } },
     ]);
 
     return ticket;
@@ -969,7 +969,7 @@ const TicketService = {
           price: "$prices.price",
         },
       },
-      { $sort: { startDate: -1 } },
+      { $sort: { createdAt: -1 } },
     ]);
 
     return ticket;
