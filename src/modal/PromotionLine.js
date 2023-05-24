@@ -36,7 +36,14 @@ const promotionLineSchema = new Schema(
     routeTypeId: {
       type: ObjectId,
     },
+    userUpdate: {
+      type: ObjectId,
+    },
+    userCreate: {
+      type: ObjectId,
+    },
   },
+
   { timestamps: true }
 );
 

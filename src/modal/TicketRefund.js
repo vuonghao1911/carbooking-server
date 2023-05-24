@@ -23,6 +23,9 @@ const ticketRefundSchema = new Schema(
     returnAmount: {
       type: Number,
     },
+    employeeId: {
+      type: ObjectId,
+    },
   },
   { timestamps: true }
 );

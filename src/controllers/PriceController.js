@@ -2,11 +2,12 @@ const priceService = require("../services/PriceService");
 const utilsService = require("../utils/utils");
 const Price = require("../modal/Price");
 const PriceHeader = require("../modal/PriceHeader");
+const Employee = require("../modal/Employee");
 const ObjectId = require("mongoose").Types.ObjectId;
 
 class PriceController {
   async addPriceHeader(req, res, next) {
-    var { startDate, endDate, title } = req.body;
+    var { startDate, endDate, title, userCreate } = req.body;
     var status;
     var message = "startDate >= Current Date";
     const codeFind = await PriceHeader.find().sort({ _id: -1 }).limit(1);
@@ -26,6 +27,8 @@ class PriceController {
           title: title,
           status: status,
           code: code + 1,
+          userUpdate: userCreate,
+          userCreate: userCreate,
         };
 
         const priceHeader = new PriceHeader(data);
@@ -156,12 +159,16 @@ class PriceController {
     try {
       if (code) {
         const arrayPriceFind = [];
-        priceHeader = await PriceHeader.find({ code: code });
+        priceHeader = await priceService.getPriceHeaderByCode(Number(code));
 
-        return res.json({ priceHeader: priceHeader, totalPages: null });
+        return res.json({
+          priceHeader: priceHeader,
+
+          totalPages: null,
+        });
       } else {
         if (page && size) {
-          priceHeader = await PriceHeader.find().sort({ _id: -1 });
+          priceHeader = await priceService.getAllPriceHeader();
           const arrayResult = [];
           if (startDate != "" && endDate != "") {
             for (const elem of priceHeader) {
@@ -234,7 +241,7 @@ class PriceController {
   }
   // update price header
   async updatePriceHeader(req, res, next) {
-    const { idHeader } = req.body;
+    const { idHeader, userUpdate } = req.body;
     const { startDate = "", endDate = "", status = null } = req.query;
 
     try {
@@ -246,6 +253,7 @@ class PriceController {
           {
             $set: {
               status: status,
+              userUpdate: ObjectId(userUpdate),
             },
           }
         );
@@ -259,6 +267,7 @@ class PriceController {
             {
               $set: {
                 endDate: endDate,
+                userUpdate: ObjectId(userUpdate),
               },
             }
           );
@@ -272,6 +281,7 @@ class PriceController {
               $set: {
                 endDate: endDate,
                 startDate: startDate,
+                userUpdate: ObjectId(userUpdate),
               },
             }
           );
@@ -313,6 +323,7 @@ class PriceController {
             {
               $set: {
                 status: status,
+                userUpdate: userUpdate,
               },
             }
           );

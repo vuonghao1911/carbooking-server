@@ -159,6 +159,28 @@ const PromotionService = {
       {
         $unwind: "$promotiontypes",
       },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "promotionlines.userUpdate",
+          foreignField: "_id",
+          as: "employeesUpdate",
+        },
+      },
+      {
+        $unwind: "$employeesUpdate",
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "promotionlines.userCreate",
+          foreignField: "_id",
+          as: "employeesCreate",
+        },
+      },
+      {
+        $unwind: "$employeesCreate",
+      },
 
       {
         $project: {
@@ -174,6 +196,10 @@ const PromotionService = {
           promotionType: "$promotiontypes",
           promotionLine: "$promotionlines",
           promotionLHeader: "$promotionheaders",
+          user: {
+            userUpDate: "$employeesUpdate",
+            userCreate: "$employeesCreate",
+          },
         },
       },
       { $sort: { _id: -1 } },
@@ -306,6 +332,106 @@ const PromotionService = {
         },
       },
     ]);
+  },
+
+  getAllPromotionHeader: async () => {
+    const promo = await PromotionHeader.aggregate([
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userUpdate",
+          foreignField: "_id",
+          as: "employeesUpdate",
+        },
+      },
+      {
+        $unwind: "$employeesUpdate",
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userCreate",
+          foreignField: "_id",
+          as: "employeesCreate",
+        },
+      },
+      {
+        $unwind: "$employeesCreate",
+      },
+      {
+        $project: {
+          _id: "$_id",
+          title: "$title",
+          startDate: "$startDate",
+          endDate: "$endDate",
+          status: "$status",
+          code: "$code",
+          imgUrl: "$imgUrl",
+          description: "$description",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          user: {
+            userUpDate: "$employeesUpdate",
+            userCreate: "$employeesCreate",
+          },
+        },
+      },
+      { $sort: { _id: -1 } },
+    ]);
+
+    return promo;
+  },
+  getPromotionHeaderByCode: async (code) => {
+    const promo = await PromotionHeader.aggregate([
+      {
+        $match: {
+          code: code,
+        },
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userUpdate",
+          foreignField: "_id",
+          as: "employeesUpdate",
+        },
+      },
+      {
+        $unwind: "$employeesUpdate",
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userCreate",
+          foreignField: "_id",
+          as: "employeesCreate",
+        },
+      },
+      {
+        $unwind: "$employeesCreate",
+      },
+      {
+        $project: {
+          _id: "$_id",
+          title: "$title",
+          startDate: "$startDate",
+          endDate: "$endDate",
+          status: "$status",
+          code: "$code",
+          imgUrl: "$imgUrl",
+          description: "$description",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          user: {
+            userUpDate: "$employeesUpdate",
+            userCreate: "$employeesCreate",
+          },
+        },
+      },
+      { $sort: { _id: -1 } },
+    ]);
+
+    return promo;
   },
 };
 

@@ -30,6 +30,12 @@ const promotionHeaderSchema = new Schema(
     code: {
       type: String,
     },
+    userUpdate: {
+      type: ObjectId,
+    },
+    userCreate: {
+      type: ObjectId,
+    },
   },
   { timestamps: true }
 );

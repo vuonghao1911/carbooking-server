@@ -25,6 +25,12 @@ const priceHeaderSchema = new Schema(
     code: {
       type: Number,
     },
+    userUpdate: {
+      type: ObjectId,
+    },
+    userCreate: {
+      type: ObjectId,
+    },
   },
   { timestamps: true }
 );

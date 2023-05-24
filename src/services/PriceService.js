@@ -44,6 +44,102 @@ const priceService = {
     });
     return price;
   },
+
+  getAllPriceHeader: async () => {
+    const price = await PriceHeader.aggregate([
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userUpdate",
+          foreignField: "_id",
+          as: "employeesUpdate",
+        },
+      },
+      {
+        $unwind: "$employeesUpdate",
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userCreate",
+          foreignField: "_id",
+          as: "employeesCreate",
+        },
+      },
+      {
+        $unwind: "$employeesCreate",
+      },
+      {
+        $project: {
+          _id: "$_id",
+          title: "$title",
+          startDate: "$startDate",
+          endDate: "$endDate",
+          status: "$status",
+          code: "$code",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          user: {
+            userUpDate: "$employeesUpdate",
+            userCreate: "$employeesCreate",
+          },
+        },
+      },
+      { $sort: { _id: -1 } },
+    ]);
+
+    return price;
+  },
+  getPriceHeaderByCode: async (code) => {
+    const price = await PriceHeader.aggregate([
+      {
+        $match: {
+          code: code,
+        },
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userUpdate",
+          foreignField: "_id",
+          as: "employeesUpdate",
+        },
+      },
+      {
+        $unwind: "$employeesUpdate",
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "userCreate",
+          foreignField: "_id",
+          as: "employeesCreate",
+        },
+      },
+      {
+        $unwind: "$employeesCreate",
+      },
+      {
+        $project: {
+          _id: "$_id",
+          title: "$title",
+          startDate: "$startDate",
+          endDate: "$endDate",
+          status: "$status",
+          code: "$code",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          user: {
+            userUpDate: "$employeesUpdate",
+            userCreate: "$employeesCreate",
+          },
+        },
+      },
+      { $sort: { _id: -1 } },
+    ]);
+
+    return price;
+  },
 };
 
 module.exports = priceService;

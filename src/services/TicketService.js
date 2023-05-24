@@ -407,6 +407,14 @@ const TicketService = {
         },
       },
       {
+        $lookup: {
+          from: "employees",
+          localField: "employeeId",
+          foreignField: "_id",
+          as: "employees",
+        },
+      },
+      {
         $unwind: "$departuretimes",
       },
       {
@@ -504,6 +512,7 @@ const TicketService = {
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
           price: "$prices.price",
+          employee: "$employees",
         },
       },
       { $sort: { createdAt: -1 } },
@@ -521,7 +530,7 @@ const TicketService = {
     return price;
   },
   // cancle ticket
-  cancleTicket: async (idTicket, returnAmount, note) => {
+  cancleTicket: async (idTicket, returnAmount, note, employeeId) => {
     const ticket = await Ticket.findById(idTicket);
     const promotion = await PromotionResult.find({ ticketId: idTicket });
 
@@ -562,6 +571,7 @@ const TicketService = {
       code: new Date().getTime(),
       note: note,
       returnAmount: returnAmount,
+      employeeId: employeeId,
     });
     return await ticketRefund.save();
   },
@@ -792,6 +802,17 @@ const TicketService = {
         $unwind: "$prices",
       },
       {
+        $lookup: {
+          from: "employees",
+          localField: "employeeId",
+          foreignField: "_id",
+          as: "employees",
+        },
+      },
+      {
+        $unwind: "$employees",
+      },
+      {
         $match: {
           "customer._id": ObjectId(userId),
         },
@@ -825,6 +846,7 @@ const TicketService = {
           promotionresults: "$promotionresults",
           price: "$prices.price",
           code: "$code",
+          employee: "$employees",
         },
       },
       { $sort: { createdAt: -1 } },
@@ -856,6 +878,17 @@ const TicketService = {
       },
       {
         $unwind: "$customer",
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "employeeId",
+          foreignField: "_id",
+          as: "employees",
+        },
+      },
+      {
+        $unwind: "$employees",
       },
       {
         $lookup: {
@@ -967,6 +1000,7 @@ const TicketService = {
           updatedAt: "$updatedAt",
           promotionresults: "$promotionresults",
           price: "$prices.price",
+          employee: "$employees",
         },
       },
       { $sort: { createdAt: -1 } },

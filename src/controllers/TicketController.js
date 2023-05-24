@@ -217,6 +217,14 @@ class TicketController {
           },
           {
             $lookup: {
+              from: "employees",
+              localField: "employeeId",
+              foreignField: "_id",
+              as: "employees",
+            },
+          },
+          {
+            $lookup: {
               from: "departuretimes",
               localField: "vehicleroute.startTime",
               foreignField: "_id",
@@ -319,6 +327,7 @@ class TicketController {
                   timezone: "+07:00",
                 },
               },
+              employee: "$employees",
               updatedAt: "$updatedAt",
               promotionresults: "$promotionresults",
               price: "$prices.price",
@@ -546,13 +555,14 @@ class TicketController {
   }
   // cancle ticket and create new Refund ticket
   async CanceledTicket(req, res, next) {
-    const { ticketId, note, returnAmount } = req.body;
+    const { ticketId, note, returnAmount, employeeId } = req.body;
 
     try {
       const cancleTicket = await ticketService.cancleTicket(
         ticketId,
         returnAmount,
-        note
+        note,
+        employeeId
       );
 
       res.json({ cancleTicket, message: " cancle success" });

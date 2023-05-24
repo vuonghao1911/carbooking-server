@@ -26,6 +26,7 @@ class PromotionController {
       promotionHeaderId,
       codeLine,
       routeTypeId,
+      userCreate,
     } = req.body;
 
     var status;
@@ -61,6 +62,8 @@ class PromotionController {
           promotionHeaderId: promotionHeaderId,
           description: description,
           routeTypeId: routeTypeId,
+          userUpdate: userCreate,
+          userCreate: userCreate,
         });
         const newPromotionLine = await promotionLine.save();
         const promotion = new Promotion({
@@ -90,7 +93,8 @@ class PromotionController {
   }
   // add promotion header
   async addPromotionHeader(req, res, next) {
-    const { startDate, endDate, title, description, code } = req.body;
+    const { startDate, endDate, title, description, code, userCreate } =
+      req.body;
     const file = req.file;
 
     try {
@@ -107,6 +111,8 @@ class PromotionController {
         code: code,
         description: description,
         imgUrl: urlImg,
+        userUpdate: userCreate,
+        userCreate: userCreate,
       };
       const promotionsHeader = new PromotionHeader(data);
 
@@ -235,11 +241,13 @@ class PromotionController {
       var promotionResult;
 
       if (code) {
-        promotionResult = await PromotionHeader.find({ code: code });
+        promotionResult = await PromotionService.getPromotionHeaderByCode(
+          Number(code)
+        );
         return res.json({ promotionsHeader: promotionResult });
       } else {
         if (page && size) {
-          promotionResult = await PromotionHeader.find().sort({ _id: -1 });
+          promotionResult = await PromotionService.getAllPromotionHeader();
           const arrayResult = [];
           if (startDate != "" && endDate != "") {
             for (const elem of promotionResult) {
@@ -290,7 +298,7 @@ class PromotionController {
   }
   // update promotion header
   async updatePromotionHeader(req, res, next) {
-    const { idHeader } = req.body;
+    const { idHeader, userUpdate } = req.body;
     const { startDate = "", endDate = "", status = null } = req.query;
 
     try {
@@ -300,6 +308,7 @@ class PromotionController {
           {
             $set: {
               status: status,
+              userUpdate: userUpdate,
             },
           }
         );
@@ -319,6 +328,7 @@ class PromotionController {
                 {
                   $set: {
                     endDate: endDate,
+                    userUpdate: userUpdate,
                   },
                 }
               );
@@ -329,6 +339,7 @@ class PromotionController {
             {
               $set: {
                 endDate: endDate,
+                userUpdate: userUpdate,
               },
             }
           );
@@ -342,6 +353,7 @@ class PromotionController {
               $set: {
                 endDate: endDate,
                 startDate: startDate,
+                userUpdate: userUpdate,
               },
             }
           );
@@ -356,7 +368,7 @@ class PromotionController {
   }
   //update promotion line
   async updatePromotionLine(req, res, next) {
-    const { idLine } = req.body;
+    const { idLine, userUpdate } = req.body;
     const { startDate = "", endDate = "", status = null } = req.query;
 
     try {
@@ -366,6 +378,7 @@ class PromotionController {
           {
             $set: {
               status: status,
+              userUpdate: userUpdate,
             },
           }
         );
@@ -379,6 +392,7 @@ class PromotionController {
             {
               $set: {
                 endDate: endDate,
+                userUpdate: userUpdate,
               },
             }
           );
@@ -392,6 +406,7 @@ class PromotionController {
               $set: {
                 endDate: endDate,
                 startDate: startDate,
+                userUpdate: userUpdate,
               },
             }
           );
