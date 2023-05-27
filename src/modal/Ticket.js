@@ -32,6 +32,10 @@ const ticketSchema = new Schema(
     priceId: {
       type: ObjectId,
     },
+    isCancleLate: {
+      type: Boolean,
+      default: false, // true cancle after 2 hours
+    },
   },
   { timestamps: true }
 );

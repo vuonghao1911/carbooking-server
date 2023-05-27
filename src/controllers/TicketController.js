@@ -555,14 +555,21 @@ class TicketController {
   }
   // cancle ticket and create new Refund ticket
   async CanceledTicket(req, res, next) {
-    const { ticketId, note, returnAmount, employeeId } = req.body;
+    const {
+      ticketId,
+      note,
+      returnAmount,
+      employeeId,
+      isCancleLate = false,
+    } = req.body;
 
     try {
       const cancleTicket = await ticketService.cancleTicket(
         ticketId,
         returnAmount,
         note,
-        employeeId
+        employeeId,
+        isCancleLate
       );
 
       res.json({ cancleTicket, message: " cancle success" });
@@ -1267,7 +1274,7 @@ class TicketController {
       const listTicketCurrent = await statisticServie.countTicketByCurrenDate(
         moment(new Date()).utcOffset(420).format("yyyy/MM/DD")
       );
-
+      var countTicketCancle = 0;
       if (listTicketCurrent && listTicketCurrent[0]?.ticket.length > 0) {
         for (const elem of listTicketCurrent[0].ticket) {
           totalAmount += await utilsService.totalAmountTicket(
@@ -1275,6 +1282,10 @@ class TicketController {
             elem.prices,
             elem.promotionResults
           );
+
+          if (elem.isCancleLate) {
+            countTicketCancle += elem.chair.length;
+          }
         }
       }
 
@@ -1288,7 +1299,7 @@ class TicketController {
 
       const statictis = {
         quantityTicket: listTicketCurrent[0]?.countTicket
-          ? listTicketCurrent[0].countTicket
+          ? listTicketCurrent[0].countTicket - countTicketCancle
           : 0,
         totalAmount: totalAmount,
         quantityRefunds: listRefunds[0]?.count ? listRefunds[0]?.count : 0,

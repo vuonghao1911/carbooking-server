@@ -57,7 +57,7 @@ const StatisticService = {
     const list = await Ticket.aggregate([
       {
         $match: {
-          status: true,
+          $or: [{ status: true }, { isCancleLate: true }],
         },
       },
       {
@@ -690,7 +690,7 @@ const StatisticService = {
       },
       {
         $match: {
-          status: true,
+          $or: [{ status: true }, { isCancleLate: true }],
         },
       },
       {
@@ -707,6 +707,7 @@ const StatisticService = {
               timezone: "+07:00",
             },
           },
+          isCancleLate: "$isCancleLate",
         },
       },
       {

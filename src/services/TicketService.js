@@ -530,7 +530,13 @@ const TicketService = {
     return price;
   },
   // cancle ticket
-  cancleTicket: async (idTicket, returnAmount, note, employeeId) => {
+  cancleTicket: async (
+    idTicket,
+    returnAmount,
+    note,
+    employeeId,
+    isCancleLate
+  ) => {
     const ticket = await Ticket.findById(idTicket);
     const promotion = await PromotionResult.find({ ticketId: idTicket });
 
@@ -563,7 +569,19 @@ const TicketService = {
         return matchedCount;
       })
     );
-    await Ticket.updateOne({ _id: idTicket }, { $set: { status: false } });
+    if (isCancleLate) {
+      await Ticket.updateOne(
+        { _id: idTicket },
+        {
+          $set: {
+            status: false,
+            isCancleLate: true,
+          },
+        }
+      );
+    } else {
+      await Ticket.updateOne({ _id: idTicket }, { $set: { status: false } });
+    }
 
     const ticketRefund = new TicketRefund({
       ticketId: idTicket,
@@ -572,6 +590,7 @@ const TicketService = {
       note: note,
       returnAmount: returnAmount,
       employeeId: employeeId,
+      isCancleLate: isCancleLate,
     });
     return await ticketRefund.save();
   },
@@ -847,6 +866,7 @@ const TicketService = {
           price: "$prices.price",
           code: "$code",
           employee: "$employees",
+          isCancleLate: "$isCancleLate",
         },
       },
       { $sort: { createdAt: -1 } },
@@ -1001,6 +1021,7 @@ const TicketService = {
           promotionresults: "$promotionresults",
           price: "$prices.price",
           employee: "$employees",
+          isCancleLate: "$isCancleLate",
         },
       },
       { $sort: { createdAt: -1 } },
@@ -1038,7 +1059,7 @@ const TicketService = {
     const ticket = await Ticket.aggregate([
       {
         $match: {
-          status: true,
+          $or: [{ status: true }, { isCancleLate: true }],
         },
       },
       {
@@ -1152,7 +1173,7 @@ const TicketService = {
     const ticket = await Ticket.aggregate([
       {
         $match: {
-          status: true,
+          $or: [{ status: true }, { isCancleLate: true }],
         },
       },
 

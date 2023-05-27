@@ -26,6 +26,10 @@ const ticketRefundSchema = new Schema(
     employeeId: {
       type: ObjectId,
     },
+    isCancleLate: {
+      type: Boolean,
+      default: false, // true cancle after 2 hours
+    },
   },
   { timestamps: true }
 );
