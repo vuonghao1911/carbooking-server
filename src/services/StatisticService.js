@@ -9,6 +9,11 @@ const StatisticService = {
   // get total amount of ticket refunds
   getTotalRefundAmount: async (month, year) => {
     const ticketRefund = await TicketRefund.aggregate([
+      // {
+      //   $match: {
+      //     isCancleLate: false,
+      //   },
+      // },
       {
         $project: {
           _id: "$_id",
@@ -19,6 +24,7 @@ const StatisticService = {
           updatedAt: "$updatedAt",
           returnAmount: "$returnAmount",
           month: { $month: "$createdAt" },
+          isCancleLate: "$isCancleLate",
           year: { $year: "$createdAt" },
           date: {
             $dateToString: {

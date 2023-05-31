@@ -1095,11 +1095,26 @@ class TicketController {
       if (listTicketRefund && listTicketRefund.length > 0) {
         for (const elemRefund of listTicketRefund) {
           quantityRefunds += elemRefund.count;
-          arrayTicketTotal.push({
-            date: elemRefund.ticketRefunds[0].date,
-            totalAmount: 0,
-            totalAmountRefund: elemRefund.returnAmount,
-          });
+
+          if (elemRefund.ticketRefunds.length > 1) {
+            for (const e of elemRefund.ticketRefunds) {
+              if (e.isCancleLate == false) {
+                arrayTicketTotal.push({
+                  date: e.date,
+                  totalAmount: 0,
+                  totalAmountRefund: e.returnAmount,
+                });
+              }
+            }
+          } else {
+            if (elemRefund.ticketRefunds[0].isCancleLate == false) {
+              arrayTicketTotal.push({
+                date: elemRefund.ticketRefunds[0].date,
+                totalAmount: 0,
+                totalAmountRefund: elemRefund.returnAmount,
+              });
+            }
+          }
         }
       }
       var quantityTicket = 0;
