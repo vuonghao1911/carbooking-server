@@ -31,13 +31,14 @@ app.use((req, res, next) => {
   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
 const httpsServer = https.createServer(options, app);
 
 //connectDB();
 connectMG();
 routes(app);
+app.use(handleEror);
 
-let dataZalo = {};
 app.get("/", (req, res) => {
   res.json({ test: "Hello World 123 !" });
 });
@@ -55,10 +56,10 @@ app.get("/", (req, res) => {
 //   res.json(response);
 // });
 
-// server.listen(5005, () => {
-//   console.log("Example app listening on http://localhost:" + 5005);
-// });
-
-httpsServer.listen(4004, () => {
-  console.log("Example app listening on http://localhost:" + 4004);
+server.listen(5005, () => {
+  console.log("Example app listening on http://localhost:" + 5005);
 });
+
+// httpsServer.listen(4004, () => {
+//   console.log("Example app listening on http://localhost:" + 4004);
+// });

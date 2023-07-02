@@ -110,6 +110,8 @@ class PlaceController {
   }
   async getRoute(req, res, next) {
     const { departure_id, destination_id } = req.query;
+    const user = req.user;
+    console.log("user", user);
     try {
       const result = [];
       const route = await Route.aggregate([

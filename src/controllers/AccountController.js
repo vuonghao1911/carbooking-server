@@ -1,9 +1,11 @@
 const AccountService = require("../services/AccountService");
 const EmployeeService = require("../services/EmployeeService");
 const CustomerService = require("../services/customerService");
+const JwtService = require("../services/JwtService");
 const Account = require("../modal/Account");
 const Employee = require("../modal/Employee");
 const Customer = require("../modal/Customer");
+const { jwt } = require("twilio");
 const ObjectId = require("mongoose").Types.ObjectId;
 const twilio = require("twilio")(
   process.env.ACCOUNT_SID,
@@ -161,6 +163,14 @@ class AccountController {
           userLogin.passWord
         );
         var user;
+        const payload = {
+          id: userLogin.idUser,
+          role: userLogin.role,
+        };
+        const jwt = await JwtService.signAccessTokenService(payload);
+        const refreshToken = await JwtService.signRefreshTokenService(payload);
+        console.log(jwt);
+
         if (passCompare) {
           if (userLogin.role) {
             const employee = await Employee.findById(userLogin.idUser);
@@ -184,6 +194,8 @@ class AccountController {
               role: userLogin.role,
               checklogin: true,
               isActive: true,
+              accessToken: jwt,
+              refreshToken: refreshToken,
             };
           } else {
             const customer = await Customer.findById(userLogin.idUser);
@@ -192,6 +204,8 @@ class AccountController {
               role: userLogin.role,
               checklogin: true,
               isActive: true,
+              accessToken: jwt,
+              refreshToken: refreshToken,
             };
           }
         } else {
@@ -274,12 +288,40 @@ class AccountController {
   }
   // send opt
   async sendPhoneOTP(req, res, next) {
-    const { phoneNumber = "" } = req.body;
+    const { phoneNumber = "", refreshToken = "" } = req.body;
 
     try {
       await AccountService.sendOTP(phoneNumber);
 
-      res.json({ message: "message was sent" });
+      res.json({ message: "send otp success" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetRefreshToken(req, res, next) {
+    const { refreshToken = "" } = req.body;
+
+    try {
+      if (refreshToken == "") {
+        return res.status(400).json({ message: "Invalid refresh token" });
+      }
+      const verifi = await JwtService.verifyRefreshToken(refreshToken);
+      if (verifi) {
+        const payload = {
+          id: verifi.id,
+          role: verifi.role,
+        };
+        const newAccessToken = await JwtService.signAccessTokenService(payload);
+        if (newAccessToken) {
+          return res
+            .status(200)
+            .json({
+              message: "reset token successfully",
+              accessToken: newAccessToken,
+            });
+        }
+      }
     } catch (error) {
       next(error);
     }

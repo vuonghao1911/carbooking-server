@@ -7,5 +7,6 @@ router.post("/changePass", accountController.ChangePass);
 router.post("/forgot", accountController.forgotPass);
 router.post("/sendOtp", accountController.sendPhoneOTP);
 router.post("/verifyOtp", accountController.verifyPhoneOTP);
+router.post("/reset-accessToken", accountController.resetRefreshToken);
 
 module.exports = router;
